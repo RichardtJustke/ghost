@@ -47,6 +47,7 @@ Item {
     property var generalSettings: Config.getSetting("general", defaultGeneralSettings)
     property string currentLanguage: generalSettings.language !== undefined ? generalSettings.language : "en"
     property bool muteSfx: generalSettings.muteSfx !== undefined ? generalSettings.muteSfx : false
+    property bool usbSound: generalSettings.usbSound !== undefined ? generalSettings.usbSound : true
     property real sfxVolume: generalSettings.sfxVolume !== undefined ? generalSettings.sfxVolume : 100
     property real shellScale: generalSettings.shellScale !== undefined ? generalSettings.shellScale : 1.0
     property bool screenshotCaptureOnRelease: generalSettings.screenshotCaptureOnRelease !== undefined ? generalSettings.screenshotCaptureOnRelease : false
@@ -85,6 +86,7 @@ Item {
             let gs = Config.getSetting("general", generalTabRoot.defaultGeneralSettings);
             generalTabRoot.currentLanguage = gs.language !== undefined ? gs.language : "en";
             generalTabRoot.muteSfx = gs.muteSfx !== undefined ? gs.muteSfx : false;
+            generalTabRoot.usbSound = gs.usbSound !== undefined ? gs.usbSound : true;
             generalTabRoot.sfxVolume = gs.sfxVolume !== undefined ? gs.sfxVolume : 100;
             generalTabRoot.shellScale = gs.shellScale !== undefined ? gs.shellScale : 1.0;
             generalTabRoot.screenshotCaptureOnRelease = gs.screenshotCaptureOnRelease !== undefined ? gs.screenshotCaptureOnRelease : false;
@@ -116,6 +118,7 @@ Item {
         current.language = generalTabRoot.currentLanguage;
         current.avatarPath = generalTabRoot.currentAvatarSourcePath;
         current.muteSfx = generalTabRoot.muteSfx;
+        current.usbSound = generalTabRoot.usbSound;
         current.sfxVolume = generalTabRoot.sfxVolume;
         current.shellScale = generalTabRoot.shellScale;
         current.screenshotCaptureOnRelease = generalTabRoot.screenshotCaptureOnRelease;
@@ -550,6 +553,72 @@ Item {
                             if (typeof Sounds !== "undefined") {
                                 Sounds.generalSettings = Object.assign({}, Sounds.generalSettings || {}, { "muteSfx": c });
                             }
+                            generalTabRoot.updateGeneralSettings();
+                        }
+                    }
+                }
+            }
+
+            Rectangle {
+                Layout.fillWidth: true
+                implicitHeight: rowUsbSoundLayout.implicitHeight + rootObj.s(24)
+                radius: ThemeBackend.borderRadius
+                color: Qt.alpha(ThemeBackend.surface0, 0.4)
+                border.width: 0
+
+                RowLayout {
+                    id: rowUsbSoundLayout
+                    anchors.left: parent.left
+                    anchors.leftMargin: rootObj.s(14)
+                    anchors.right: parent.right
+                    anchors.rightMargin: rootObj.s(14)
+                    anchors.verticalCenter: parent.verticalCenter
+                    spacing: rootObj.s(12)
+
+                    IconButton {
+                        enabled: false
+                        size: rootObj.s(32)
+                        Layout.preferredWidth: rootObj.s(32)
+                        Layout.preferredHeight: rootObj.s(32)
+                        Layout.alignment: Qt.AlignVCenter
+                        cornerRadius: ThemeBackend.borderRadius
+                        buttonIcon: "󰇖"
+                        iconFontSize: rootObj.s(16)
+                        accentColor: ThemeBackend.surface0
+                        textColor: "#ffffff"
+                    }
+
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        Layout.alignment: Qt.AlignVCenter
+                        spacing: rootObj.s(2)
+
+                        Text {
+                            Layout.fillWidth: true
+                            text: I18n.t("guide.general.usbsound.title")
+                            font.family: ThemeBackend.fontFamily
+                            font.pixelSize: rootObj.s(13)
+                            color: ThemeBackend.text
+                        }
+
+                        Text {
+                            Layout.fillWidth: true
+                            text: I18n.t("guide.general.usbsound.desc")
+                            font.family: ThemeBackend.fontFamily
+                            font.pixelSize: rootObj.s(11)
+                            color: ThemeBackend.subtext0
+                        }
+                    }
+
+                    Toggle {
+                        Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
+                        checked: generalTabRoot.usbSound
+                        accentColor: ThemeBackend.mauve
+                        baseColor: ThemeBackend.surface1
+                        handleColor: ThemeBackend.crust
+                        handleOffColor: ThemeBackend.text
+                        onToggled: function(c) {
+                            generalTabRoot.usbSound = c;
                             generalTabRoot.updateGeneralSettings();
                         }
                     }

@@ -200,6 +200,10 @@
         "title": "Mute SFX",
         "desc": "Disable user interface sound effects"
       },
+      "usbsound": {
+        "title": "USB device sound",
+        "desc": "Play a chime when a USB device is connected or disconnected"
+      },
       "sfxvolume": {
         "title": "Change the volume of sfx effects",
         "desc": "Doesn't affect system audio outputs"
@@ -262,6 +266,10 @@
       "uiscale": {
         "title": "UI scale",
         "desc": "Set the display scale factor for this monitor"
+      },
+      "shellscale": {
+        "title": "Shell scale",
+        "desc": "Resize only the shell interface on this monitor, keeping the display's own scale unchanged"
       },
       "widgets": {
         "title": "Desktop widgets",

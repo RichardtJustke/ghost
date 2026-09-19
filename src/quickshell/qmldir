@@ -24,6 +24,8 @@ WidgetRedactor 1.0 widgets/WidgetRedactor.qml
 
 Polkit 1.0 polkit/Polkit.qml
 singleton PolkitService 1.0 polkit/PolkitService.qml
+
+UsbSound 1.0 usb/UsbSound.qml
 singleton NotificationManager 1.0 notifications/NotificationManager.qml
 
 singleton Audio 1.0 singletons/audio/Audio.qml

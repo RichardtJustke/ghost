@@ -200,6 +200,10 @@
         "title": "Silenciar efeitos",
         "desc": "Desativa os efeitos sonoros da interface"
       },
+      "usbsound": {
+        "title": "Som de dispositivo USB",
+        "desc": "Toca um som ao conectar ou desconectar um dispositivo USB"
+      },
       "sfxvolume": {
         "title": "Volume dos efeitos sonoros",
         "desc": "Não afeta as saídas de áudio do sistema"
@@ -262,6 +266,10 @@
       "uiscale": {
         "title": "Escala da UI",
         "desc": "Define o fator de escala deste monitor"
+      },
+      "shellscale": {
+        "title": "Escala do shell",
+        "desc": "Redimensiona só a interface do shell neste monitor, mantendo a escala real da tela"
       },
       "widgets": {
         "title": "Widgets do desktop",

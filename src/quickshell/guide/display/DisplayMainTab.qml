@@ -569,6 +569,7 @@ Item {
                     property bool filterAuto: monSettings.auto !== undefined ? monSettings.auto : false
                     property real currentTemp: monSettings.temperature !== undefined ? monSettings.temperature : 50
                     property real currentScale: modelData.scale !== undefined ? modelData.scale : 1.0
+                    property real currentShellScale: monSettings.shellScale !== undefined ? monSettings.shellScale : 1.0
 
                     color: monitorPowered ? Qt.alpha(ThemeBackend.surface0, 0.4) : Qt.darker(Qt.alpha(ThemeBackend.surface0, 0.4), 1.1)
                     border.color: monitorPowered ? Qt.alpha(ThemeBackend.surface1, 0.4) : Qt.darker(Qt.alpha(ThemeBackend.surface1, 0.4), 1.1)
@@ -609,6 +610,9 @@ Item {
                         filterAuto = monSettings.auto !== undefined ? monSettings.auto : false;
                         if (displayTabRoot.pendingMonName !== monName && !temperatureSlider.pressed) {
                             currentTemp = monSettings.temperature !== undefined ? monSettings.temperature : 50;
+                        }
+                        if (!shellScaleSlider.isDragging) {
+                            currentShellScale = monSettings.shellScale !== undefined ? monSettings.shellScale : 1.0;
                         }
                     }
 
@@ -1103,6 +1107,84 @@ Item {
                                                 displayTabRoot.pendingMonScaleName = "";
                                             }
                                         }
+                                    }
+                                }
+                            }
+                        }
+
+                        Rectangle {
+                            Layout.fillWidth: true
+                            implicitHeight: rowShellScaleLayout.implicitHeight + rootObj.s(24)
+                            radius: ThemeBackend.borderRadius
+                            color: Qt.alpha(ThemeBackend.surface1, 0.35)
+                            border.width: 0
+
+                            RowLayout {
+                                id: rowShellScaleLayout
+                                anchors.left: parent.left
+                                anchors.leftMargin: rootObj.s(14)
+                                anchors.right: parent.right
+                                anchors.rightMargin: rootObj.s(14)
+                                anchors.verticalCenter: parent.verticalCenter
+                                spacing: rootObj.s(12)
+
+                                IconButton {
+                                    enabled: false
+                                    size: rootObj.s(32)
+                                    Layout.preferredWidth: rootObj.s(32)
+                                    Layout.preferredHeight: rootObj.s(32)
+                                    Layout.alignment: Qt.AlignVCenter
+                                    cornerRadius: ThemeBackend.borderRadius
+                                    buttonIcon: "󰍉"
+                                    iconFontSize: rootObj.s(16)
+                                    accentColor: ThemeBackend.surface0
+                                    textColor: "#ffffff"
+                                }
+
+                                ColumnLayout {
+                                    Layout.fillWidth: true
+                                    Layout.alignment: Qt.AlignVCenter
+                                    spacing: rootObj.s(2)
+
+                                    Text {
+                                        Layout.fillWidth: true
+                                        text: I18n.t("guide.display.shellscale.title")
+                                        font.family: ThemeBackend.fontFamily
+                                        font.pixelSize: rootObj.s(13)
+                                        color: ThemeBackend.text
+                                    }
+
+                                    Text {
+                                        Layout.fillWidth: true
+                                        text: I18n.t("guide.display.shellscale.desc")
+                                        font.family: ThemeBackend.fontFamily
+                                        font.pixelSize: rootObj.s(11)
+                                        color: ThemeBackend.subtext0
+                                    }
+                                }
+
+                                Draggable {
+                                    id: shellScaleSlider
+                                    Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
+                                    implicitWidth: rootObj.s(220)
+                                    implicitHeight: rootObj.s(18)
+                                    from: 50
+                                    to: 200
+                                    stepSize: 5
+                                    defaultValue: 100
+                                    showValueBubble: true
+                                    showTooltip: true
+                                    valueFormatter: function(v) { return Math.round(v) + "%" }
+                                    value: Math.round(monDelegate.currentShellScale * 100)
+                                    backgroundColor: ThemeBackend.surface0
+                                    accentColor: ThemeBackend.mauve
+                                    handleColor: ThemeBackend.text
+                                    handleBorderColor: ThemeBackend.mantle
+                                    onMoved: function(val) {
+                                        monDelegate.currentShellScale = Math.round(val) / 100;
+                                    }
+                                    onDragFinished: {
+                                        displayTabRoot.updateMonitorSetting(monDelegate.monName, "shellScale", monDelegate.currentShellScale);
                                     }
                                 }
                             }
