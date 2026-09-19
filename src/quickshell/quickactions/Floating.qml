@@ -239,7 +239,8 @@ Variants {
             property var tabModules: [
                 "actions/DrawAction.qml",
                 "actions/SystemUsage.qml",
-                "actions/Timer.qml"
+                "actions/Timer.qml",
+                "actions/Habits.qml"
             ]
 
             property int tabCount: Math.max(1, tabModules.length)

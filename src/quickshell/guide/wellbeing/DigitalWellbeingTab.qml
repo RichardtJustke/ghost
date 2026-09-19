@@ -70,6 +70,9 @@ Item {
 
     property var allKnownApps: []
 
+    property int todayMood: 0
+    property var moodWeek: []
+
     property real animatedTotalSeconds: 0
     Behavior on animatedTotalSeconds {
         NumberAnimation { duration: 850; easing.type: Easing.OutQuint }
@@ -1544,10 +1547,146 @@ Item {
                 visible: opacity > 0
                 transform: Translate { y: rootObj.s(40) * (1 - tabRoot.settingsViewFocus) }
 
-                Reserved {
+                readonly property var moodValues: [1, 2, 3, 4, 5]
+                readonly property var moodEmojis: ["😞", "😐", "🙂", "😄", "🤩"]
+
+                function requestMoodUpdate() {
+                    moodPoller.command = ["python3", tabRoot.scriptsDir + "/mood.py", "week", tabRoot.getIsoDate(new Date()), "--db-dir", rootObj.appPaths.getStateDir("focustime")];
+                    moodPoller.running = true;
+                }
+
+                function setMood(value) {
+                    tabRoot.todayMood = value;
+                    Quickshell.execDetached(["python3", tabRoot.scriptsDir + "/mood.py", "set", tabRoot.getIsoDate(new Date()), String(value), "--db-dir", rootObj.appPaths.getStateDir("focustime")]);
+                    moodWeekTimer.restart();
+                }
+
+                onVisibleChanged: if (visible) requestMoodUpdate()
+
+                Timer {
+                    id: moodWeekTimer
+                    interval: 250
+                    onTriggered: settingsWrapper.requestMoodUpdate()
+                }
+
+                Process {
+                    id: moodPoller
+                    stdout: StdioCollector {
+                        onStreamFinished: {
+                            let raw = this.text.trim();
+                            if (raw === "") return;
+                            try {
+                                let data = JSON.parse(raw);
+                                tabRoot.todayMood = data.today || 0;
+                                tabRoot.moodWeek = data.week || [];
+                            } catch(e) {}
+                        }
+                    }
+                }
+
+                ColumnLayout {
                     anchors.centerIn: parent
-                    imageSize: rootObj.s(220)
-                    textSize: rootObj.s(15)
+                    spacing: rootObj.s(22)
+                    width: Math.min(parent.width - rootObj.s(40), rootObj.s(420))
+
+                    Text {
+                        Layout.alignment: Qt.AlignHCenter
+                        text: I18n.t("guide.wellbeing.settings.mood_title", "Como você está hoje?")
+                        font.family: ThemeBackend.fontFamily
+                        font.weight: Font.DemiBold
+                        font.pixelSize: rootObj.s(15)
+                        color: ThemeBackend.text
+                    }
+
+                    RowLayout {
+                        Layout.alignment: Qt.AlignHCenter
+                        spacing: rootObj.s(10)
+
+                        Repeater {
+                            model: settingsWrapper.moodValues
+                            delegate: Rectangle {
+                                id: moodChip
+                                required property int modelData
+                                property bool isActive: tabRoot.todayMood === modelData
+
+                                width: rootObj.s(46)
+                                height: rootObj.s(46)
+                                radius: width / 2
+                                color: isActive ? Qt.alpha(ThemeBackend.mauve, 0.18) : Qt.alpha(ThemeBackend.surface0, 0.6)
+                                border.width: isActive ? 2 : 1
+                                border.color: isActive ? ThemeBackend.mauve : Qt.alpha(ThemeBackend.surface1, 0.6)
+                                scale: moodChipMa.pressed ? 0.92 : (moodChipMa.containsMouse ? 1.06 : 1.0)
+
+                                Behavior on color { ColorAnimation { duration: 150 } }
+                                Behavior on border.color { ColorAnimation { duration: 150 } }
+                                Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutQuint } }
+
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: settingsWrapper.moodEmojis[moodChip.modelData - 1]
+                                    font.pixelSize: rootObj.s(20)
+                                }
+
+                                MouseArea {
+                                    id: moodChipMa
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: settingsWrapper.setMood(moodChip.modelData)
+                                }
+                            }
+                        }
+                    }
+
+                    RowLayout {
+                        Layout.alignment: Qt.AlignHCenter
+                        Layout.fillWidth: true
+                        spacing: rootObj.s(10)
+
+                        Repeater {
+                            model: tabRoot.moodWeek
+                            delegate: ColumnLayout {
+                                required property var modelData
+                                spacing: rootObj.s(6)
+                                Layout.alignment: Qt.AlignBottom
+
+                                Rectangle {
+                                    Layout.alignment: Qt.AlignHCenter
+                                    Layout.preferredWidth: rootObj.s(18)
+                                    Layout.preferredHeight: Math.max(rootObj.s(6), rootObj.s(46) * (modelData.value / 5))
+                                    radius: rootObj.s(4)
+                                    color: modelData.value === 0 ? ThemeBackend.surface1
+                                        : modelData.value <= 2 ? ThemeBackend.blue
+                                        : modelData.value === 3 ? ThemeBackend.sapphire
+                                        : ThemeBackend.green
+
+                                    Behavior on Layout.preferredHeight { NumberAnimation { duration: 400; easing.type: Easing.OutQuint } }
+                                    Behavior on color { ColorAnimation { duration: 400 } }
+                                }
+
+                                Text {
+                                    Layout.alignment: Qt.AlignHCenter
+                                    font.family: ThemeBackend.fontFamily
+                                    font.pixelSize: rootObj.s(10)
+                                    color: ThemeBackend.overlay0
+                                    text: {
+                                        let dayNames = [
+                                            I18n.t("guide.wellbeing.days.monday"),
+                                            I18n.t("guide.wellbeing.days.tuesday"),
+                                            I18n.t("guide.wellbeing.days.wednesday"),
+                                            I18n.t("guide.wellbeing.days.thursday"),
+                                            I18n.t("guide.wellbeing.days.friday"),
+                                            I18n.t("guide.wellbeing.days.saturday"),
+                                            I18n.t("guide.wellbeing.days.sunday")
+                                        ];
+                                        let d = new Date(modelData.date + "T12:00:00");
+                                        let idx = (d.getDay() + 6) % 7;
+                                        return dayNames[idx].charAt(0).toUpperCase();
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }

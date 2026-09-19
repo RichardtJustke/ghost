@@ -518,6 +518,7 @@
       },
       "settings": {
         "title": "Wellbeing settings",
+        "mood_title": "How are you feeling today?",
         "overall_limit": "Overall daily limit",
         "off": "Off",
         "app_limits": "App usage limits",
@@ -807,6 +808,16 @@
       "temp": "Temp",
       "disk": "Disk",
       "net": "Net"
+    },
+    "habits": {
+      "title": "habits",
+      "level": "level {n}",
+      "heatmap_caption": "last 30 days",
+      "habit": {
+        "coding": "coding",
+        "water": "drink water",
+        "read": "read"
+      }
     },
     "timer": {
       "tabs": {

@@ -518,6 +518,7 @@
       },
       "settings": {
         "title": "Configurações de bem-estar",
+        "mood_title": "Como você está hoje?",
         "overall_limit": "Limite diário geral",
         "off": "Desligado",
         "app_limits": "Limites de uso por app",
@@ -807,6 +808,16 @@
       "temp": "Temp",
       "disk": "Disco",
       "net": "Rede"
+    },
+    "habits": {
+      "title": "hábitos",
+      "level": "nível {n}",
+      "heatmap_caption": "últimos 30 dias",
+      "habit": {
+        "coding": "coding",
+        "water": "beber água",
+        "read": "ler"
+      }
     },
     "timer": {
       "tabs": {
