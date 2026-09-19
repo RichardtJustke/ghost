@@ -53,7 +53,7 @@ install_wallpapers() {
     local full_pack="${1:-true}"
     local wallpaper_dir
     wallpaper_dir=$(get_wallpaper_dir)
-    local wallpaper_repo="https://github.com/ilyamiro/shell-wallpapers.git"
+    local wallpaper_repo="https://github.com/RichardtJustke/ghost-wallpapers.git"
     local clone_dir="${XDG_CACHE_HOME:-"$HOME/.cache"}/serpantinum-wallpapers"
 
     mkdir -p "$wallpaper_dir"
