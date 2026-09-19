@@ -10,7 +10,6 @@ C_YELLOW=$'\e[33m'
 C_RED=$'\e[31m'
 C_MAGENTA=$'\e[35m'
 
-ENABLE_TELEMETRY=true
 INSTALL_FULL_WALLPAPERS=true
 SELECTED_COMPOSITORS=()
 DETECTED_COMPOSITOR_LABEL=""
@@ -466,12 +465,10 @@ run_installer_ui() {
             fi
 
             local S_SDDM="${DIM}[OFF]${RESET}"
-            local S_TEL="${DIM}[OFF]${RESET}"
             local S_WP="${DIM}[3 Random]${RESET}"
             local S_PERS="${DIM}[OFF]${RESET}"
 
             [ "$OPT_SDDM" = true ] && S_SDDM="${C_GREEN}[ON]${RESET}"
-            [ "$ENABLE_TELEMETRY" = true ] && S_TEL="${C_GREEN}[ON]${RESET}"
             [ "$INSTALL_FULL_WALLPAPERS" = true ] && S_WP="${C_GREEN}[Full Pack]${RESET}"
             [ "$OPT_PERSONAL_SETUP" = true ] && S_PERS="${C_GREEN}[ON]${RESET}"
 
@@ -480,16 +477,15 @@ run_installer_ui() {
             items+=("2. $COMP_MENU_ITEM")
             items+=("3. $(t "installer.ui.menu_sddm") $S_SDDM")
             items+=("4. $(t "installer.ui.menu_wallpapers") $S_WP")
-            items+=("5. $(t "installer.ui.menu_telemetry") $S_TEL")
-            items+=("6. $(t "installer.ui.menu_personal_setup") $S_PERS")
+            items+=("5. $(t "installer.ui.menu_personal_setup") $S_PERS")
 
             if [[ "$INSTALL_STATE" == "current" ]]; then
-                items+=("7. ${BOLD}${C_GREEN}$(t "installer.ui.menu_update")${RESET}")
-                items+=("8. ${BOLD}${C_YELLOW}$(t "installer.ui.menu_reinstall")${RESET}")
-                items+=("9. ${DIM}$(t "installer.ui.menu_exit")${RESET}")
-            else
-                items+=("7. ${BOLD}${C_GREEN}$(t "installer.ui.menu_install")${RESET}")
+                items+=("6. ${BOLD}${C_GREEN}$(t "installer.ui.menu_update")${RESET}")
+                items+=("7. ${BOLD}${C_YELLOW}$(t "installer.ui.menu_reinstall")${RESET}")
                 items+=("8. ${DIM}$(t "installer.ui.menu_exit")${RESET}")
+            else
+                items+=("6. ${BOLD}${C_GREEN}$(t "installer.ui.menu_install")${RESET}")
+                items+=("7. ${DIM}$(t "installer.ui.menu_exit")${RESET}")
             fi
 
             if [ "$rendered_lines" -gt 0 ]; then
@@ -539,12 +535,9 @@ run_installer_ui() {
                     INSTALL_FULL_WALLPAPERS=$([ "$INSTALL_FULL_WALLPAPERS" = true ] && echo false || echo true)
                     ;;
                 "5")
-                    ENABLE_TELEMETRY=$([ "$ENABLE_TELEMETRY" = true ] && echo false || echo true)
-                    ;;
-                "6")
                     OPT_PERSONAL_SETUP=$([ "$OPT_PERSONAL_SETUP" = true ] && echo false || echo true)
                     ;;
-                "7")
+                "6")
                     if [ ${#SELECTED_COMPOSITORS[@]} -eq 0 ]; then
                         printf "\n%s[!] %s%s\n" "$C_RED" "$(t "installer.ui.error_no_compositor")" "$RESET"
                         sleep 1.5
@@ -554,7 +547,7 @@ run_installer_ui() {
                     cleanup_terminal
                     return 0
                     ;;
-                "8")
+                "7")
                     if [[ "$INSTALL_STATE" == "current" ]]; then
                         if [ ${#SELECTED_COMPOSITORS[@]} -eq 0 ]; then
                             printf "\n%s[!] %s%s\n" "$C_RED" "$(t "installer.ui.error_no_compositor")" "$RESET"
@@ -570,7 +563,7 @@ run_installer_ui() {
                         exit 0
                     fi
                     ;;
-                "9")
+                "8")
                     if [[ "$INSTALL_STATE" == "current" ]]; then
                         cleanup_terminal
                         clear
@@ -601,12 +594,9 @@ run_installer_ui() {
                             INSTALL_FULL_WALLPAPERS=$([ "$INSTALL_FULL_WALLPAPERS" = true ] && echo false || echo true)
                             ;;
                         *"5."*)
-                            ENABLE_TELEMETRY=$([ "$ENABLE_TELEMETRY" = true ] && echo false || echo true)
-                            ;;
-                        *"6."*)
                             OPT_PERSONAL_SETUP=$([ "$OPT_PERSONAL_SETUP" = true ] && echo false || echo true)
                             ;;
-                        *"7."*)
+                        *"6."*)
                             if [ ${#SELECTED_COMPOSITORS[@]} -eq 0 ]; then
                                 printf "\n%s[!] %s%s\n" "$C_RED" "$(t "installer.ui.error_no_compositor")" "$RESET"
                                 sleep 1.5
@@ -616,7 +606,7 @@ run_installer_ui() {
                             cleanup_terminal
                             return 0
                             ;;
-                        *"8."*)
+                        *"7."*)
                             if [[ "$INSTALL_STATE" == "current" ]]; then
                                 if [ ${#SELECTED_COMPOSITORS[@]} -eq 0 ]; then
                                     printf "\n%s[!] %s%s\n" "$C_RED" "$(t "installer.ui.error_no_compositor")" "$RESET"
@@ -632,7 +622,7 @@ run_installer_ui() {
                                 exit 0
                             fi
                             ;;
-                        *"9."*)
+                        *"8."*)
                             if [[ "$INSTALL_STATE" == "current" ]]; then
                                 cleanup_terminal
                                 clear

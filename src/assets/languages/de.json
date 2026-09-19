@@ -1224,7 +1224,6 @@
       "menu_overview": "Paketinstallations-übersicht ({count} kernpakete)",
       "menu_sddm": "SDDM-login-manager",
       "menu_wallpapers": "Hintergrundbild-paket",
-      "menu_telemetry": "Anonyme telemetrie",
       "menu_update": "Aktualisieren",
       "menu_reinstall": "Neu installieren",
       "menu_install": "Installieren",
