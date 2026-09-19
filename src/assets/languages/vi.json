@@ -1188,8 +1188,6 @@
       "main_menu_header": " Sử dụng phím mũi tên để điều hướng, enter để chọn ",
       "error_no_compositor": "Bạn phải chọn ít nhất một compositor được hỗ trợ trước khi tiếp tục.",
       "tagline": "Một desktop shell được xây dựng cho bạn",
-      "support_creator": "Ủng hộ tác giả:",
-      "buy_coffee": "Nếu bạn thích dự án này, hãy cân nhắc mời tôi một ly cà phê!",
       "installed_success": "✔ Đã cài đặt thành công Ghost {ver} ({commit}).",
       "failed_packages": "Các gói sau đã gặp lỗi trong quá trình cài đặt:",
       "restart_prompt": "Hãy khởi động lại compositor hoặc chạy 'serpantinumd start' để bắt đầu.",

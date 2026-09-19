@@ -1232,8 +1232,6 @@
       "main_menu_header": " Pfeiltasten zur navigation, enter zur auswahl ",
       "error_no_compositor": "Sie müssen mindestens einen unterstützten compositor auswählen, bevor sie fortfahren können.",
       "tagline": "Eine desktop-shell, gemacht für dich",
-      "support_creator": "Entwickler unterstützen:",
-      "buy_coffee": "Wenn dir dieses projekt gefällt, spendiere mir gerne einen kaffee!",
       "installed_success": "✔ Ghost {ver} ({commit}) erfolgreich installiert.",
       "failed_packages": "Bei den folgenden paketen sind während der installation fehler aufgetreten:",
       "restart_prompt": "Compositor neu starten oder 'serpantinumd start' ausführen, um zu beginnen.",

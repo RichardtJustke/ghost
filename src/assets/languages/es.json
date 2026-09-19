@@ -1232,8 +1232,6 @@
       "main_menu_header": " Usa las flechas para navegar, enter para seleccionar ",
       "error_no_compositor": "Debes elegir al menos un compositor compatible antes de continuar.",
       "tagline": "Un entorno de escritorio creado para ti",
-      "support_creator": "Apoya al creador:",
-      "buy_coffee": "Si disfrutas este proyecto, ¡invítame a un café!",
       "installed_success": "✔ Ghost {ver} ({commit}) instalado con éxito.",
       "failed_packages": "Los siguientes paquetes encontraron errores durante la instalación:",
       "restart_prompt": "Reinicia tu compositor o ejecuta 'serpantinumd start' para comenzar.",

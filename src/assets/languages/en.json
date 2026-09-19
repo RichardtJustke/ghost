@@ -1206,8 +1206,6 @@
       "main_menu_header": " Use arrow keys to navigate, enter to select ",
       "error_no_compositor": "You must choose at least one supported compositor before proceeding.",
       "tagline": "A desktop shell built for you",
-      "support_creator": "Support the creator:",
-      "buy_coffee": "If you enjoy this project, consider buying me a coffee!",
       "installed_success": "✔ Ghost {ver} ({commit}) installed successfully.",
       "failed_packages": "The following packages encountered errors during installation:",
       "restart_prompt": "Restart your compositor or run 'serpantinumd start' to begin.",

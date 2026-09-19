@@ -1182,8 +1182,6 @@
       "main_menu_header": " Menyuda hərəkət etmək üçün ox düymələrindən istifadə edin, seçmək üçün Enter düyməsini basın ",
       "error_no_compositor": "Davam etməzdən əvvəl ən azı bir dəstəklənən görüntü birləşdiricisi seçməlisiniz.",
       "tagline": "Sizin üçün hazırlanmış iş masası mühiti",
-      "support_creator": "Müəllifə dəstək olun:",
-      "buy_coffee": "Layihə xoşunuza gəlirsə, mənə bir fincan qəhvə almaqla dəstək ola bilərsiniz!",
       "installed_success": "✔ Ghost {ver} ({commit}) uğurla quraşdırıldı.",
       "failed_packages": "Aşağıdakı paketlərin quraşdırılması zamanı xətalar baş verdi:",
       "restart_prompt": "Başlamaq üçün görüntü birləşdiricisini yenidən başladın və ya 'serpantinumd start' əmrini icra edin.",

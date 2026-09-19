@@ -650,11 +650,6 @@ draw_completion_screen() {
 EOF
     printf "%s\n\n" "$RESET"
     printf "%s%s  %s%s\n\n" "$BOLD" "$C_CYAN" "$(t "installer.ui.tagline")" "$RESET"
-    printf "%s%s================================================================================%s\n" "$BOLD" "$C_MAGENTA" "$RESET"
-    printf "%s%s $(t "installer.ui.support_creator")%s\n" "$BOLD" "$C_YELLOW" "$RESET"
-    printf " $(t "installer.ui.buy_coffee")\n"
-    printf " %s%sKo-fi:%s https://ko-fi.com/ilyamiro\n" "$BOLD" "$C_CYAN" "$RESET"
-    printf "%s%s================================================================================%s\n\n" "$BOLD" "$C_MAGENTA" "$RESET"
     printf "%s%s%s\n" "$C_GREEN" "$(t "installer.ui.installed_success" "ver=$target_ver" "commit=$target_commit")" "$RESET"
     if [ ${#FAILED_PKGS[@]} -gt 0 ]; then
         printf "\n%s%s%s%s\n" "$BOLD" "$C_RED" "$(t "installer.ui.failed_packages")" "$RESET"
