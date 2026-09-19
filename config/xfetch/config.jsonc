@@ -1,0 +1,155 @@
+{
+    "ascii": "~/.config/xfetch/logos/arch.txt",
+
+    "layout": "section",
+
+    "os_wsl_style": "minimal",
+
+    // ─────────────────────────────────────────────
+    // Modules
+    // ─────────────────────────────────────────────
+    "modules": [
+        {
+            "type": "group",
+            "title": "Hardware",
+            "modules": [
+                "hostname",
+                "cpu",
+                "gpu",
+                "memory",
+                "swap",
+                "disk",
+                "battery"
+            ]
+        },
+
+        {
+            "type": "group",
+            "title": "Software",
+            "modules": [
+                "os",
+                "kernel",
+                "packages",
+                "shell",
+                "wm",
+                "terminal",
+                "local_ip"
+            ]
+        },
+
+        {
+            "type": "group",
+            "title": "Services",
+            "modules": [
+                "docker",
+                "music",
+                "github-stats"
+            ]
+        },
+
+        {
+            "type": "group",
+            "title": "Session",
+            "modules": [
+                "user",
+                "uptime",
+                "datetime"
+            ]
+        },
+
+        "palette"
+    ],
+
+    // ─────────────────────────────────────────────
+    // Colors
+    // ─────────────────────────────────────────────
+    "show_colors": true,
+
+    "colors": {
+        "hostname": "Green",
+        "cpu": "Green",
+        "gpu": "Green",
+        "memory": "Green",
+        "swap": "Green",
+        "disk": "Green",
+        "battery": "Green",
+
+        "os": "Yellow",
+        "kernel": "Yellow",
+        "packages": "Yellow",
+        "shell": "Yellow",
+        "wm": "Yellow",
+        "terminal": "Yellow",
+        "local_ip": "Yellow",
+
+        "docker": "Cyan",
+        "music": "Cyan",
+        "github-stats": "Cyan",
+
+        "user": "Magenta",
+        "uptime": "Magenta",
+        "datetime": "Magenta",
+
+        "palette": "White"
+    },
+
+    // ─────────────────────────────────────────────
+    // Icons
+    // ─────────────────────────────────────────────
+    "icons": {
+        "hostname": "",
+        "cpu": "",
+        "gpu": "󰍹",
+        "memory": "",
+        "swap": "󰓡",
+        "disk": "󰋊",
+        "battery": "",
+
+        "os": "",
+        "kernel": "",
+        "packages": "",
+        "shell": "",
+        "wm": "",
+        "terminal": "",
+        "local_ip": "󰩟",
+
+        "docker": "",
+        "music": "",
+        "github-stats": "",
+
+        "user": "",
+        "uptime": "󰔛",
+        "datetime": "",
+
+        "palette": "",
+
+        "hardware": "",
+        "software": "",
+        "services": "󰒋",
+        "session": ""
+    },
+
+    // ─────────────────────────────────────────────
+    // Labels
+    // ─────────────────────────────────────────────
+    "labels": {
+        "cpu": "",
+        "gpu": "",
+        "docker": "",
+        "music": "",
+        "github-stats": ""
+    },
+
+    // ─────────────────────────────────────────────
+    // Output formats
+    // ─────────────────────────────────────────────
+    "formats": {
+        "cpu": "{model} · {cores} núcleos · {freq}",
+        "gpu": "{vendor} {model}"
+    },
+
+    // ─────────────────────────────────────────────
+    // Palette
+    // ─────────────────────────────────────────────
+    "palette_style": "circles"
+}
