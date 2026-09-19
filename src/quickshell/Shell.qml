@@ -52,5 +52,9 @@ ShellRoot {
 
     Component.onCompleted: {
         FirstLaunch.checkFirstLaunch();
+        // Touch PauseReminder once so the singleton is instantiated at
+        // startup and its background timer runs regardless of which
+        // guide tab (if any) is open.
+        PauseReminder.enabled;
     }
 }

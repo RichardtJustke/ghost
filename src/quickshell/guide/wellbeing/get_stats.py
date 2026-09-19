@@ -18,6 +18,7 @@ def main():
     parser.add_argument("date", nargs="?", default=date.today().isoformat())
     parser.add_argument("--app", type=str, default=None)
     parser.add_argument("--db-dir", type=str, default=None)
+    parser.add_argument("--limit-seconds", type=int, default=0)
     args = parser.parse_args()
 
     target_date_str = args.date
@@ -44,8 +45,9 @@ def main():
 
     if not os.path.exists(db_path):
         print(json.dumps({
-            "total": 0, "average": 0, "week_range": "", "yesterday": 0, "current": "History", 
-            "apps": [], "week_apps": [], "week": [], "month": [], "hourly": [0]*48, "week_heatmap": [[0]*24 for _ in range(7)], "peak_usage_str": "N/A", "all_known_apps": []
+            "total": 0, "average": 0, "week_range": "", "yesterday": 0, "current": "History",
+            "apps": [], "week_apps": [], "week": [], "month": [], "hourly": [0]*48, "week_heatmap": [[0]*24 for _ in range(7)], "peak_usage_str": "N/A", "all_known_apps": [],
+            "streak": 0, "streak_week": []
         }))
         return
 
@@ -182,11 +184,40 @@ def main():
     except sqlite3.OperationalError:
         all_known_apps = []
 
+    streak_count = 0
+    streak_week = []
+    streak_limit = args.limit_seconds
+    if streak_limit > 0:
+        lookback_days = 30
+        lookback_start = target_date - timedelta(days=lookback_days)
+        q, p = build_query('SELECT log_date, SUM(seconds) FROM focus_log WHERE log_date >= ? AND log_date <= ?',
+                           (lookback_start.isoformat(), target_date.isoformat()), app_filter)
+        c.execute(q + " GROUP BY log_date", p)
+        daily_totals = {r[0]: r[1] for r in c.fetchall()}
+
+        today_str = target_date.isoformat()
+        today_secs = daily_totals.get(today_str, 0)
+        cur = target_date if today_secs < streak_limit else target_date - timedelta(days=1)
+        for _ in range(lookback_days):
+            d_str = cur.isoformat()
+            secs = daily_totals.get(d_str)
+            if secs is None or secs >= streak_limit:
+                break
+            streak_count += 1
+            cur -= timedelta(days=1)
+
+        for i in range(6, -1, -1):
+            d = target_date - timedelta(days=i)
+            d_str = d.isoformat()
+            secs = daily_totals.get(d_str, 0)
+            streak_week.append({"date": d_str, "seconds": secs, "ok": secs < streak_limit})
+
     result = {
         "selected_date": target_date.isoformat(), "total": total_seconds, "average": average_seconds,
         "week_range": week_range_str, "yesterday": yesterday_seconds, "current": app_filter if app_filter else "History",
         "apps": all_apps, "week_apps": week_apps, "week": week_data, "month": month_data,
-        "hourly": hourly_data, "week_heatmap": week_heatmap, "peak_usage_str": peak_str, "all_known_apps": all_known_apps
+        "hourly": hourly_data, "week_heatmap": week_heatmap, "peak_usage_str": peak_str, "all_known_apps": all_known_apps,
+        "streak": streak_count, "streak_week": streak_week
     }
     
     print(json.dumps(result))

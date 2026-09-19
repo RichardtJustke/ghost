@@ -23,20 +23,43 @@ Item {
     property real preferredWidth: (root.safeActiveEdge === "bottom" || root.safeActiveEdge === "top") ? baseL : baseW
     property real preferredExtraLength: (root.safeActiveEdge === "bottom" || root.safeActiveEdge === "top") ? baseW : baseL
 
-    readonly property var habitIds: ["coding", "water", "read"]
-    readonly property var habitNames: ({
-        coding: I18n.t("quickactions.habits.habit.coding"),
-        water: I18n.t("quickactions.habits.habit.water"),
-        read: I18n.t("quickactions.habits.habit.read")
+    readonly property var builtinDefaultNames: ({
+        coding: "coding",
+        water: "drink water",
+        read: "read"
     })
     readonly property string scriptPath: Quickshell.env("QS_DIR") + "/quickactions/actions/habits.py"
 
     property var habitStatus: []
+    property var defs: []
     property int xp: 0
     property int level: 1
     property int xpIntoLevel: 0
     property int xpPerLevel: 10
     property var heatmap: []
+
+    function habitDisplayName(def) {
+        if (def.builtin && def.name === root.builtinDefaultNames[def.id]) {
+            return I18n.t("quickactions.habits.habit." + def.id);
+        }
+        return def.name;
+    }
+
+    readonly property var groupedDefs: {
+        let groups = {};
+        let order = [];
+        for (let i = 0; i < root.defs.length; i++) {
+            let d = root.defs[i];
+            let cat = (d.category || "").trim();
+            if (!groups[cat]) { groups[cat] = []; order.push(cat); }
+            groups[cat].push(d);
+        }
+        let result = [];
+        for (let i = 0; i < order.length; i++) {
+            result.push({ category: order[i], items: groups[order[i]] });
+        }
+        return result;
+    }
 
     function getStorageDir() {
         return Quickshell.env("QS_STATE_HABITS") || ((Quickshell.env("HOME") || "/tmp") + "/.local/state/serpantinum/habits");
@@ -49,6 +72,7 @@ Item {
 
     function applyStatus(data) {
         root.habitStatus = data.habits || [];
+        root.defs = (data.defs || []).filter(d => !d.archived);
         root.xp = data.xp || 0;
         root.level = data.level || 1;
         root.xpIntoLevel = data.xpIntoLevel || 0;
@@ -64,12 +88,12 @@ Item {
     }
 
     function requestStatus() {
-        statusProc.command = ["python3", root.scriptPath, "status", root.getIsoDate(new Date()), "--habits", root.habitIds.join(","), "--db-dir", root.getStorageDir()];
+        statusProc.command = ["python3", root.scriptPath, "status", root.getIsoDate(new Date()), "--db-dir", root.getStorageDir()];
         statusProc.running = true;
     }
 
     function toggleHabit(habitId) {
-        toggleProc.command = ["python3", root.scriptPath, "toggle", root.getIsoDate(new Date()), habitId, "--habits", root.habitIds.join(","), "--db-dir", root.getStorageDir()];
+        toggleProc.command = ["python3", root.scriptPath, "toggle", root.getIsoDate(new Date()), habitId, "--db-dir", root.getStorageDir()];
         toggleProc.running = true;
     }
 
@@ -169,72 +193,100 @@ Item {
             }
         }
 
-        ColumnLayout {
+        Flickable {
             Layout.fillWidth: true
-            spacing: root.s(6)
+            Layout.fillHeight: true
+            clip: true
+            boundsBehavior: Flickable.StopAtBounds
+            contentHeight: habitListCol.implicitHeight
+            contentWidth: width
 
-            Repeater {
-                model: root.habitIds
-                delegate: Item {
-                    id: habitRow
-                    required property string modelData
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: root.s(22)
+            ColumnLayout {
+                id: habitListCol
+                width: parent.width
+                spacing: root.s(10)
 
-                    property var st: root.habitStatusFor(modelData)
-
-                    RowLayout {
-                        anchors.fill: parent
-                        spacing: root.s(10)
-
-                        Rectangle {
-                            Layout.preferredWidth: root.s(16)
-                            Layout.preferredHeight: root.s(16)
-                            radius: root.s(4)
-                            color: habitRow.st.done ? ThemeBackend.green : "transparent"
-                            border.width: 1
-                            border.color: habitRow.st.done ? ThemeBackend.green : ThemeBackend.surface2
-                            Behavior on color { ColorAnimation { duration: 150 } }
-
-                            Text {
-                                anchors.centerIn: parent
-                                visible: habitRow.st.done
-                                text: "✓"
-                                font.pixelSize: root.s(10)
-                                font.bold: true
-                                color: ThemeBackend.crust
-                            }
-                        }
+                Repeater {
+                    model: root.groupedDefs
+                    delegate: ColumnLayout {
+                        id: groupCol
+                        required property var modelData
+                        Layout.fillWidth: true
+                        spacing: root.s(4)
 
                         Text {
                             Layout.fillWidth: true
+                            visible: root.groupedDefs.length > 1 && groupCol.modelData.category !== ""
                             font.family: ThemeBackend.fontFamily
-                            font.pixelSize: root.s(12)
-                            color: habitRow.st.done ? ThemeBackend.overlay0 : ThemeBackend.text
-                            font.strikeout: habitRow.st.done
-                            text: root.habitNames[habitRow.modelData] || habitRow.modelData
-                            elide: Text.ElideRight
+                            font.weight: Font.DemiBold
+                            font.pixelSize: root.s(9.5)
+                            color: ThemeBackend.overlay0
+                            text: groupCol.modelData.category.toUpperCase()
                         }
 
-                        Text {
-                            font.family: ThemeBackend.fontFamily
-                            font.pixelSize: root.s(10.5)
-                            color: ThemeBackend.peach
-                            text: "🔥 " + habitRow.st.streak
-                        }
-                    }
+                        Repeater {
+                            model: groupCol.modelData.items
+                            delegate: Item {
+                                id: habitRow
+                                required property var modelData
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: root.s(22)
 
-                    MouseArea {
-                        anchors.fill: parent
-                        anchors.margins: -root.s(4)
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: root.toggleHabit(habitRow.modelData)
+                                property var st: root.habitStatusFor(habitRow.modelData.id)
+
+                                RowLayout {
+                                    anchors.fill: parent
+                                    spacing: root.s(10)
+
+                                    Rectangle {
+                                        Layout.preferredWidth: root.s(16)
+                                        Layout.preferredHeight: root.s(16)
+                                        radius: root.s(4)
+                                        color: habitRow.st.done ? ThemeBackend.green : "transparent"
+                                        border.width: 1
+                                        border.color: habitRow.st.done ? ThemeBackend.green : ThemeBackend.surface2
+                                        Behavior on color { ColorAnimation { duration: 150 } }
+
+                                        Text {
+                                            anchors.centerIn: parent
+                                            visible: habitRow.st.done
+                                            text: "✓"
+                                            font.pixelSize: root.s(10)
+                                            font.bold: true
+                                            color: ThemeBackend.crust
+                                        }
+                                    }
+
+                                    Text {
+                                        Layout.fillWidth: true
+                                        font.family: ThemeBackend.fontFamily
+                                        font.pixelSize: root.s(12)
+                                        color: habitRow.st.done ? ThemeBackend.overlay0 : ThemeBackend.text
+                                        font.strikeout: habitRow.st.done
+                                        text: root.habitDisplayName(habitRow.modelData)
+                                        elide: Text.ElideRight
+                                    }
+
+                                    Text {
+                                        font.family: ThemeBackend.fontFamily
+                                        font.pixelSize: root.s(10.5)
+                                        color: ThemeBackend.peach
+                                        text: "🔥 " + habitRow.st.streak
+                                    }
+                                }
+
+                                MouseArea {
+                                    anchors.fill: parent
+                                    anchors.margins: -root.s(4)
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: root.toggleHabit(habitRow.modelData.id)
+                                }
+                            }
+                        }
                     }
                 }
             }
         }
-
-        Item { Layout.fillHeight: true }
 
         ColumnLayout {
             Layout.fillWidth: true

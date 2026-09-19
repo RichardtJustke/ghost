@@ -1561,7 +1561,116 @@ Item {
                     moodWeekTimer.restart();
                 }
 
-                onVisibleChanged: if (visible) requestMoodUpdate()
+                readonly property string habitsScriptPath: rootObj.appPaths.qsDir + "/quickactions/actions/habits.py"
+                readonly property string habitsDbDir: rootObj.appPaths.getStateDir("habits")
+                readonly property var habitBuiltinNames: ({ coding: "coding", water: "drink water", read: "read" })
+
+                property var habitDefs: []
+                property string habitFormName: ""
+                property string habitFormCategory: ""
+                property string editingHabitId: ""
+
+                readonly property var activeHabitDefs: settingsWrapper.habitDefs.filter(d => !d.archived)
+                readonly property var archivedHabitDefs: settingsWrapper.habitDefs.filter(d => d.archived)
+                readonly property var existingCategories: {
+                    let seen = {};
+                    let result = [];
+                    for (let i = 0; i < settingsWrapper.habitDefs.length; i++) {
+                        let cat = (settingsWrapper.habitDefs[i].category || "").trim();
+                        if (cat !== "" && !seen[cat]) { seen[cat] = true; result.push(cat); }
+                    }
+                    return result;
+                }
+
+                function habitDisplayName(def) {
+                    if (def.builtin && def.name === settingsWrapper.habitBuiltinNames[def.id]) {
+                        return I18n.t("quickactions.habits.habit." + def.id);
+                    }
+                    return def.name;
+                }
+
+                function requestHabitDefs() {
+                    habitDefsProc.command = ["python3", settingsWrapper.habitsScriptPath, "status", tabRoot.getIsoDate(new Date()), "--db-dir", settingsWrapper.habitsDbDir];
+                    habitDefsProc.running = true;
+                }
+
+                function resetHabitForm() {
+                    settingsWrapper.editingHabitId = "";
+                    settingsWrapper.habitFormName = "";
+                    settingsWrapper.habitFormCategory = "";
+                }
+
+                function startEditHabit(def) {
+                    settingsWrapper.editingHabitId = def.id;
+                    settingsWrapper.habitFormName = settingsWrapper.habitDisplayName(def);
+                    settingsWrapper.habitFormCategory = def.category || "";
+                }
+
+                function submitHabitForm() {
+                    let name = settingsWrapper.habitFormName.trim();
+                    if (name === "") return;
+                    if (settingsWrapper.editingHabitId === "") {
+                        habitMutateProc.command = ["python3", settingsWrapper.habitsScriptPath, "add-habit", "--db-dir", settingsWrapper.habitsDbDir, "--name", name, "--category", settingsWrapper.habitFormCategory.trim()];
+                    } else {
+                        habitMutateProc.command = ["python3", settingsWrapper.habitsScriptPath, "update-habit", "--db-dir", settingsWrapper.habitsDbDir, "--id", settingsWrapper.editingHabitId, "--name", name, "--category", settingsWrapper.habitFormCategory.trim()];
+                    }
+                    habitMutateProc.running = true;
+                    settingsWrapper.resetHabitForm();
+                }
+
+                function setHabitArchived(id, archived) {
+                    if (settingsWrapper.editingHabitId === id) settingsWrapper.resetHabitForm();
+                    habitMutateProc.command = ["python3", settingsWrapper.habitsScriptPath, "set-archived", "--db-dir", settingsWrapper.habitsDbDir, "--id", id, "--archived", archived ? "1" : "0"];
+                    habitMutateProc.running = true;
+                }
+
+                property int activeSettingsTab: 0
+
+                readonly property string statsScriptPath: tabRoot.scriptsDir + "/get_stats.py"
+                property int dailyLimitSeconds: Config.getSetting("wellbeing.overallDailyLimit", 0)
+                property int streakCount: 0
+                property var streakWeek: []
+
+                property bool focusSoundEnabled: Config.getSetting("wellbeing.focusSound.enabled", false)
+                property string focusSoundTrack: Config.getSetting("wellbeing.focusSound.track", "lofi")
+
+                function requestStreak() {
+                    if (settingsWrapper.dailyLimitSeconds <= 0) {
+                        settingsWrapper.streakCount = 0;
+                        settingsWrapper.streakWeek = [];
+                        return;
+                    }
+                    streakProc.command = ["python3", settingsWrapper.statsScriptPath, tabRoot.getIsoDate(new Date()),
+                        "--db-dir", rootObj.appPaths.getStateDir("focustime"),
+                        "--limit-seconds", String(settingsWrapper.dailyLimitSeconds)];
+                    streakProc.running = true;
+                }
+
+                function setDailyLimitHours(hours) {
+                    let secs = Math.max(0, Math.round(hours)) * 3600;
+                    settingsWrapper.dailyLimitSeconds = secs;
+                    Config.setSetting("wellbeing.overallDailyLimit", secs);
+                    settingsWrapper.requestStreak();
+                }
+
+                function setFocusSoundEnabled(value) {
+                    settingsWrapper.focusSoundEnabled = value === true;
+                    Config.setSetting("wellbeing.focusSound.enabled", settingsWrapper.focusSoundEnabled);
+                    TimerState.refreshFocusSound();
+                }
+
+                function setFocusSoundTrack(track) {
+                    settingsWrapper.focusSoundTrack = track;
+                    Config.setSetting("wellbeing.focusSound.track", track);
+                    TimerState.refreshFocusSound();
+                }
+
+                onActiveSettingsTabChanged: {
+                    if (settingsWrapper.activeSettingsTab === 1) tabRoot.requestDataUpdate();
+                    else if (settingsWrapper.activeSettingsTab === 2) settingsWrapper.requestStreak();
+                }
+
+                onVisibleChanged: if (visible) { requestMoodUpdate(); requestHabitDefs(); settingsWrapper.requestStreak(); }
 
                 Timer {
                     id: moodWeekTimer
@@ -1584,10 +1693,65 @@ Item {
                     }
                 }
 
+                Process {
+                    id: habitDefsProc
+                    stdout: StdioCollector {
+                        onStreamFinished: {
+                            let raw = this.text.trim();
+                            if (raw === "") return;
+                            try { settingsWrapper.habitDefs = JSON.parse(raw).defs || []; } catch(e) {}
+                        }
+                    }
+                }
+
+                Process {
+                    id: habitMutateProc
+                    stdout: StdioCollector {
+                        onStreamFinished: {
+                            let raw = this.text.trim();
+                            if (raw === "") return;
+                            try { settingsWrapper.habitDefs = JSON.parse(raw).defs || []; } catch(e) {}
+                        }
+                    }
+                }
+
+                Process {
+                    id: streakProc
+                    stdout: StdioCollector {
+                        onStreamFinished: {
+                            let raw = this.text.trim();
+                            if (raw === "") return;
+                            try {
+                                let data = JSON.parse(raw);
+                                settingsWrapper.streakCount = data.streak || 0;
+                                settingsWrapper.streakWeek = data.streak_week || [];
+                            } catch(e) {}
+                        }
+                    }
+                }
+
+                Flickable {
+                    anchors.top: parent.top
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.bottom: settingsTabStrip.top
+                    anchors.margins: rootObj.s(24)
+                    anchors.bottomMargin: rootObj.s(14)
+                    clip: true
+                    boundsBehavior: Flickable.StopAtBounds
+                    contentWidth: width
+                    contentHeight: settingsBody.implicitHeight
+
                 ColumnLayout {
-                    anchors.centerIn: parent
+                    id: settingsBody
+                    width: parent.width
+                    spacing: rootObj.s(40)
+
+                ColumnLayout {
+                    Layout.alignment: Qt.AlignHCenter
                     spacing: rootObj.s(22)
-                    width: Math.min(parent.width - rootObj.s(40), rootObj.s(420))
+                    Layout.preferredWidth: Math.min(settingsBody.width, rootObj.s(420))
+                    visible: settingsWrapper.activeSettingsTab === 0
 
                     Text {
                         Layout.alignment: Qt.AlignHCenter
@@ -1684,6 +1848,756 @@ Item {
                                         return dayNames[idx].charAt(0).toUpperCase();
                                     }
                                 }
+                            }
+                        }
+                    }
+                }
+
+                ColumnLayout {
+                    Layout.alignment: Qt.AlignHCenter
+                    Layout.preferredWidth: Math.min(settingsBody.width, rootObj.s(420))
+                    spacing: rootObj.s(18)
+                    visible: settingsWrapper.activeSettingsTab === 1
+
+                    Text {
+                        Layout.alignment: Qt.AlignHCenter
+                        text: I18n.t("guide.wellbeing.settings.recap.title")
+                        font.family: ThemeBackend.fontFamily
+                        font.weight: Font.DemiBold
+                        font.pixelSize: rootObj.s(15)
+                        color: ThemeBackend.text
+                    }
+
+                    Rectangle {
+                        Layout.alignment: Qt.AlignHCenter
+                        Layout.preferredWidth: rootObj.s(300)
+                        implicitHeight: recapCardCol.implicitHeight + rootObj.s(36)
+                        radius: Math.min(ThemeBackend.borderRadius, rootObj.s(14))
+                        color: Qt.alpha(ThemeBackend.surface0, 0.6)
+                        visible: tabRoot.averageSeconds > 0 || (tabRoot.weekAppsData && tabRoot.weekAppsData.length > 0)
+
+                        ColumnLayout {
+                            id: recapCardCol
+                            anchors.centerIn: parent
+                            width: parent.width - rootObj.s(48)
+                            spacing: rootObj.s(4)
+
+                            Text {
+                                Layout.alignment: Qt.AlignHCenter
+                                text: I18n.t("guide.wellbeing.settings.recap.card_label").toUpperCase()
+                                font.family: ThemeBackend.fontFamily
+                                font.weight: Font.DemiBold
+                                font.pixelSize: rootObj.s(9.5)
+                                color: ThemeBackend.overlay0
+                            }
+
+                            Text {
+                                Layout.alignment: Qt.AlignHCenter
+                                Layout.topMargin: rootObj.s(4)
+                                text: tabRoot.formatTimeLarge(tabRoot.averageSeconds)
+                                font.family: ThemeBackend.fontFamily
+                                font.weight: Font.Bold
+                                font.pixelSize: rootObj.s(28)
+                                color: ThemeBackend.text
+                            }
+
+                            Text {
+                                Layout.alignment: Qt.AlignHCenter
+                                Layout.bottomMargin: rootObj.s(14)
+                                text: I18n.t("guide.wellbeing.settings.recap.avg_caption")
+                                font.family: ThemeBackend.fontFamily
+                                font.pixelSize: rootObj.s(10.5)
+                                color: ThemeBackend.subtext0
+                            }
+
+                            Rectangle {
+                                Layout.fillWidth: true
+                                Layout.bottomMargin: rootObj.s(14)
+                                implicitHeight: 1
+                                color: Qt.alpha(ThemeBackend.surface2, 0.6)
+                            }
+
+                            RowLayout {
+                                Layout.fillWidth: true
+
+                                ColumnLayout {
+                                    Layout.fillWidth: true
+                                    spacing: -rootObj.s(1)
+                                    Text {
+                                        text: (tabRoot.weekAppsData && tabRoot.weekAppsData.length > 0) ? tabRoot.weekAppsData[0].name : "—"
+                                        font.family: ThemeBackend.fontFamily
+                                        font.weight: Font.DemiBold
+                                        font.pixelSize: rootObj.s(12.5)
+                                        color: ThemeBackend.text
+                                        elide: Text.ElideRight
+                                        Layout.fillWidth: true
+                                    }
+                                    Text {
+                                        text: I18n.t("guide.wellbeing.settings.recap.top_app_caption").toUpperCase()
+                                        font.family: ThemeBackend.fontFamily
+                                        font.pixelSize: rootObj.s(8.5)
+                                        color: ThemeBackend.overlay0
+                                    }
+                                }
+
+                                ColumnLayout {
+                                    Layout.fillWidth: true
+                                    spacing: -rootObj.s(1)
+                                    Text {
+                                        Layout.alignment: Qt.AlignRight
+                                        text: tabRoot.peakUsageHours !== "" ? tabRoot.peakUsageHours : "—"
+                                        font.family: ThemeBackend.fontFamily
+                                        font.weight: Font.DemiBold
+                                        font.pixelSize: rootObj.s(12.5)
+                                        color: ThemeBackend.text
+                                    }
+                                    Text {
+                                        Layout.alignment: Qt.AlignRight
+                                        text: I18n.t("guide.wellbeing.settings.recap.peak_caption").toUpperCase()
+                                        font.family: ThemeBackend.fontFamily
+                                        font.pixelSize: rootObj.s(8.5)
+                                        color: ThemeBackend.overlay0
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    Text {
+                        Layout.alignment: Qt.AlignHCenter
+                        visible: tabRoot.averageSeconds <= 0 && (!tabRoot.weekAppsData || tabRoot.weekAppsData.length === 0)
+                        text: I18n.t("guide.wellbeing.settings.recap.no_data")
+                        font.family: ThemeBackend.fontFamily
+                        font.pixelSize: rootObj.s(11)
+                        color: ThemeBackend.overlay0
+                    }
+                }
+
+                ColumnLayout {
+                    Layout.alignment: Qt.AlignHCenter
+                    Layout.preferredWidth: Math.min(settingsBody.width, rootObj.s(420))
+                    spacing: rootObj.s(16)
+                    visible: settingsWrapper.activeSettingsTab === 2
+
+                    Text {
+                        Layout.alignment: Qt.AlignHCenter
+                        text: I18n.t("guide.wellbeing.settings.streak.title")
+                        font.family: ThemeBackend.fontFamily
+                        font.weight: Font.DemiBold
+                        font.pixelSize: rootObj.s(15)
+                        color: ThemeBackend.text
+                    }
+
+                    Text {
+                        Layout.alignment: Qt.AlignHCenter
+                        Layout.fillWidth: true
+                        horizontalAlignment: Text.AlignHCenter
+                        text: I18n.t("guide.wellbeing.settings.streak.desc")
+                        wrapMode: Text.WordWrap
+                        font.family: ThemeBackend.fontFamily
+                        font.pixelSize: rootObj.s(11)
+                        color: ThemeBackend.subtext0
+                    }
+
+                    ColumnLayout {
+                        Layout.alignment: Qt.AlignHCenter
+                        spacing: rootObj.s(14)
+                        visible: settingsWrapper.dailyLimitSeconds > 0
+
+                        RowLayout {
+                            Layout.alignment: Qt.AlignHCenter
+                            spacing: rootObj.s(12)
+
+                            Rectangle {
+                                Layout.preferredWidth: rootObj.s(46)
+                                Layout.preferredHeight: rootObj.s(46)
+                                radius: width / 2
+                                color: Qt.alpha(ThemeBackend.surface0, 0.7)
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: "🐾"
+                                    font.pixelSize: rootObj.s(20)
+                                }
+                            }
+
+                            ColumnLayout {
+                                spacing: -rootObj.s(2)
+                                Text {
+                                    text: settingsWrapper.streakCount
+                                    font.family: ThemeBackend.fontFamily
+                                    font.weight: Font.Bold
+                                    font.pixelSize: rootObj.s(26)
+                                    color: ThemeBackend.peach
+                                }
+                                Text {
+                                    text: I18n.t("guide.wellbeing.settings.streak.days_suffix")
+                                    font.family: ThemeBackend.fontFamily
+                                    font.pixelSize: rootObj.s(10.5)
+                                    color: ThemeBackend.subtext0
+                                }
+                            }
+                        }
+
+                        RowLayout {
+                            Layout.alignment: Qt.AlignHCenter
+                            spacing: rootObj.s(6)
+
+                            Repeater {
+                                model: settingsWrapper.streakWeek
+                                delegate: Rectangle {
+                                    id: streakChip
+                                    required property var modelData
+                                    Layout.preferredWidth: rootObj.s(28)
+                                    Layout.preferredHeight: rootObj.s(28)
+                                    radius: rootObj.s(8)
+                                    property bool isToday: streakChip.modelData.date === tabRoot.getIsoDate(new Date())
+                                    color: streakChip.isToday ? ThemeBackend.peach : (streakChip.modelData.ok ? Qt.alpha(ThemeBackend.peach, 0.35) : ThemeBackend.surface1)
+
+                                    Text {
+                                        anchors.centerIn: parent
+                                        text: {
+                                            let d = new Date(streakChip.modelData.date + "T12:00:00");
+                                            let idx = (d.getDay() + 6) % 7;
+                                            let letters = [
+                                                I18n.t("guide.wellbeing.days.monday"),
+                                                I18n.t("guide.wellbeing.days.tuesday"),
+                                                I18n.t("guide.wellbeing.days.wednesday"),
+                                                I18n.t("guide.wellbeing.days.thursday"),
+                                                I18n.t("guide.wellbeing.days.friday"),
+                                                I18n.t("guide.wellbeing.days.saturday"),
+                                                I18n.t("guide.wellbeing.days.sunday")
+                                            ];
+                                            return letters[idx].charAt(0).toUpperCase();
+                                        }
+                                        font.family: ThemeBackend.fontFamily
+                                        font.weight: Font.DemiBold
+                                        font.pixelSize: rootObj.s(10.5)
+                                        color: streakChip.isToday ? ThemeBackend.crust : ThemeBackend.text
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    Text {
+                        Layout.alignment: Qt.AlignHCenter
+                        Layout.fillWidth: true
+                        horizontalAlignment: Text.AlignHCenter
+                        visible: settingsWrapper.dailyLimitSeconds <= 0
+                        text: I18n.t("guide.wellbeing.settings.streak.limit_hint")
+                        wrapMode: Text.WordWrap
+                        font.family: ThemeBackend.fontFamily
+                        font.pixelSize: rootObj.s(11)
+                        color: ThemeBackend.overlay0
+                    }
+
+                    ColumnLayout {
+                        Layout.alignment: Qt.AlignHCenter
+                        spacing: rootObj.s(6)
+
+                        Text {
+                            Layout.alignment: Qt.AlignHCenter
+                            text: I18n.t("guide.wellbeing.settings.overall_limit")
+                            font.family: ThemeBackend.fontFamily
+                            font.pixelSize: rootObj.s(10.5)
+                            color: ThemeBackend.subtext0
+                        }
+
+                        NumberSelector {
+                            id: dailyLimitSelector
+                            Layout.alignment: Qt.AlignHCenter
+                            implicitWidth: rootObj.s(130)
+                            implicitHeight: rootObj.s(32)
+                            from: 0
+                            to: 12
+                            stepSize: 1
+                            decimals: 0
+                            suffix: I18n.t("guide.wellbeing.settings.streak.hours_unit")
+                            specialZeroText: I18n.t("guide.wellbeing.settings.off")
+                            value: Math.round(settingsWrapper.dailyLimitSeconds / 3600)
+                            baseColor: ThemeBackend.surface0
+                            accentColor: ThemeBackend.mauve
+                            buttonColor: ThemeBackend.surface1
+                            buttonTextColor: ThemeBackend.text
+                            textColor: ThemeBackend.text
+                            subTextColor: ThemeBackend.subtext0
+                            borderColor: Qt.alpha(ThemeBackend.surface2, 0.6)
+                            cornerRadius: ThemeBackend.borderRadius
+                            fontFamily: ThemeBackend.fontFamily
+                            fontPixelSize: rootObj.s(11)
+
+                            onValueChanged: {
+                                let hours = Math.round(dailyLimitSelector.value);
+                                if (!isNaN(hours) && hours * 3600 !== settingsWrapper.dailyLimitSeconds) {
+                                    settingsWrapper.setDailyLimitHours(hours);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                ColumnLayout {
+                    Layout.alignment: Qt.AlignHCenter
+                    Layout.preferredWidth: Math.min(settingsBody.width, rootObj.s(420))
+                    spacing: rootObj.s(16)
+                    visible: settingsWrapper.activeSettingsTab === 3
+
+                    Text {
+                        Layout.alignment: Qt.AlignHCenter
+                        text: I18n.t("guide.wellbeing.settings.pause.title")
+                        font.family: ThemeBackend.fontFamily
+                        font.weight: Font.DemiBold
+                        font.pixelSize: rootObj.s(15)
+                        color: ThemeBackend.text
+                    }
+
+                    Text {
+                        Layout.alignment: Qt.AlignHCenter
+                        Layout.fillWidth: true
+                        horizontalAlignment: Text.AlignHCenter
+                        text: I18n.t("guide.wellbeing.settings.pause.desc")
+                        wrapMode: Text.WordWrap
+                        font.family: ThemeBackend.fontFamily
+                        font.pixelSize: rootObj.s(11)
+                        color: ThemeBackend.subtext0
+                    }
+
+                    Toggle {
+                        Layout.alignment: Qt.AlignHCenter
+                        buttonText: I18n.t("guide.wellbeing.settings.pause.enable_toggle")
+                        checked: PauseReminder.enabled
+                        accentColor: ThemeBackend.mauve
+                        textColor: ThemeBackend.text
+                        onToggled: newChecked => PauseReminder.setEnabled(newChecked)
+                    }
+
+                    Rectangle {
+                        Layout.alignment: Qt.AlignHCenter
+                        Layout.preferredWidth: rootObj.s(280)
+                        Layout.preferredHeight: rootObj.s(70)
+                        radius: Math.min(ThemeBackend.borderRadius, rootObj.s(14))
+                        color: Qt.alpha(ThemeBackend.surface0, 0.6)
+                        opacity: PauseReminder.enabled ? 1.0 : 0.5
+
+                        RowLayout {
+                            anchors.centerIn: parent
+                            spacing: rootObj.s(12)
+
+                            Rectangle {
+                                Layout.preferredWidth: rootObj.s(38)
+                                Layout.preferredHeight: rootObj.s(38)
+                                radius: width / 2
+                                color: Qt.alpha(ThemeBackend.blue, 0.18)
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: "󰈈"
+                                    font.family: "Iosevka Nerd Font"
+                                    font.pixelSize: rootObj.s(16)
+                                    color: ThemeBackend.blue
+                                }
+                            }
+
+                            ColumnLayout {
+                                spacing: -rootObj.s(1)
+                                Text {
+                                    text: I18n.t("guide.wellbeing.settings.pause.card_title")
+                                    font.family: ThemeBackend.fontFamily
+                                    font.weight: Font.DemiBold
+                                    font.pixelSize: rootObj.s(12.5)
+                                    color: ThemeBackend.text
+                                }
+                                Text {
+                                    text: I18n.t("guide.wellbeing.settings.pause.next_in", { "n": tabRoot.formatTimeList(PauseReminder.remainingSeconds) })
+                                    font.family: ThemeBackend.fontFamily
+                                    font.pixelSize: rootObj.s(9.5)
+                                    color: ThemeBackend.overlay0
+                                }
+                            }
+                        }
+                    }
+                }
+
+                ColumnLayout {
+                    Layout.alignment: Qt.AlignHCenter
+                    Layout.preferredWidth: Math.min(settingsBody.width, rootObj.s(420))
+                    spacing: rootObj.s(16)
+                    visible: settingsWrapper.activeSettingsTab === 4
+
+                    Text {
+                        Layout.alignment: Qt.AlignHCenter
+                        text: I18n.t("guide.wellbeing.settings.focus_sound.title")
+                        font.family: ThemeBackend.fontFamily
+                        font.weight: Font.DemiBold
+                        font.pixelSize: rootObj.s(15)
+                        color: ThemeBackend.text
+                    }
+
+                    Text {
+                        Layout.alignment: Qt.AlignHCenter
+                        Layout.fillWidth: true
+                        horizontalAlignment: Text.AlignHCenter
+                        text: I18n.t("guide.wellbeing.settings.focus_sound.desc")
+                        wrapMode: Text.WordWrap
+                        font.family: ThemeBackend.fontFamily
+                        font.pixelSize: rootObj.s(11)
+                        color: ThemeBackend.subtext0
+                    }
+
+                    Toggle {
+                        Layout.alignment: Qt.AlignHCenter
+                        buttonText: I18n.t("guide.wellbeing.settings.focus_sound.enable_toggle")
+                        checked: settingsWrapper.focusSoundEnabled
+                        accentColor: ThemeBackend.mauve
+                        textColor: ThemeBackend.text
+                        onToggled: newChecked => settingsWrapper.setFocusSoundEnabled(newChecked)
+                    }
+
+                    Item {
+                        Layout.preferredWidth: rootObj.s(64)
+                        Layout.preferredHeight: rootObj.s(40)
+                        Layout.alignment: Qt.AlignHCenter
+                        opacity: settingsWrapper.focusSoundEnabled ? 1.0 : 0.35
+
+                        RowLayout {
+                            anchors.centerIn: parent
+                            spacing: rootObj.s(3)
+                            Repeater {
+                                model: 5
+                                delegate: Rectangle {
+                                    required property int index
+                                    Layout.preferredWidth: rootObj.s(5)
+                                    Layout.preferredHeight: rootObj.s(10) + (index % 3) * rootObj.s(8)
+                                    radius: rootObj.s(2)
+                                    color: ThemeBackend.blue
+                                }
+                            }
+                        }
+                    }
+
+                    RowLayout {
+                        Layout.alignment: Qt.AlignHCenter
+                        spacing: rootObj.s(8)
+
+                        Repeater {
+                            model: [
+                                { id: "rain", label: I18n.t("guide.wellbeing.settings.focus_sound.track_rain") },
+                                { id: "lofi", label: I18n.t("guide.wellbeing.settings.focus_sound.track_lofi") },
+                                { id: "white-noise", label: I18n.t("guide.wellbeing.settings.focus_sound.track_white_noise") }
+                            ]
+                            delegate: Rectangle {
+                                id: trackChip
+                                required property var modelData
+                                property bool isActive: settingsWrapper.focusSoundTrack === trackChip.modelData.id
+                                radius: height / 2
+                                height: rootObj.s(28)
+                                width: trackLabel.implicitWidth + rootObj.s(22)
+                                color: trackChip.isActive ? Qt.alpha(ThemeBackend.mauve, 0.2) : Qt.alpha(ThemeBackend.surface1, 0.6)
+                                border.width: trackChip.isActive ? 1 : 0
+                                border.color: ThemeBackend.mauve
+
+                                Text {
+                                    id: trackLabel
+                                    anchors.centerIn: parent
+                                    text: trackChip.modelData.label
+                                    font.family: ThemeBackend.fontFamily
+                                    font.pixelSize: rootObj.s(10.5)
+                                    color: trackChip.isActive ? ThemeBackend.mauve : ThemeBackend.subtext0
+                                }
+
+                                MouseArea {
+                                    anchors.fill: parent
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: settingsWrapper.setFocusSoundTrack(trackChip.modelData.id)
+                                }
+                            }
+                        }
+                    }
+                }
+
+                ColumnLayout {
+                    Layout.alignment: Qt.AlignHCenter
+                    Layout.preferredWidth: Math.min(settingsBody.width, rootObj.s(480))
+                    spacing: rootObj.s(14)
+                    visible: settingsWrapper.activeSettingsTab === 5
+
+                    Text {
+                        Layout.fillWidth: true
+                        text: I18n.t("guide.wellbeing.settings.habits.title")
+                        font.family: ThemeBackend.fontFamily
+                        font.weight: Font.DemiBold
+                        font.pixelSize: rootObj.s(15)
+                        color: ThemeBackend.text
+                    }
+
+                    Text {
+                        Layout.fillWidth: true
+                        text: I18n.t("guide.wellbeing.settings.habits.desc")
+                        font.family: ThemeBackend.fontFamily
+                        font.pixelSize: rootObj.s(11)
+                        color: ThemeBackend.subtext0
+                        wrapMode: Text.WordWrap
+                    }
+
+                    Text {
+                        Layout.fillWidth: true
+                        visible: settingsWrapper.activeHabitDefs.length === 0
+                        text: I18n.t("guide.wellbeing.settings.habits.empty_state")
+                        font.family: ThemeBackend.fontFamily
+                        font.pixelSize: rootObj.s(11)
+                        color: ThemeBackend.overlay0
+                    }
+
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        spacing: rootObj.s(6)
+                        visible: settingsWrapper.activeHabitDefs.length > 0
+
+                        Repeater {
+                            model: settingsWrapper.activeHabitDefs
+                            delegate: Rectangle {
+                                id: defRow
+                                required property var modelData
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: rootObj.s(44)
+                                radius: Math.min(ThemeBackend.borderRadius, rootObj.s(10))
+                                color: Qt.alpha(ThemeBackend.surface0, 0.6)
+
+                                RowLayout {
+                                    anchors.fill: parent
+                                    anchors.leftMargin: rootObj.s(12)
+                                    anchors.rightMargin: rootObj.s(8)
+                                    spacing: rootObj.s(8)
+
+                                    ColumnLayout {
+                                        Layout.fillWidth: true
+                                        spacing: -rootObj.s(1)
+
+                                        Text {
+                                            Layout.fillWidth: true
+                                            text: settingsWrapper.habitDisplayName(defRow.modelData)
+                                            font.family: ThemeBackend.fontFamily
+                                            font.pixelSize: rootObj.s(12.5)
+                                            color: ThemeBackend.text
+                                            elide: Text.ElideRight
+                                        }
+
+                                        Text {
+                                            visible: (defRow.modelData.category || "") !== ""
+                                            text: defRow.modelData.category
+                                            font.family: ThemeBackend.fontFamily
+                                            font.pixelSize: rootObj.s(10)
+                                            color: ThemeBackend.overlay0
+                                        }
+                                    }
+
+                                    IconButton {
+                                        size: rootObj.s(26)
+                                        cornerRadius: rootObj.s(7)
+                                        buttonIcon: "󰏫"
+                                        iconFontSize: rootObj.s(13)
+                                        accentColor: Qt.alpha(ThemeBackend.surface1, 0.7)
+                                        textColor: ThemeBackend.subtext0
+                                        onClicked: settingsWrapper.startEditHabit(defRow.modelData)
+                                    }
+
+                                    DeleteButton {
+                                        size: rootObj.s(26)
+                                        cornerRadius: rootObj.s(7)
+                                        iconFontSize: rootObj.s(13)
+                                        accentColor: Qt.alpha(ThemeBackend.surface1, 0.7)
+                                        onClicked: settingsWrapper.setHabitArchived(defRow.modelData.id, true)
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: rootObj.s(8)
+
+                        Input {
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: rootObj.s(34)
+                            placeholderText: I18n.t("guide.wellbeing.settings.habits.name_placeholder")
+                            text: settingsWrapper.habitFormName
+                            onTextEdited: newText => settingsWrapper.habitFormName = newText
+                            baseColor: ThemeBackend.surface0
+                            textColor: ThemeBackend.text
+                            borderColor: ThemeBackend.surface1
+                            accentColor: ThemeBackend.mauve
+                            fontPixelSize: rootObj.s(12)
+                        }
+
+                        Input {
+                            Layout.preferredWidth: rootObj.s(140)
+                            Layout.preferredHeight: rootObj.s(34)
+                            placeholderText: I18n.t("guide.wellbeing.settings.habits.category_placeholder")
+                            text: settingsWrapper.habitFormCategory
+                            onTextEdited: newText => settingsWrapper.habitFormCategory = newText
+                            baseColor: ThemeBackend.surface0
+                            textColor: ThemeBackend.text
+                            borderColor: ThemeBackend.surface1
+                            accentColor: ThemeBackend.mauve
+                            fontPixelSize: rootObj.s(12)
+                        }
+
+                        ClickButton {
+                            Layout.preferredHeight: rootObj.s(34)
+                            horizontalPadding: rootObj.s(14)
+                            cornerRadius: rootObj.s(8)
+                            textFontSize: rootObj.s(12)
+                            accentColor: ThemeBackend.mauve
+                            textColor: ThemeBackend.crust
+                            buttonText: settingsWrapper.editingHabitId === "" ? I18n.t("guide.wellbeing.settings.habits.add_button") : I18n.t("guide.wellbeing.settings.habits.save_button")
+                            onClicked: settingsWrapper.submitHabitForm()
+                        }
+
+                        ClickButton {
+                            visible: settingsWrapper.editingHabitId !== ""
+                            Layout.preferredHeight: rootObj.s(34)
+                            horizontalPadding: rootObj.s(12)
+                            cornerRadius: rootObj.s(8)
+                            textFontSize: rootObj.s(12)
+                            accentColor: Qt.alpha(ThemeBackend.surface1, 0.7)
+                            textColor: ThemeBackend.subtext0
+                            buttonText: I18n.t("guide.wellbeing.settings.habits.cancel_button")
+                            onClicked: settingsWrapper.resetHabitForm()
+                        }
+                    }
+
+                    Flow {
+                        Layout.fillWidth: true
+                        spacing: rootObj.s(6)
+                        visible: settingsWrapper.existingCategories.length > 0
+
+                        Repeater {
+                            model: settingsWrapper.existingCategories
+                            delegate: Rectangle {
+                                id: catChip
+                                required property string modelData
+                                radius: height / 2
+                                height: rootObj.s(22)
+                                width: chipLabel.implicitWidth + rootObj.s(16)
+                                color: Qt.alpha(ThemeBackend.surface1, 0.6)
+
+                                Text {
+                                    id: chipLabel
+                                    anchors.centerIn: parent
+                                    text: catChip.modelData
+                                    font.family: ThemeBackend.fontFamily
+                                    font.pixelSize: rootObj.s(10)
+                                    color: ThemeBackend.subtext0
+                                }
+
+                                MouseArea {
+                                    anchors.fill: parent
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: settingsWrapper.habitFormCategory = catChip.modelData
+                                }
+                            }
+                        }
+                    }
+
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        spacing: rootObj.s(6)
+                        visible: settingsWrapper.archivedHabitDefs.length > 0
+
+                        Text {
+                            Layout.fillWidth: true
+                            text: I18n.t("guide.wellbeing.settings.habits.archived_title")
+                            font.family: ThemeBackend.fontFamily
+                            font.weight: Font.DemiBold
+                            font.pixelSize: rootObj.s(11)
+                            color: ThemeBackend.overlay0
+                        }
+
+                        Repeater {
+                            model: settingsWrapper.archivedHabitDefs
+                            delegate: RowLayout {
+                                id: archRow
+                                required property var modelData
+                                Layout.fillWidth: true
+                                spacing: rootObj.s(8)
+
+                                Text {
+                                    Layout.fillWidth: true
+                                    text: settingsWrapper.habitDisplayName(archRow.modelData)
+                                    font.family: ThemeBackend.fontFamily
+                                    font.pixelSize: rootObj.s(11.5)
+                                    color: ThemeBackend.overlay1
+                                    elide: Text.ElideRight
+                                }
+
+                                ClickButton {
+                                    Layout.preferredHeight: rootObj.s(26)
+                                    horizontalPadding: rootObj.s(10)
+                                    cornerRadius: rootObj.s(7)
+                                    textFontSize: rootObj.s(10.5)
+                                    accentColor: Qt.alpha(ThemeBackend.surface1, 0.7)
+                                    textColor: ThemeBackend.subtext0
+                                    buttonText: I18n.t("guide.wellbeing.settings.habits.restore_button")
+                                    onClicked: settingsWrapper.setHabitArchived(archRow.modelData.id, false)
+                                }
+                            }
+                        }
+                    }
+                }
+                }
+                }
+
+                RowLayout {
+                    id: settingsTabStrip
+                    anchors.bottom: parent.bottom
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.bottomMargin: rootObj.s(14)
+                    spacing: rootObj.s(6)
+
+                    Repeater {
+                        model: [
+                            { index: 0, icon: "😊", label: I18n.t("guide.wellbeing.settings.tabs.mood") },
+                            { index: 1, icon: "📊", label: I18n.t("guide.wellbeing.settings.tabs.recap") },
+                            { index: 2, icon: "🔥", label: I18n.t("guide.wellbeing.settings.tabs.streak") },
+                            { index: 3, icon: "👁", label: I18n.t("guide.wellbeing.settings.tabs.pause") },
+                            { index: 4, icon: "🎧", label: I18n.t("guide.wellbeing.settings.tabs.focus") },
+                            { index: 5, icon: "✅", label: I18n.t("guide.wellbeing.settings.habits.title") }
+                        ]
+                        delegate: Rectangle {
+                            id: tabPill
+                            required property var modelData
+                            property bool isActive: settingsWrapper.activeSettingsTab === tabPill.modelData.index
+                            radius: height / 2
+                            height: rootObj.s(30)
+                            width: pillRow.implicitWidth + rootObj.s(20)
+                            color: tabPill.isActive ? Qt.alpha(ThemeBackend.mauve, 0.15) : "transparent"
+                            border.width: tabPill.isActive ? 1 : 0
+                            border.color: ThemeBackend.mauve
+
+                            Behavior on color { ColorAnimation { duration: 150 } }
+
+                            RowLayout {
+                                id: pillRow
+                                anchors.centerIn: parent
+                                spacing: rootObj.s(5)
+
+                                Text {
+                                    text: tabPill.modelData.icon
+                                    font.pixelSize: rootObj.s(11)
+                                }
+                                Text {
+                                    text: tabPill.modelData.label
+                                    font.family: ThemeBackend.fontFamily
+                                    font.weight: tabPill.isActive ? Font.DemiBold : Font.Normal
+                                    font.pixelSize: rootObj.s(11)
+                                    color: tabPill.isActive ? ThemeBackend.mauve : ThemeBackend.subtext0
+                                }
+                            }
+
+                            MouseArea {
+                                anchors.fill: parent
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: settingsWrapper.activeSettingsTab = tabPill.modelData.index
                             }
                         }
                     }

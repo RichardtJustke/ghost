@@ -524,7 +524,62 @@
         "app_limits": "App usage limits",
         "app_limits_desc": "Set maximum daily allowance per application",
         "excluded_apps": "Excluded apps",
-        "excluded_apps_desc": "Exclude apps from overall tracking going forward"
+        "excluded_apps_desc": "Exclude apps from overall tracking going forward",
+        "habits": {
+          "title": "Habits",
+          "desc": "Add, rename and organize the habits tracked in the quick panel.",
+          "name_placeholder": "Habit name",
+          "category_placeholder": "Category (optional)",
+          "add_button": "Add",
+          "save_button": "Save",
+          "cancel_button": "Cancel",
+          "edit_tooltip": "Rename",
+          "hide_tooltip": "Hide",
+          "restore_button": "Restore",
+          "empty_state": "No habits yet — add your first one below.",
+          "archived_title": "Hidden habits",
+          "no_category": "No category"
+        },
+        "tabs": {
+          "mood": "Mood",
+          "recap": "Recap",
+          "streak": "Streak",
+          "pause": "Pause",
+          "focus": "Focus"
+        },
+        "recap": {
+          "title": "Weekly recap",
+          "card_label": "Your week",
+          "avg_caption": "average time per day",
+          "top_app_caption": "top app",
+          "peak_caption": "peak usage",
+          "no_data": "Not enough data yet this week."
+        },
+        "streak": {
+          "title": "Day streak",
+          "desc": "Consecutive days you stayed under your daily limit.",
+          "days_suffix": "days in a row",
+          "limit_hint": "Set a daily limit below to start tracking your streak.",
+          "hours_unit": "h/day"
+        },
+        "pause": {
+          "title": "20-20-20 break",
+          "desc": "Every 20 min of active use, a gentle nudge to look away for 20s. Unlike Idle, this triggers on continuous use, not an idle screen.",
+          "card_title": "Look away for 20s",
+          "next_in": "NEXT BREAK IN {n}",
+          "enable_toggle": "Enable reminder",
+          "notif_app_name": "Ghost",
+          "notif_title": "Break time",
+          "notif_body": "Look at something 20 feet away for 20 seconds."
+        },
+        "focus_sound": {
+          "title": "Focus sound",
+          "desc": "Rain, lo-fi or white noise plays automatically whenever a Pomodoro focus session starts.",
+          "enable_toggle": "Enable",
+          "track_rain": "Rain",
+          "track_lofi": "Lo-fi",
+          "track_white_noise": "White noise"
+        }
       }
     },
     "update_available": "Update available",

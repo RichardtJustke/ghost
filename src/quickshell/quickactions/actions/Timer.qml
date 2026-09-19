@@ -241,6 +241,8 @@ Item {
         TimerState.timeFormatted = timeStr;
         TimerState.icon = icon;
         TimerState.colorType = colorType;
+        TimerState.pomoPhase = stateCache.pomoState;
+        TimerState.pomoRunning = stateCache.activeMode === 2 && stateCache.pomoTargetEpoch > 0;
     }
 
     function notify(title, message, icon) {

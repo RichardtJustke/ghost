@@ -524,7 +524,62 @@
         "app_limits": "Limites de uso por app",
         "app_limits_desc": "Define o máximo diário por aplicativo",
         "excluded_apps": "Apps excluídos",
-        "excluded_apps_desc": "Exclui apps do rastreio geral daqui pra frente"
+        "excluded_apps_desc": "Exclui apps do rastreio geral daqui pra frente",
+        "habits": {
+          "title": "Hábitos",
+          "desc": "Adicione, renomeie e organize os hábitos rastreados no painel rápido.",
+          "name_placeholder": "Nome do hábito",
+          "category_placeholder": "Categoria (opcional)",
+          "add_button": "Adicionar",
+          "save_button": "Salvar",
+          "cancel_button": "Cancelar",
+          "edit_tooltip": "Renomear",
+          "hide_tooltip": "Ocultar",
+          "restore_button": "Restaurar",
+          "empty_state": "Nenhum hábito ainda — adicione o primeiro abaixo.",
+          "archived_title": "Hábitos ocultos",
+          "no_category": "Sem categoria"
+        },
+        "tabs": {
+          "mood": "Humor",
+          "recap": "Recap",
+          "streak": "Streak",
+          "pause": "Pausa",
+          "focus": "Foco"
+        },
+        "recap": {
+          "title": "Recap semanal",
+          "card_label": "Sua semana",
+          "avg_caption": "tempo médio por dia",
+          "top_app_caption": "app campeão",
+          "peak_caption": "pico de uso",
+          "no_data": "Ainda sem dados suficientes esta semana."
+        },
+        "streak": {
+          "title": "Streak de dias",
+          "desc": "Dias seguidos que você ficou dentro do limite diário.",
+          "days_suffix": "dias seguidos",
+          "limit_hint": "Defina um limite diário abaixo para começar a contar sua streak.",
+          "hours_unit": "h/dia"
+        },
+        "pause": {
+          "title": "Pausa 20-20-20",
+          "desc": "A cada 20 min de uso ativo, um aviso suave pra olhar pra longe por 20s. Diferente da Inatividade — aqui o gatilho é uso contínuo, não tela parada.",
+          "card_title": "Olhe para longe por 20s",
+          "next_in": "PRÓXIMA PAUSA EM {n}",
+          "enable_toggle": "Ativar lembrete",
+          "notif_app_name": "Ghost",
+          "notif_title": "Hora da pausa",
+          "notif_body": "Olhe para algo a uns 6 metros de distância por 20 segundos."
+        },
+        "focus_sound": {
+          "title": "Foco sonoro",
+          "desc": "Chuva, lo-fi ou ruído branco ligam sozinhos quando uma sessão de foco do Pomodoro começa.",
+          "enable_toggle": "Ativar",
+          "track_rain": "Chuva",
+          "track_lofi": "Lo-fi",
+          "track_white_noise": "Ruído branco"
+        }
       }
     },
     "update_available": "Atualização disponível",
