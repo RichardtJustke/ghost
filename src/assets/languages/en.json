@@ -247,6 +247,15 @@
       }
     },
     "display": {
+      "arrangement": {
+        "title": "Screen arrangement",
+        "desc": "Drag the monitors to match their physical position",
+        "identify": "Identify",
+        "apply": "Apply",
+        "extend": "Extend these displays",
+        "duplicate": "Duplicate these displays",
+        "only": "Show only on"
+      },
       "bluelight": {
         "title": "Blue light filter",
         "desc": "Toggle warm screen lighting"
@@ -396,6 +405,10 @@
         "desc": "Choose the default used by serpantinum",
         "select": "Select..."
       },
+      "cursor": {
+        "title": "Mouse cursor",
+        "desc": "Cursor theme used by the system (applied live)"
+      },
       "radius": {
         "title": "Border radius",
         "desc": "Corner radius for UI elements"
@@ -412,6 +425,16 @@
         "select_dir": "Select directory...",
         "select_wallpaper": "Select wallpaper",
         "no_wallpaper_selected": "No wallpaper selected"
+      },
+      "glass": {
+        "title": "Frosted glass",
+        "desc": "Translucent frosted-glass effect for the bar and dock",
+        "blur": {
+          "title": "Blur intensity"
+        },
+        "frost": {
+          "title": "Glass opacity"
+        }
       }
     },
     "file_picker": {

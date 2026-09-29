@@ -62,6 +62,19 @@ Variants {
                 readonly property real effectiveWindowWidth: dockWindow.width > 0 ? dockWindow.width : screenWidth
                 readonly property real effectiveWindowHeight: dockWindow.height > 0 ? dockWindow.height : screenHeight
 
+                readonly property string wallpaperSnapshotPath: (dockWindow.screen && dockWindow.screen.name) ? (Caching.getCacheDir("wallpaper") + "/current_wallpaper_" + dockWindow.screen.name + ".png") : ""
+                property int wallpaperRevision: 0
+                readonly property string glassWallpaperSource: dockWindow.wallpaperSnapshotPath !== "" ? ("file://" + dockWindow.wallpaperSnapshotPath + "?rev=" + dockWindow.wallpaperRevision) : ""
+                property bool glassActive: ThemeBackend.glassEnabled
+
+                FileView {
+                    id: glassWallpaperWatcher
+                    path: dockWindow.wallpaperSnapshotPath
+                    watchChanges: true
+                    onFileChanged: dockWindow.wallpaperRevision++
+                    onLoaded: dockWindow.wallpaperRevision++
+                }
+
                 Timer {
                     id: initTimer
                     interval: 50
@@ -556,7 +569,7 @@ Variants {
                 readonly property bool isVertical: dockPosition === "left" || dockPosition === "right"
 
                 function s(val) {
-                    return (typeof Scaler !== "undefined" && Scaler.s) ? Scaler.s(val) : val;
+                    return (typeof Scaler !== "undefined" && Scaler.s) ? Scaler.s(val, dockWindow.screen ? dockWindow.screen.name : "") : val;
                 }
 
                 property real cornerRadius: ThemeBackend.borderRadius <= 16 ? ThemeBackend.borderRadius * 2 : Math.min(32, 32 - 16 * Math.exp(-(ThemeBackend.borderRadius - 16) / 12))
@@ -1133,10 +1146,24 @@ Variants {
                             id: dockBg
                             anchors.fill: parent
                             radius: dockContainer.dynamicCornerRadius
-                            color: ThemeBackend.base
+                            color: dockWindow.glassActive ? "transparent" : ThemeBackend.base
                             border.width: (dockWindow.dockFloating || dockWindow.editMode || dockContainer.outerCornerProgress < 0.99) ? 1 : 0
                             border.color: (dockWindow.dockFloating || dockWindow.editMode || dockContainer.outerCornerProgress < 0.99) ? Qt.alpha(ThemeBackend.surface1, 0.4 * (1.0 - dockContainer.outerCornerProgress * 0.5)) : "transparent"
                             clip: true
+
+                            GlassPane {
+                                anchors.fill: parent
+                                cornerRadius: dockContainer.dynamicCornerRadius
+                                visible: dockWindow.glassActive
+                                wallpaperSource: dockWindow.glassWallpaperSource
+                                originX: dockContainer.x
+                                originY: dockContainer.y
+                                screenWidth: dockWindow.screenWidth
+                                screenHeight: dockWindow.screenHeight
+                                blurAmount: ThemeBackend.glassBlur / 100.0
+                                frostOpacity: ThemeBackend.glassFrost / 100.0
+                                tintColor: ThemeBackend.base
+                            }
 
                             Rectangle {
                                 visible: dockContainer.outerCornerProgress > 0.001 && dockWindow.dockPosition === "bottom" && dockWindow.outerCornerRadius > 0.5 && (!dockWindow.sameSideAsBar || dockContainer.height >= dockWindow.outerCornerRadius)

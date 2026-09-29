@@ -113,6 +113,18 @@ Variants {
                 return (typeof Config !== "undefined" && Config.rawSettings && Config.rawSettings.bar && Config.rawSettings.bar.opacity !== undefined) ? (Config.rawSettings.bar.opacity / 100.0) : 1.0;
             }
 
+            readonly property string wallpaperSnapshotPath: (barWindow.screen && barWindow.screen.name) ? (Caching.getCacheDir("wallpaper") + "/current_wallpaper_" + barWindow.screen.name + ".png") : ""
+            property int wallpaperRevision: 0
+            readonly property string glassWallpaperSource: barWindow.wallpaperSnapshotPath !== "" ? ("file://" + barWindow.wallpaperSnapshotPath + "?rev=" + barWindow.wallpaperRevision) : ""
+
+            FileView {
+                id: glassWallpaperWatcher
+                path: barWindow.wallpaperSnapshotPath
+                watchChanges: true
+                onFileChanged: barWindow.wallpaperRevision++
+                onLoaded: barWindow.wallpaperRevision++
+            }
+
             HoverHandler {
                 id: barHover
                 acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
@@ -237,7 +249,7 @@ Variants {
             property real baseScale: Scaler.baseScale
 
             function s(val) {
-                return Math.round(Scaler.s(val));
+                return Math.round(Scaler.s(val, barWindow.screen ? barWindow.screen.name : ""));
             }
 
             property int barHeight: s(40)

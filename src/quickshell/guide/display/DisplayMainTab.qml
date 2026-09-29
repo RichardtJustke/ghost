@@ -288,12 +288,16 @@ Item {
                             let rr = m.refresh_rate ? Math.round(m.refresh_rate / 1000) : 60;
                             let sc = item.scale !== undefined ? item.scale : 1.0;
                             let isOff = item.active === false || item.is_active === false || (modes.length > 0 && (item.current_mode === null || item.current_mode === undefined));
+                            let lg = item.logical || {};
                             mList.push({
                                 name: k,
                                 dimensions: w + "x" + h,
                                 framerate: rr.toString(),
                                 scale: sc,
-                                active: !isOff
+                                active: !isOff,
+                                x: lg.x !== undefined ? lg.x : 0,
+                                y: lg.y !== undefined ? lg.y : 0,
+                                mirrorOf: "none"
                             });
                         }
                     } else if (displayTabRoot.compositor === "sway") {
@@ -307,12 +311,16 @@ Item {
                                 let rr = cm.refresh ? Math.round(cm.refresh / 1000) : 60;
                                 let sc = item.scale !== undefined ? item.scale : 1.0;
                                 let isOff = item.active === false;
+                                let rect = item.rect || {};
                                 mList.push({
                                     name: name,
                                     dimensions: w + "x" + h,
                                     framerate: rr.toString(),
                                     scale: sc,
-                                    active: !isOff
+                                    active: !isOff,
+                                    x: rect.x !== undefined ? rect.x : 0,
+                                    y: rect.y !== undefined ? rect.y : 0,
+                                    mirrorOf: "none"
                                 });
                             }
                         }
@@ -331,7 +339,10 @@ Item {
                                     dimensions: w + "x" + h,
                                     framerate: rr.toString(),
                                     scale: sc,
-                                    active: !isOff
+                                    active: !isOff,
+                                    x: item.x !== undefined ? item.x : 0,
+                                    y: item.y !== undefined ? item.y : 0,
+                                    mirrorOf: item.mirrorOf !== undefined ? item.mirrorOf : "none"
                                 });
                             }
                         }
@@ -378,6 +389,15 @@ Item {
         displayTabRoot.displaySettings = JSON.parse(JSON.stringify(current));
     }
 
+    // Hyprland's runtime monitor changes need two different IPC calls depending on
+    // the user's config parser: newer ("non-legacy") setups reject `hyprctl keyword`
+    // outright ("keyword can't work with non-legacy parsers. Use eval.") and require
+    // `hyprctl eval` with the Lua hl.monitor() API instead, while older setups only
+    // understand `hyprctl keyword monitor ...`. Try eval first, fall back to keyword.
+    function hyprMonitorCmd(luaCmd, keywordArgs) {
+        return "hyprctl eval '" + luaCmd + "' || hyprctl keyword monitor " + keywordArgs;
+    }
+
     function applyMonitorPower(monName, enabled) {
         if (!monName) return;
         if (displayTabRoot.compositor === "niri") {
@@ -389,19 +409,17 @@ Item {
             let modeStr = mon ? (mon.dimensions + "@" + mon.framerate) : "preferred";
             let scaleVal = mon ? mon.scale : 1.0;
             if (enabled) {
-                let luaCmd =
-                    'hl.monitor({' +
-                    ' output = "' + monName + '",' +
-                    ' mode = "' + modeStr + '",' +
-                    ' position = "auto",' +
-                    ' scale = ' + scaleVal.toString() + ',' +
-                    ' disabled = false' +
-                    ' })';
-                Quickshell.execDetached(["bash", "-c", "hyprctl eval '" + luaCmd + "'"]);
+                // Use the actual saved/desired position here (not "auto"): this call
+                // races (both are fire-and-forget detached processes) against any
+                // explicit position-apply for the same monitor, and "auto" winning
+                // that race is what silently reverted user arrangements before.
+                let pos = displayTabRoot.monitorPosition(monName);
+                let posStr = Math.round(pos.x) + "x" + Math.round(pos.y);
+                let luaCmd = 'hl.monitor({ output = "' + monName + '", mode = "' + modeStr + '", position = "' + posStr + '", scale = ' + scaleVal.toString() + ', disabled = false })';
+                Quickshell.execDetached(["bash", "-c", displayTabRoot.hyprMonitorCmd(luaCmd, monName + "," + modeStr + "," + posStr + "," + scaleVal.toString())]);
             } else {
-                let luaCmd =
-                    'hl.monitor({ output = "' + monName + '", disabled = true })';
-                Quickshell.execDetached(["bash", "-c", "hyprctl eval '" + luaCmd + "'"]);
+                let luaCmd = 'hl.monitor({ output = "' + monName + '", disabled = true })';
+                Quickshell.execDetached(["bash", "-c", displayTabRoot.hyprMonitorCmd(luaCmd, monName + ",disable")]);
             }
         }
     }
@@ -415,9 +433,129 @@ Item {
         } else {
             let mon = displayTabRoot.monitorsList.find(m => m.name === monName);
             let modeStr = mon ? (mon.dimensions + "@" + mon.framerate) : "preferred";
-            let luaCmd = 'hl.monitor({ output = "' + monName + '", mode = "' + modeStr + '", position = "auto", scale = ' + scaleVal.toString() + ' })';
-            Quickshell.execDetached(["bash", "-c", "hyprctl eval '" + luaCmd + "' || hyprctl keyword monitor " + monName + "," + modeStr + ",auto," + scaleVal.toString()]);
+            let pos = displayTabRoot.monitorPosition(monName);
+            let posStr = Math.round(pos.x) + "x" + Math.round(pos.y);
+            let luaCmd = 'hl.monitor({ output = "' + monName + '", mode = "' + modeStr + '", position = "' + posStr + '", scale = ' + scaleVal.toString() + ' })';
+            Quickshell.execDetached(["bash", "-c", displayTabRoot.hyprMonitorCmd(luaCmd, monName + "," + modeStr + "," + posStr + "," + scaleVal.toString())]);
         }
+    }
+
+    function monitorPosition(monName) {
+        let mon = displayTabRoot.monitorsList.find(m => m.name === monName);
+        let saved = (displayTabRoot.displaySettings && displayTabRoot.displaySettings.monitors && displayTabRoot.displaySettings.monitors[monName]) ? displayTabRoot.displaySettings.monitors[monName] : ({});
+        let x = saved.posX !== undefined ? saved.posX : (mon && mon.x !== undefined ? mon.x : 0);
+        let y = saved.posY !== undefined ? saved.posY : (mon && mon.y !== undefined ? mon.y : 0);
+        return { x: x, y: y };
+    }
+
+    function applyMonitorPosition(monName, x, y, forceHardware) {
+        if (!monName) return;
+        let ix = Math.round(x);
+        let iy = Math.round(y);
+        let mon = displayTabRoot.monitorsList.find(m => m.name === monName);
+        let shouldTouchHardware = forceHardware === true || !mon || mon.active !== false;
+        if (shouldTouchHardware) {
+            if (displayTabRoot.compositor === "niri") {
+                Quickshell.execDetached(["bash", "-c", "niri msg output " + monName + " position set " + ix + " " + iy]);
+            } else if (displayTabRoot.compositor === "sway") {
+                Quickshell.execDetached(["bash", "-c", "swaymsg output " + monName + " position " + ix + " " + iy]);
+            } else {
+                let modeStr = mon ? (mon.dimensions + "@" + mon.framerate) : "preferred";
+                let scaleVal = mon && mon.scale ? mon.scale : 1.0;
+                let posStr = ix + "x" + iy;
+                let luaCmd = 'hl.monitor({ output = "' + monName + '", mode = "' + modeStr + '", position = "' + posStr + '", scale = ' + scaleVal.toString() + ' })';
+                Quickshell.execDetached(["bash", "-c", displayTabRoot.hyprMonitorCmd(luaCmd, monName + "," + modeStr + "," + posStr + "," + scaleVal.toString())]);
+            }
+        }
+        displayTabRoot.updateMonitorSetting(monName, "posX", ix);
+        displayTabRoot.updateMonitorSetting(monName, "posY", iy);
+    }
+
+    function applyMonitorMirror(targetName, sourceName) {
+        if (!targetName || !sourceName || displayTabRoot.compositor !== "hyprland") return;
+        let mon = displayTabRoot.monitorsList.find(m => m.name === targetName);
+        let modeStr = mon ? (mon.dimensions + "@" + mon.framerate) : "preferred";
+        let luaCmd = 'hl.monitor({ output = "' + targetName + '", mode = "' + modeStr + '", position = "auto", mirror = "' + sourceName + '" })';
+        Quickshell.execDetached(["bash", "-c", displayTabRoot.hyprMonitorCmd(luaCmd, targetName + "," + modeStr + ",auto,1,mirror," + sourceName)]);
+    }
+
+    // Note: each monitor gets exactly one hardware command here. applyMonitorPosition
+    // already enables the output (its hl.monitor()/keyword line has no disabled flag),
+    // so pairing it with a separate applyMonitorPower(true) call would race two
+    // independent detached processes against each other for the same monitor —
+    // whichever finished last would silently win, sometimes reverting the arrangement.
+    function applyExtendArrangement() {
+        for (let i = 0; i < displayTabRoot.monitorsList.length; i++) {
+            let m = displayTabRoot.monitorsList[i];
+            let pos = displayTabRoot.monitorPosition(m.name);
+            displayTabRoot.applyMonitorPosition(m.name, pos.x, pos.y, true);
+        }
+    }
+
+    function applyDuplicateArrangement(sourceName) {
+        for (let i = 0; i < displayTabRoot.monitorsList.length; i++) {
+            let m = displayTabRoot.monitorsList[i];
+            if (m.name === sourceName) {
+                let pos = displayTabRoot.monitorPosition(m.name);
+                displayTabRoot.applyMonitorPosition(m.name, pos.x, pos.y, true);
+            } else {
+                displayTabRoot.applyMonitorMirror(m.name, sourceName);
+            }
+        }
+    }
+
+    function applyOnlyArrangement(targetName) {
+        for (let i = 0; i < displayTabRoot.monitorsList.length; i++) {
+            let m = displayTabRoot.monitorsList[i];
+            if (m.name === targetName) {
+                displayTabRoot.applyMonitorPosition(m.name, 0, 0, true);
+            } else {
+                displayTabRoot.applyMonitorPower(m.name, false);
+            }
+        }
+    }
+
+    function applyArrangementValue(value) {
+        if (!value) return;
+        if (value === "extend") {
+            displayTabRoot.applyExtendArrangement();
+        } else if (value.indexOf("duplicate:") === 0) {
+            displayTabRoot.applyDuplicateArrangement(value.slice("duplicate:".length));
+        } else if (value.indexOf("only:") === 0) {
+            displayTabRoot.applyOnlyArrangement(value.slice("only:".length));
+        }
+        // The hyprctl/niri/sway calls above are fire-and-forget detached processes;
+        // querying monitor state immediately can race ahead of them and read stale
+        // positions. Give them a moment to land before re-reading.
+        arrangementReloadTimer.restart();
+    }
+
+    readonly property string detectedArrangementValue: {
+        let list = displayTabRoot.monitorsList;
+        if (!list || list.length < 2) return "extend";
+        let activeOnes = list.filter(m => m.active !== false);
+        let mirrored = list.find(m => m.mirrorOf && m.mirrorOf !== "none");
+        if (mirrored) {
+            return "duplicate:" + mirrored.mirrorOf;
+        }
+        if (activeOnes.length === 1) {
+            return "only:" + activeOnes[0].name;
+        }
+        return "extend";
+    }
+
+    readonly property var arrangementOptions: {
+        let list = displayTabRoot.monitorsList;
+        let opts = [];
+        if (!list || list.length < 2) return opts;
+        if (displayTabRoot.compositor === "hyprland") {
+            opts.push({ value: "duplicate:" + list[0].name, label: I18n.t("guide.display.arrangement.duplicate", "Duplicar estas telas") });
+        }
+        opts.push({ value: "extend", label: I18n.t("guide.display.arrangement.extend", "Estender estas telas") });
+        for (let i = 0; i < list.length; i++) {
+            opts.push({ value: "only:" + list[i].name, label: I18n.t("guide.display.arrangement.only", "Mostrar somente em") + " " + (i + 1) + " (" + list[i].name + ")" });
+        }
+        return opts;
     }
 
     function updateMonitorSettingDebounced(monName, tempVal) {
@@ -463,6 +601,13 @@ Item {
                 displayTabRoot.pendingMonScaleName = "";
             }
         }
+    }
+
+    Timer {
+        id: arrangementReloadTimer
+        interval: 400
+        repeat: false
+        onTriggered: displayTabRoot.reloadMonitors()
     }
 
     Component.onCompleted: {
@@ -549,6 +694,24 @@ Item {
             id: settingsCol
             width: parent.width - (parent.contentHeight > parent.height ? rootObj.s(6) : 0)
             spacing: rootObj.s(12)
+
+            MonitorArrangement {
+                Layout.fillWidth: true
+                visible: displayTabRoot.monitorsList.length > 1
+                rootObj: displayTabRoot.rootObj
+                monitorsList: displayTabRoot.monitorsList
+                compositor: displayTabRoot.compositor
+                positionResolver: displayTabRoot.monitorPosition
+                arrangementOptions: displayTabRoot.arrangementOptions
+                currentArrangementValue: displayTabRoot.detectedArrangementValue
+
+                onPositionDragged: function(monName, x, y) {
+                    displayTabRoot.applyMonitorPosition(monName, x, y);
+                }
+                onApplyRequested: function(value) {
+                    displayTabRoot.applyArrangementValue(value);
+                }
+            }
 
             Repeater {
                 model: displayTabRoot.monitorsList

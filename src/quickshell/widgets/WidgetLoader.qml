@@ -15,7 +15,7 @@ Item {
     property bool isRedacting: false
 
     function s(val) {
-        return Math.round(Scaler.s(val));
+        return Math.round(Scaler.s(val, loaderRoot.screen ? loaderRoot.screen.name : loaderRoot.monitorName));
     }
 
     function getScreenWidth() {

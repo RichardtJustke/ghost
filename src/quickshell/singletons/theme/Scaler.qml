@@ -45,8 +45,12 @@ Item {
         return 1.0;
     }
 
-    function s(val) {
-        let f = scaleFor(root.screenName);
+    // Scaler is a singleton, so it has no window/screen of its own: root.screenName
+    // is not reliable per-caller. Any per-monitor window (bar, dock, widgets, ...)
+    // MUST pass its own screen name so each monitor's shell scale stays independent.
+    // Omitting screenName falls back to root.screenName for callers with no screen context.
+    function s(val, screenName) {
+        let f = scaleFor(screenName !== undefined && screenName !== null && screenName !== "" ? screenName : root.screenName);
         return Math.round(val * (isNaN(f) ? 1.0 : f));
     }
 }

@@ -247,6 +247,15 @@
       }
     },
     "display": {
+      "arrangement": {
+        "title": "Disposição das telas",
+        "desc": "Arraste os monitores para combinar com a posição física deles",
+        "identify": "Identificar",
+        "apply": "Aplicar",
+        "extend": "Estender estas telas",
+        "duplicate": "Duplicar estas telas",
+        "only": "Mostrar somente em"
+      },
       "bluelight": {
         "title": "Filtro de luz azul",
         "desc": "Alterna iluminação quente da tela"
@@ -396,6 +405,10 @@
         "desc": "Escolha a padrão usada pelo serpantinum",
         "select": "Selecionar..."
       },
+      "cursor": {
+        "title": "Cursor do mouse",
+        "desc": "Tema de cursor usado pelo sistema (aplicado na hora)"
+      },
       "radius": {
         "title": "Raio da borda",
         "desc": "Raio dos cantos dos elementos da UI"
@@ -412,6 +425,16 @@
         "select_dir": "Selecionar pasta...",
         "select_wallpaper": "Selecionar papel de parede",
         "no_wallpaper_selected": "Nenhum papel de parede selecionado"
+      },
+      "glass": {
+        "title": "Vidro fosco",
+        "desc": "Efeito translúcido de vidro fosco na barra e na dock",
+        "blur": {
+          "title": "Intensidade do desfoque"
+        },
+        "frost": {
+          "title": "Opacidade do vidro"
+        }
       }
     },
     "file_picker": {

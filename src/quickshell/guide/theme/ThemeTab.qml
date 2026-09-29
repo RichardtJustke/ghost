@@ -26,7 +26,12 @@ Item {
         "borderRadius": ThemeBackend.borderRadius,
         "activePreset": "Matugen",
         "matugen": true,
-        "colors": {}
+        "colors": {},
+        "glass": {
+            "enabled": false,
+            "blur": 48,
+            "frost": 55
+        }
     }
 
     property var themeSettings: Config.getSetting("theme", defaultThemeSettings)
@@ -34,6 +39,10 @@ Item {
     property int currentBorderRadius: themeSettings.borderRadius !== undefined ? themeSettings.borderRadius : ThemeBackend.borderRadius
     property string currentPreset: themeSettings.activePreset !== undefined ? themeSettings.activePreset : "Matugen"
     property bool useMatugen: themeSettings.matugen !== undefined ? themeSettings.matugen : true
+
+    property bool currentGlassEnabled: (themeSettings.glass && themeSettings.glass.enabled !== undefined) ? themeSettings.glass.enabled : false
+    property real currentGlassBlur: (themeSettings.glass && themeSettings.glass.blur !== undefined) ? themeSettings.glass.blur : 48
+    property real currentGlassFrost: (themeSettings.glass && themeSettings.glass.frost !== undefined) ? themeSettings.glass.frost : 55
 
     property string currentWallpaperDir: Config.getSetting("wallpaperDir", "") || Config.getSetting("wallpaper_dir", "") || Quickshell.env("WALLPAPER_DIR") || (Quickshell.env("HOME") + "/Pictures/Wallpapers")
     property var availableWallpaperDirs: []
@@ -82,6 +91,48 @@ Item {
             combined.push(themeTabRoot.currentFontFamily);
         }
         themeTabRoot.availableFonts = combined;
+    }
+
+    property string currentCursorTheme: ""
+    property int currentCursorSize: 24
+    property var availableCursorThemes: []
+
+    Process {
+        id: cursorReader
+        running: false
+        command: ["bash", "-c",
+            "cur=$(gsettings get org.gnome.desktop.interface cursor-theme 2>/dev/null | tr -d \"'\"); " +
+            "[ -z \"$cur\" ] && cur=\"$XCURSOR_THEME\"; " +
+            "size=$(gsettings get org.gnome.desktop.interface cursor-size 2>/dev/null); " +
+            "[ -z \"$size\" ] && size=\"${XCURSOR_SIZE:-24}\"; " +
+            "echo \"$cur\"; echo \"$size\"; " +
+            "for d in /usr/share/icons \"$HOME/.icons\" \"$HOME/.local/share/icons\"; do " +
+            "for t in \"$d\"/*/cursors; do [ -d \"$t\" ] && basename \"$(dirname \"$t\")\"; done; done 2>/dev/null | sort -u"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                let lines = this.text.split("\n").map(l => l.trim()).filter(l => l !== "");
+                if (lines.length < 2) return;
+                themeTabRoot.currentCursorTheme = lines[0];
+                let sz = parseInt(lines[1]);
+                themeTabRoot.currentCursorSize = isNaN(sz) ? 24 : sz;
+                let themes = lines.slice(2);
+                if (themeTabRoot.currentCursorTheme && themes.indexOf(themeTabRoot.currentCursorTheme) === -1)
+                    themes.push(themeTabRoot.currentCursorTheme);
+                themeTabRoot.availableCursorThemes = themes;
+            }
+        }
+    }
+
+    function applyCursorTheme(name) {
+        if (!name) return;
+        themeTabRoot.currentCursorTheme = name;
+        Config.setSetting("cursorTheme", name);
+        let q = "'" + String(name).replace(/'/g, "'\\''") + "'";
+        let size = themeTabRoot.currentCursorSize;
+        Quickshell.execDetached(["bash", "-c",
+            "gsettings set org.gnome.desktop.interface cursor-theme " + q + "; " +
+            "if [ -n \"$HYPRLAND_INSTANCE_SIGNATURE\" ]; then hyprctl setcursor " + q + " " + size + "; " +
+            "elif [ -n \"$SWAYSOCK\" ]; then swaymsg seat '*' xcursor_theme " + q + " " + size + "; fi"]);
     }
 
     property var systemPresets: []
@@ -158,6 +209,15 @@ Item {
         repeat: false
         onTriggered: {
             themeTabRoot.wallpaperRevision++;
+        }
+    }
+
+    Timer {
+        id: glassDebounceTimer
+        interval: 200
+        repeat: false
+        onTriggered: {
+            themeTabRoot.updateGlassSetting();
         }
     }
 
@@ -430,6 +490,7 @@ Item {
     }
 
     Component.onCompleted: {
+        cursorReader.running = true;
         activateTab();
     }
 
@@ -470,6 +531,9 @@ Item {
             themeTabRoot.currentBorderRadius = ts.borderRadius !== undefined ? ts.borderRadius : ThemeBackend.borderRadius;
             themeTabRoot.currentPreset = ts.activePreset !== undefined ? ts.activePreset : "Matugen";
             themeTabRoot.useMatugen = ts.matugen !== undefined ? ts.matugen : true;
+            themeTabRoot.currentGlassEnabled = (ts.glass && ts.glass.enabled !== undefined) ? ts.glass.enabled : false;
+            themeTabRoot.currentGlassBlur = (ts.glass && ts.glass.blur !== undefined) ? ts.glass.blur : 48;
+            themeTabRoot.currentGlassFrost = (ts.glass && ts.glass.frost !== undefined) ? ts.glass.frost : 55;
             themeTabRoot.themeSettings = ts;
 
             let wpDir = Config.getSetting("wallpaperDir", "") || Config.getSetting("wallpaper_dir", "");
@@ -492,6 +556,19 @@ Item {
     function updateBorderRadiusSetting() {
         let current = Config.getSetting("theme", themeTabRoot.defaultThemeSettings);
         current.borderRadius = themeTabRoot.currentBorderRadius;
+        Config.setSetting("theme", current);
+        if (typeof ThemeBackend !== "undefined") {
+            ThemeBackend.reloadColors();
+        }
+    }
+
+    function updateGlassSetting() {
+        let current = Config.getSetting("theme", themeTabRoot.defaultThemeSettings);
+        current.glass = {
+            enabled: themeTabRoot.currentGlassEnabled,
+            blur: themeTabRoot.currentGlassBlur,
+            frost: themeTabRoot.currentGlassFrost
+        };
         Config.setSetting("theme", current);
         if (typeof ThemeBackend !== "undefined") {
             ThemeBackend.reloadColors();
@@ -1257,6 +1334,70 @@ Item {
 
             Rectangle {
                 Layout.fillWidth: true
+                implicitHeight: rowCursorLayout.implicitHeight + rootObj.s(24)
+                radius: ThemeBackend.borderRadius
+                color: Qt.alpha(ThemeBackend.surface0, 0.4)
+                border.width: 0
+
+                RowLayout {
+                    id: rowCursorLayout
+                    anchors.left: parent.left
+                    anchors.leftMargin: rootObj.s(14)
+                    anchors.right: parent.right
+                    anchors.rightMargin: rootObj.s(14)
+                    anchors.verticalCenter: parent.verticalCenter
+                    spacing: rootObj.s(12)
+
+                    IconButton {
+                        enabled: false
+                        size: rootObj.s(32)
+                        Layout.preferredWidth: rootObj.s(32)
+                        Layout.preferredHeight: rootObj.s(32)
+                        Layout.alignment: Qt.AlignVCenter
+                        cornerRadius: ThemeBackend.borderRadius
+                        buttonIcon: "󰇀"
+                        iconFontSize: rootObj.s(16)
+                        accentColor: ThemeBackend.surface0
+                        textColor: "#ffffff"
+                    }
+
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        Layout.alignment: Qt.AlignVCenter
+                        spacing: rootObj.s(2)
+
+                        Text { Layout.fillWidth: true; text: I18n.t("guide.theme.cursor.title"); font.family: ThemeBackend.fontFamily; font.pixelSize: rootObj.s(13); color: ThemeBackend.text }
+                        Text { Layout.fillWidth: true; text: I18n.t("guide.theme.cursor.desc"); font.family: ThemeBackend.fontFamily; font.pixelSize: rootObj.s(11); color: ThemeBackend.subtext0 }
+                    }
+
+                    Dropdown {
+                        id: cursorDropdown
+                        Layout.preferredWidth: rootObj.s(260)
+                        Layout.preferredHeight: rootObj.s(32)
+                        Layout.alignment: Qt.AlignVCenter
+                        options: themeTabRoot.availableCursorThemes
+                        currentIndex: options.indexOf(themeTabRoot.currentCursorTheme) >= 0 ? options.indexOf(themeTabRoot.currentCursorTheme) : 0
+                        placeholderText: I18n.t("guide.theme.font.select")
+                        fontFamily: ThemeBackend.fontFamily
+                        accentColor: ThemeBackend.mauve
+                        baseColor: ThemeBackend.surface0
+                        hoverColor: ThemeBackend.surface1
+                        dropdownColor: ThemeBackend.surface0
+                        borderColor: Qt.alpha(ThemeBackend.surface2, 0.6)
+                        textColor: ThemeBackend.text
+                        activeTextColor: ThemeBackend.crust
+                        cornerRadius: ThemeBackend.borderRadius
+                        fontPixelSize: rootObj.s(11)
+                        onValueChanged: function(index, value) {
+                            if (value !== themeTabRoot.currentCursorTheme) themeTabRoot.applyCursorTheme(value);
+                        }
+                        onClicked: cursorReader.running = true
+                    }
+                }
+            }
+
+            Rectangle {
+                Layout.fillWidth: true
                 implicitHeight: rowRadLayout.implicitHeight + rootObj.s(24)
                 radius: ThemeBackend.borderRadius
                 color: Qt.alpha(ThemeBackend.surface0, 0.4)
@@ -1328,6 +1469,184 @@ Item {
                             let snapped = themeTabRoot.getSnappedRadius(rounded);
                             themeTabRoot.currentBorderRadius = snapped;
                             themeTabRoot.updateBorderRadiusSetting();
+                        }
+                    }
+                }
+            }
+
+            Rectangle {
+                Layout.fillWidth: true
+                implicitHeight: glassSectionCol.implicitHeight + rootObj.s(24)
+                radius: ThemeBackend.borderRadius
+                color: Qt.alpha(ThemeBackend.surface0, 0.4)
+                border.width: 0
+
+                ColumnLayout {
+                    id: glassSectionCol
+                    anchors.left: parent.left
+                    anchors.leftMargin: rootObj.s(14)
+                    anchors.right: parent.right
+                    anchors.rightMargin: rootObj.s(14)
+                    anchors.top: parent.top
+                    anchors.topMargin: rootObj.s(12)
+                    spacing: rootObj.s(14)
+
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: rootObj.s(12)
+
+                        IconButton {
+                            enabled: false
+                            size: rootObj.s(32)
+                            Layout.preferredWidth: rootObj.s(32)
+                            Layout.preferredHeight: rootObj.s(32)
+                            Layout.alignment: Qt.AlignVCenter
+                            cornerRadius: ThemeBackend.borderRadius
+                            buttonIcon: "󰃟"
+                            iconFontSize: rootObj.s(16)
+                            accentColor: ThemeBackend.surface0
+                            textColor: "#ffffff"
+                        }
+
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            Layout.alignment: Qt.AlignVCenter
+                            spacing: rootObj.s(2)
+
+                            Text {
+                                Layout.fillWidth: true
+                                text: I18n.t("guide.theme.glass.title") || "Vidro fosco"
+                                font.family: ThemeBackend.fontFamily
+                                font.pixelSize: rootObj.s(13)
+                                color: ThemeBackend.text
+                            }
+                            Text {
+                                Layout.fillWidth: true
+                                text: I18n.t("guide.theme.glass.desc") || "Efeito translúcido de vidro fosco na barra e na dock"
+                                font.family: ThemeBackend.fontFamily
+                                font.pixelSize: rootObj.s(11)
+                                color: ThemeBackend.subtext0
+                                wrapMode: Text.WordWrap
+                            }
+                        }
+
+                        Toggle {
+                            Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
+                            checked: themeTabRoot.currentGlassEnabled
+                            accentColor: ThemeBackend.mauve
+                            baseColor: ThemeBackend.surface1
+                            handleColor: ThemeBackend.crust
+                            handleOffColor: ThemeBackend.text
+                            onToggled: function(c) {
+                                themeTabRoot.currentGlassEnabled = c;
+                                themeTabRoot.updateGlassSetting();
+                            }
+                        }
+                    }
+
+                    Item {
+                        id: glassOptionsWrapper
+                        Layout.fillWidth: true
+                        property bool isOpen: themeTabRoot.currentGlassEnabled
+                        clip: true
+                        visible: implicitHeight > 0
+                        opacity: isOpen ? 1.0 : 0.0
+                        implicitHeight: isOpen ? glassOptionsCol.implicitHeight : 0
+
+                        Behavior on opacity { NumberAnimation { duration: 250; easing.type: Easing.OutCubic } }
+                        Behavior on implicitHeight { NumberAnimation { duration: 250; easing.type: Easing.OutCubic } }
+
+                        ColumnLayout {
+                            id: glassOptionsCol
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            anchors.top: parent.top
+                            spacing: rootObj.s(14)
+
+                            RowLayout {
+                                Layout.fillWidth: true
+                                spacing: rootObj.s(12)
+
+                                Text {
+                                    Layout.fillWidth: true
+                                    text: I18n.t("guide.theme.glass.blur.title") || "Intensidade do desfoque"
+                                    font.family: ThemeBackend.fontFamily
+                                    font.pixelSize: rootObj.s(12)
+                                    color: ThemeBackend.text
+                                }
+
+                                Draggable {
+                                    id: glassBlurSlider
+                                    Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
+                                    implicitWidth: rootObj.s(200)
+                                    implicitHeight: rootObj.s(18)
+                                    from: 0
+                                    to: 100
+                                    stepSize: 1
+                                    defaultValue: 48
+                                    showValueBubble: true
+                                    valueFormatter: function(v) { return Math.round(v) + "%" }
+                                    value: themeTabRoot.currentGlassBlur
+                                    backgroundColor: ThemeBackend.surface0
+                                    accentColor: ThemeBackend.mauve
+                                    handleColor: ThemeBackend.text
+                                    handleBorderColor: ThemeBackend.mantle
+                                    onMoved: function(val) {
+                                        let rounded = Math.round(val);
+                                        if (themeTabRoot.currentGlassBlur !== rounded) {
+                                            themeTabRoot.currentGlassBlur = rounded;
+                                            glassDebounceTimer.restart();
+                                        }
+                                    }
+                                    onDragFinished: {
+                                        glassDebounceTimer.stop();
+                                        themeTabRoot.updateGlassSetting();
+                                    }
+                                }
+                            }
+
+                            RowLayout {
+                                Layout.fillWidth: true
+                                spacing: rootObj.s(12)
+
+                                Text {
+                                    Layout.fillWidth: true
+                                    text: I18n.t("guide.theme.glass.frost.title") || "Opacidade do vidro"
+                                    font.family: ThemeBackend.fontFamily
+                                    font.pixelSize: rootObj.s(12)
+                                    color: ThemeBackend.text
+                                }
+
+                                Draggable {
+                                    id: glassFrostSlider
+                                    Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
+                                    implicitWidth: rootObj.s(200)
+                                    implicitHeight: rootObj.s(18)
+                                    from: 0
+                                    to: 100
+                                    stepSize: 1
+                                    defaultValue: 55
+                                    showValueBubble: true
+                                    valueFormatter: function(v) { return Math.round(v) + "%" }
+                                    value: themeTabRoot.currentGlassFrost
+                                    backgroundColor: ThemeBackend.surface0
+                                    accentColor: ThemeBackend.mauve
+                                    handleColor: ThemeBackend.text
+                                    handleBorderColor: ThemeBackend.mantle
+                                    onMoved: function(val) {
+                                        let rounded = Math.round(val);
+                                        if (themeTabRoot.currentGlassFrost !== rounded) {
+                                            themeTabRoot.currentGlassFrost = rounded;
+                                            glassDebounceTimer.restart();
+                                        }
+                                    }
+                                    onDragFinished: {
+                                        glassDebounceTimer.stop();
+                                        themeTabRoot.updateGlassSetting();
+                                    }
+                                }
+                            }
+
                         }
                     }
                 }

@@ -31,6 +31,7 @@ Item {
     property bool isSolid: barStyle === "solid" || barStyle === "fill"
     property bool distinctPills: barWindow ? (barWindow.distinctPills !== undefined ? barWindow.distinctPills : false) : false
     property real cornerRadius: barWindow ? barWindow.cornerRadius : 12
+    property bool glassActive: ThemeBackend.glassEnabled
 
     property bool suppressAnimation: false
     property bool layoutAnimationsEnabled: barWindow && barWindow.startupCascadeFinished && !barWindow.positionChanging && !contentWrapper.suppressAnimation
@@ -458,6 +459,40 @@ Item {
         NumberAnimation { duration: 250; easing.type: Easing.OutCubic }
     }
 
+    GlassPane {
+        id: glassBackground
+        x: barWindow && barWindow.barPosition === "right" ? (parent.width - width) : 0
+        y: isFill ? 0 : contentWrapper.dynamicMinY
+        width: barWindow ? barWindow.barHeight : 40
+        height: isFill ? contentWrapper.height : (contentWrapper.dynamicMaxY - contentWrapper.dynamicMinY)
+        cornerRadius: isFill ? 0 : ThemeBackend.borderRadius
+        visible: (isSolid || isFill) && contentWrapper.glassActive && (barWindow ? !barWindow.positionChanging : true)
+        opacity: visible ? 1.0 : 0.0
+        wallpaperSource: barWindow ? barWindow.glassWallpaperSource : ""
+        originX: glassBackground.x
+        originY: glassBackground.y
+        screenWidth: (barWindow && barWindow.screen) ? barWindow.screen.width : 1920
+        screenHeight: (barWindow && barWindow.screen) ? barWindow.screen.height : 1080
+        blurAmount: ThemeBackend.glassBlur / 100.0
+        frostOpacity: ThemeBackend.glassFrost / 100.0
+        tintColor: ThemeBackend.base
+
+        Behavior on y {
+            enabled: contentWrapper.layoutAnimationsEnabled
+            NumberAnimation { duration: 300; easing.type: Easing.OutCubic }
+        }
+
+        Behavior on height {
+            enabled: contentWrapper.layoutAnimationsEnabled
+            NumberAnimation { duration: 300; easing.type: Easing.OutCubic }
+        }
+
+        Behavior on opacity {
+            enabled: barWindow && !barWindow.positionChanging && barWindow.startupCascadeFinished && !contentWrapper.suppressAnimation
+            NumberAnimation { duration: 250; easing.type: Easing.OutCubic }
+        }
+    }
+
     Rectangle {
         id: solidBackground
         x: barWindow && barWindow.barPosition === "right" ? (parent.width - width) : 0
@@ -468,7 +503,7 @@ Item {
         radius: isFill ? 0 : ThemeBackend.borderRadius
         border.width: (isSolid || isFill) ? 0 : 1
         border.color: (isSolid || isFill) ? "transparent" : Qt.alpha(ThemeBackend.surface0, (barWindow && barWindow.barOpacity !== undefined) ? barWindow.barOpacity : 1.0)
-        visible: (isSolid || isFill) && (barWindow ? !barWindow.positionChanging : true)
+        visible: (isSolid || isFill) && !contentWrapper.glassActive && (barWindow ? !barWindow.positionChanging : true)
         opacity: visible ? 1.0 : 0.0
 
         Behavior on y {
@@ -493,7 +528,7 @@ Item {
         y: 0
         width: contentWrapper.cornerRadius
         height: contentWrapper.cornerRadius
-        visible: contentWrapper.isFill && (barWindow ? !barWindow.positionChanging : true)
+        visible: contentWrapper.isFill && !contentWrapper.glassActive && (barWindow ? !barWindow.positionChanging : true)
         opacity: (visible && (!barWindow || barWindow.isRevealed)) ? 1.0 : 0.0
         z: 0
 
@@ -545,7 +580,7 @@ Item {
         y: parent.height - height
         width: contentWrapper.cornerRadius
         height: contentWrapper.cornerRadius
-        visible: contentWrapper.isFill && (barWindow ? !barWindow.positionChanging : true)
+        visible: contentWrapper.isFill && !contentWrapper.glassActive && (barWindow ? !barWindow.positionChanging : true)
         opacity: (visible && (!barWindow || barWindow.isRevealed)) ? 1.0 : 0.0
         z: 0
 

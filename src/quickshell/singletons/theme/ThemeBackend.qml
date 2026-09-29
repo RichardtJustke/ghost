@@ -41,6 +41,10 @@ Item {
     property color maroon: "#eba0ac"
     property color teal: "#94e2d5"
 
+    property bool glassEnabled: false
+    property real glassBlur: 48
+    property real glassFrost: 55
+
     property string configPath: Quickshell.env("QS_COLORS_JSON") ?? "~/.local/state/serpantinum/qs_colors.json"
     property string matugenConfigPath: (typeof Caching !== "undefined" && Caching.stateDir ? Caching.stateDir : ((Quickshell.env("HOME") ?? "") + "/.local/state/serpantinum")) + "/qs_matugen_colors.json"
 
@@ -222,6 +226,11 @@ Item {
         if (themeConfig.borderRadius !== undefined) {
             root.borderRadius = themeConfig.borderRadius;
         }
+
+        let glassConfig = themeConfig.glass || {};
+        root.glassEnabled = glassConfig.enabled === true;
+        root.glassBlur = (glassConfig.blur !== undefined) ? glassConfig.blur : 48;
+        root.glassFrost = (glassConfig.frost !== undefined) ? glassConfig.frost : 55;
 
         let customColors = themeConfig.colors || themeConfig.palette || (themeConfig.base !== undefined ? themeConfig : null);
 

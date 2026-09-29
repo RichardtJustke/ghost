@@ -369,7 +369,7 @@ Variants {
 
             property real baseScale: Scaler.baseScale
             function s(val) {
-                let res = Scaler.s(val);
+                let res = Scaler.s(val, floatingWidget.screen ? floatingWidget.screen.name : "");
                 return isNaN(res) ? val : res;
             }
 

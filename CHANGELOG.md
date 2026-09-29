@@ -1,3 +1,10 @@
+### 2.2.0
+
+- feat: add a mouse cursor theme picker to the theme tab, showing the current cursor and applying changes live
+- feat: add a monitor arrangement editor (drag to position, mirror) to the display tab
+- feat: add per-monitor shell scale and a glass pane effect
+- feat: turn Bem-estar into an activity hub (habits, recap, streak, pause, focus sound)
+
 ### 2.1.8
 
 - feat: add time-setting styling, move the time string setting into modules, merge the modules and sidemodules subtabs under the bar tab
