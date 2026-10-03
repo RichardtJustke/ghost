@@ -7,7 +7,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(dirname "$SCRIPT_DIR")"
 SRC_DIR="$REPO_ROOT/src"
-DEST_DIR="${GHOST_DEV_SYNC_TARGET:-$HOME/.local/share/serpantinum/src}"
+DEST_DIR="${GHOST_DEV_SYNC_TARGET:-$HOME/.local/share/ghost/src}"
 
 if [ ! -d "$SRC_DIR" ]; then
     echo "error: src dir not found at $SRC_DIR" >&2

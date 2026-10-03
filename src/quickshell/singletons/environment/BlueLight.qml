@@ -101,8 +101,8 @@ Item {
         let keys = Object.keys(pendingTargets);
         if (keys.length === 0) return;
 
-        let scriptPath = (typeof Caching !== "undefined" && Caching.serpantinumDir)
-            ? Caching.serpantinumDir + "/scripts/blue_light_filter.sh"
+        let scriptPath = (typeof Caching !== "undefined" && Caching.ghostDir)
+            ? Caching.ghostDir + "/scripts/blue_light_filter.sh"
             : "";
 
         if (!scriptPath) {

@@ -31,11 +31,11 @@ hl.bind(mainMod .. " + C", hl.dsp.window.close())
 hl.bind(mainMod .. " + SHIFT + F", hl.dsp.window.float({ action = "toggle" }))
 
 -- ───────── Brilho / lock (locked = funcionam mesmo com tela travada) ─────────
-hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd("serpantinum brightness lower"), { locked = true })
-hl.bind("XF86MonBrightnessUp", hl.dsp.exec_cmd("serpantinum brightness raise"), { locked = true })
+hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd("ghost brightness lower"), { locked = true })
+hl.bind("XF86MonBrightnessUp", hl.dsp.exec_cmd("ghost brightness raise"), { locked = true })
 
-hl.bind("XF86PowerOff", hl.dsp.exec_cmd("serpantinum lock"), { locked = true })
-hl.bind(mainMod .. " + L", hl.dsp.exec_cmd("serpantinum lock"), { repeating = true, locked = true })
+hl.bind("XF86PowerOff", hl.dsp.exec_cmd("ghost lock"), { locked = true })
+hl.bind(mainMod .. " + L", hl.dsp.exec_cmd("ghost lock"), { repeating = true, locked = true })
 
 -- ───────── Screenshot (grimblast — app antigo mantido, só o layout de teclas mudou) ─────────
 -- ALT+S era o print de área ativo no antigo; mantido igual
@@ -55,10 +55,10 @@ hl.bind("Caps_Lock", hl.dsp.exec_cmd("swayosd-client --caps-lock"), { locked = t
 hl.bind(mainMod .. " + SPACE", hl.dsp.exec_cmd("playerctl play-pause"), { locked = true })
 hl.bind("XF86AudioPause", hl.dsp.exec_cmd("playerctl play-pause"), { locked = true })
 hl.bind("XF86AudioPlay", hl.dsp.exec_cmd("playerctl play-pause"), { locked = true })
-hl.bind("XF86AudioMicMute", hl.dsp.exec_cmd("serpantinum volume mic-toggle"), { locked = true })
-hl.bind("XF86AudioMute", hl.dsp.exec_cmd("serpantinum volume mute-toggle"), { locked = true })
-hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd("serpantinum volume lower"), { repeating = true, locked = true })
-hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("serpantinum volume raise"), { repeating = true, locked = true })
+hl.bind("XF86AudioMicMute", hl.dsp.exec_cmd("ghost volume mic-toggle"), { locked = true })
+hl.bind("XF86AudioMute", hl.dsp.exec_cmd("ghost volume mute-toggle"), { locked = true })
+hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd("ghost volume lower"), { repeating = true, locked = true })
+hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("ghost volume raise"), { repeating = true, locked = true })
 
 -- ───────── Apps ─────────
 hl.bind(mainMod .. " + F", hl.dsp.exec_cmd("firefox"))
@@ -66,30 +66,30 @@ hl.bind(mainMod .. " + E", hl.dsp.exec_cmd("nautilus"))
 hl.bind(mainMod .. " + RETURN", hl.dsp.exec_cmd(terminal))
 -- (do antigo) SUPER+T também abria o terminal — mantido como atalho extra
 hl.bind(mainMod .. " + T", hl.dsp.exec_cmd(terminal))
-hl.bind(mainMod .. " + R", hl.dsp.exec_cmd("serpantinum reload"))
+hl.bind(mainMod .. " + R", hl.dsp.exec_cmd("ghost reload"))
 
--- ───────── Painéis (serpantinum msg toggle) ─────────
-hl.bind(mainMod .. " + D", hl.dsp.exec_cmd("serpantinum msg toggle launcher"))
-hl.bind(mainMod .. " + Q", hl.dsp.exec_cmd("serpantinum msg toggle music"))
-hl.bind(mainMod .. " + B", hl.dsp.exec_cmd("serpantinum msg toggle system"))
+-- ───────── Painéis (ghost msg toggle) ─────────
+hl.bind(mainMod .. " + D", hl.dsp.exec_cmd("ghost msg toggle launcher"))
+hl.bind(mainMod .. " + Q", hl.dsp.exec_cmd("ghost msg toggle music"))
+hl.bind(mainMod .. " + B", hl.dsp.exec_cmd("ghost msg toggle system"))
 -- (do antigo) SUPER+B era "battery" — se "system" não cobrir bateria, troque a linha acima ou adicione:
--- hl.bind(mainMod .. " + SHIFT + B", hl.dsp.exec_cmd("serpantinum msg toggle battery"))
-hl.bind(mainMod .. " + W", hl.dsp.exec_cmd("serpantinum msg toggle wallpaper"))
-hl.bind(mainMod .. " + S", hl.dsp.exec_cmd("serpantinum msg toggle calendar"))
-hl.bind(mainMod .. " + N", hl.dsp.exec_cmd("serpantinum msg toggle network"))
-hl.bind(mainMod .. " + V", hl.dsp.exec_cmd("serpantinum msg toggle volume"))
-hl.bind(mainMod .. " + H", hl.dsp.exec_cmd("serpantinum msg toggle guide"))
+-- hl.bind(mainMod .. " + SHIFT + B", hl.dsp.exec_cmd("ghost msg toggle battery"))
+hl.bind(mainMod .. " + W", hl.dsp.exec_cmd("ghost msg toggle wallpaper"))
+hl.bind(mainMod .. " + S", hl.dsp.exec_cmd("ghost msg toggle calendar"))
+hl.bind(mainMod .. " + N", hl.dsp.exec_cmd("ghost msg toggle network"))
+hl.bind(mainMod .. " + V", hl.dsp.exec_cmd("ghost msg toggle volume"))
+hl.bind(mainMod .. " + H", hl.dsp.exec_cmd("ghost msg toggle guide"))
 
 -- (do antigo, sem equivalente no novo — adicionados)
-hl.bind(mainMod .. " + SHIFT + T", hl.dsp.exec_cmd("serpantinum msg toggle focustime"))
-hl.bind(mainMod .. " + SHIFT + S", hl.dsp.exec_cmd("serpantinum msg toggle settings"))
+hl.bind(mainMod .. " + SHIFT + T", hl.dsp.exec_cmd("ghost msg toggle focustime"))
+hl.bind(mainMod .. " + SHIFT + S", hl.dsp.exec_cmd("ghost msg toggle settings"))
 -- clipboard usava SUPER+V no antigo, mas essa tecla já é "volume" no novo -> movido para SUPER+SHIFT+V
-hl.bind("ALT + V", hl.dsp.exec_cmd("serpantinum msg toggle clipboard"))
+hl.bind("ALT + V", hl.dsp.exec_cmd("ghost msg toggle clipboard"))
 
 -- ───────── Workspaces ─────────
 for i = 1, 10 do
 	local ws = tostring(i)
 	local key = tostring(i % 10)
-	hl.bind(mainMod .. " + " .. key, hl.dsp.exec_cmd("serpantinum msg workspace " .. ws))
-	hl.bind(mainMod .. " + SHIFT + " .. key, hl.dsp.exec_cmd("serpantinum msg workspace " .. ws .. " move"))
+	hl.bind(mainMod .. " + " .. key, hl.dsp.exec_cmd("ghost msg workspace " .. ws))
+	hl.bind(mainMod .. " + SHIFT + " .. key, hl.dsp.exec_cmd("ghost msg workspace " .. ws .. " move"))
 end

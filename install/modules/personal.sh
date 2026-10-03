@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Optional, opt-in layer on top of the regular serpantinum shell install.
+# Optional, opt-in layer on top of the regular ghost shell install.
 # Installs a full personal desktop setup: GPU/bluetooth drivers, essential
 # tools, dev tools, apps and gaming packages. Off by default (OPT_PERSONAL_SETUP),
 # enabled from the installer menu. Never runs for someone who doesn't ask for it.

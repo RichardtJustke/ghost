@@ -62,7 +62,7 @@ Item {
     }
 
     function getStorageDir() {
-        return Quickshell.env("QS_STATE_HABITS") || ((Quickshell.env("HOME") || "/tmp") + "/.local/state/serpantinum/habits");
+        return Quickshell.env("QS_STATE_HABITS") || ((Quickshell.env("HOME") || "/tmp") + "/.local/state/ghost/habits");
     }
 
     function getIsoDate(d) {

@@ -45,8 +45,8 @@ Item {
     property real glassBlur: 48
     property real glassFrost: 55
 
-    property string configPath: Quickshell.env("QS_COLORS_JSON") ?? "~/.local/state/serpantinum/qs_colors.json"
-    property string matugenConfigPath: (typeof Caching !== "undefined" && Caching.stateDir ? Caching.stateDir : ((Quickshell.env("HOME") ?? "") + "/.local/state/serpantinum")) + "/qs_matugen_colors.json"
+    property string configPath: Quickshell.env("QS_COLORS_JSON") ?? "~/.local/state/ghost/qs_colors.json"
+    property string matugenConfigPath: (typeof Caching !== "undefined" && Caching.stateDir ? Caching.stateDir : ((Quickshell.env("HOME") ?? "") + "/.local/state/ghost")) + "/qs_matugen_colors.json"
 
     property bool _readInProgress: false
     property var matugenColors: null
@@ -54,6 +54,18 @@ Item {
     property var availableFontPaths: ({})
     property var bundledNames: []
     property string activeFontPath: ""
+
+    FontLoader {
+        id: iconFontLoader
+        source: (typeof Caching !== "undefined" && Caching.ghostDir && Caching.ghostDir !== "")
+            ? ("file://" + Caching.ghostDir + "/assets/fonts/SymbolsNerdFontMono-Regular.ttf")
+            : ""
+    }
+
+    readonly property string iconFont: (iconFontLoader.status === FontLoader.Ready && iconFontLoader.name !== "")
+        ? iconFontLoader.name
+        : (root.fontFamily !== "" ? root.fontFamily : "sans-serif")
+    readonly property bool iconFontReady: iconFontLoader.status === FontLoader.Ready
 
     onFontFamilyChanged: {
         root.updateActiveFontLoader();
@@ -102,9 +114,9 @@ Item {
         property bool forceRescan: false
 
         command: {
-            let sys = Caching.serpantinumDir ? (Caching.serpantinumDir + "/assets/fonts") : "";
-            let usr = Caching.stateDir ? (Caching.stateDir + "/fonts") : (Caching.home + "/.local/state/serpantinum/fonts");
-            let cacheFile = Caching.stateDir ? (Caching.stateDir + "/fonts_cache.txt") : (Caching.home + "/.local/state/serpantinum/fonts_cache.txt");
+            let sys = Caching.ghostDir ? (Caching.ghostDir + "/assets/fonts") : "";
+            let usr = Caching.stateDir ? (Caching.stateDir + "/fonts") : (Caching.home + "/.local/state/ghost/fonts");
+            let cacheFile = Caching.stateDir ? (Caching.stateDir + "/fonts_cache.txt") : (Caching.home + "/.local/state/ghost/fonts_cache.txt");
             let force = forceRescan ? "true" : "false";
 
             let cmd = "CACHE=\"" + cacheFile + "\"; ";
@@ -140,6 +152,8 @@ Item {
                     let idx = line.indexOf('|');
                     if (idx !== -1) {
                         let fName = line.substring(0, idx).trim();
+                        if (fName.toLowerCase().indexOf("symbols nerd font") !== -1) continue;
+
                         let fPath = line.substring(idx + 1).trim();
                         let key = fName.toLowerCase();
 

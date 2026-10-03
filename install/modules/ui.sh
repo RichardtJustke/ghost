@@ -102,9 +102,9 @@ init_compositor_detection() {
     if [ -n "$running" ]; then
         SELECTED_COMPOSITORS=("$running")
         DETECTED_COMPOSITOR_LABEL="$running"
-    elif [ -f "$HOME/.local/state/serpantinum/version" ]; then
+    elif [ -f "$HOME/.local/state/ghost/version" ]; then
         local saved_comps
-        saved_comps=$(awk -F= '/^SELECTED_COMPOSITORS=/{gsub(/"/, "", $2); print $2}' "$HOME/.local/state/serpantinum/version" 2>/dev/null || true)
+        saved_comps=$(awk -F= '/^SELECTED_COMPOSITORS=/{gsub(/"/, "", $2); print $2}' "$HOME/.local/state/ghost/version" 2>/dev/null || true)
         if [ -n "$saved_comps" ]; then
             read -r -a SELECTED_COMPOSITORS <<< "$saved_comps"
             DETECTED_COMPOSITOR_LABEL="$(IFS=, ; echo "${SELECTED_COMPOSITORS[*]}")"

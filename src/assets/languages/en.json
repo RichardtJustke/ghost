@@ -152,23 +152,24 @@
       },
       "dim": {
         "title": "Dim screen",
-        "desc": "Time before dimming output"
+        "desc": "Reduce screen brightness before locking"
       },
       "dpms": {
         "title": "Display off (DPMS)",
-        "desc": "Time before turning screen completely off"
+        "desc": "Turn off monitor display signal"
       },
       "lock": {
         "title": "Lock session",
-        "desc": "Time before demanding password"
+        "desc": "Lock the session after a period of inactivity"
       },
       "suspend": {
         "title": "System suspend",
-        "desc": "Time before putting machine to sleep"
+        "desc": "Suspend the system to sleep mode"
       },
       "hooks": {
         "title": "Hooks (shell commands)"
-      }
+      },
+      "custom_action_desc": "Custom timeout action and command"
     },
     "welcome": {
       "by_author": "by @{author}",
@@ -296,7 +297,8 @@
         "save_preset": {
           "title": "Save Preset"
         },
-        "preset_name_placeholder": "Enter preset name..."
+        "preset_name_placeholder": "Enter preset name...",
+        "screen_desc": "Configure and edit desktop widgets"
       }
     },
     "bar": {
@@ -350,7 +352,15 @@
       "workspaces": {
         "title": "Choose an amount of workspaces to display",
         "disc": "Note: this doesn't affect the actual amount of workspaces in the compositor",
-        "desc": "Number of workspaces to display"
+        "desc": "Number of workspaces to display",
+        "hide_empty": {
+          "title": "Hide empty workspaces",
+          "desc": "Show only occupied workspaces and the active one"
+        },
+        "style": {
+          "title": "Style",
+          "desc": "Choose the visual style for workspace indicators"
+        }
       },
       "opacity": {
         "title": "Bar opacity",
@@ -396,13 +406,82 @@
         "show_date": {
           "title": "Show Date",
           "desc": "Display the date text alongside the clock"
+        },
+        "style": {
+          "title": "Style",
+          "desc": "Choose the visual style for the clock and date display"
+        }
+      },
+      "vis": {
+        "bars": {
+          "title": "Amount of Bars",
+          "desc": "Number of frequency bars to display"
+        },
+        "alignment": {
+          "title": "Alignment",
+          "desc": "Center the visualizer or align to top or bottom"
+        },
+        "align": {
+          "center": "Center",
+          "top": "Top",
+          "bottom": "Bottom",
+          "left": "Left",
+          "right": "Right"
+        },
+        "continuous": {
+          "title": "Continuous Wave",
+          "desc": "Render a smooth fluid wave instead of discrete bars"
+        }
+      },
+      "sysmon": {
+        "style": {
+          "title": "Circle Style",
+          "desc": "Visual appearance of the progress rings",
+          "wave": "Wave",
+          "circle": "Circle"
+        },
+        "cpu": {
+          "title": "CPU Usage",
+          "desc": "Display processor utilization ring"
+        },
+        "ram": {
+          "title": "Memory Usage",
+          "desc": "Display memory (RAM) utilization ring"
+        },
+        "temp": {
+          "title": "Temperature",
+          "desc": "Display system temperature ring"
+        },
+        "disk": {
+          "title": "Disk Usage",
+          "desc": "Display storage disk utilization ring"
+        }
+      },
+      "bat": {
+        "show_percent": {
+          "title": "Show Percentage",
+          "desc": "Display the numeric battery charge percentage"
+        },
+        "show_icon": {
+          "title": "Show Icon",
+          "desc": "Display the battery icon or graphic indicator"
+        },
+        "style": {
+          "title": "Battery Style",
+          "desc": "Choose the visual appearance of the battery indicator",
+          "name": {
+            "classic": "Classic",
+            "minimal": "Minimal"
+          },
+          "classic": "Pill with gradient wave fill",
+          "minimal": "iOS/Android capsule with cap"
         }
       }
     },
     "theme": {
       "font": {
         "title": "Font",
-        "desc": "Choose the default used by serpantinum",
+        "desc": "Choose the default used by ghost",
         "select": "Select..."
       },
       "cursor": {
@@ -424,7 +503,8 @@
         "desc": "Directory to search for wallpapers",
         "select_dir": "Select directory...",
         "select_wallpaper": "Select wallpaper",
-        "no_wallpaper_selected": "No wallpaper selected"
+        "no_wallpaper_selected": "No wallpaper selected",
+        "select": "Wallpaper"
       },
       "glass": {
         "title": "Frosted glass",
@@ -446,7 +526,9 @@
       "places": {
         "home": "Home",
         "downloads": "Downloads",
-        "pictures": "Pictures"
+        "pictures": "Pictures",
+        "music": "Music",
+        "documents": "Documents"
       }
     },
     "font_picker": {
@@ -732,6 +814,16 @@
         "title": "Smart auto-hide",
         "desc": "Auto-hide dock only when windows are open, keep visible on desktop"
       }
+    },
+    "lyrics_picker": {
+      "title": "Select lyrics file",
+      "no_lyrics_selected": "No lyrics selected"
+    },
+    "settings": "Settings",
+    "search": {
+      "placeholder": "Search settings...",
+      "prompt": "Type to search settings...",
+      "no_results": "No settings found"
     }
   },
   "sysnotif": {
@@ -763,7 +855,12 @@
   "applauncher": {
     "search": "Search",
     "placeholder": "Start with > for a command...",
-    "term_cmd": "Terminal command"
+    "term_cmd": "Terminal command",
+    "tab_applications": "Applications",
+    "tab_files": "Files",
+    "placeholder_files": "Search files or enter path...",
+    "tab_emojis": "Emojis",
+    "placeholder_emojis": "Search emojis by name or keyword..."
   },
   "calendar": {
     "loading": "Loading...",
@@ -832,7 +929,11 @@
       "jazz": "Jazz",
       "classic": "Classic",
       "custom": "Custom"
-    }
+    },
+    "searching_lyrics": "Searching lyrics...",
+    "no_lyrics": "No lyrics found",
+    "select_local_file": "Select a local file",
+    "lyrics": "Lyrics"
   },
   "network": {
     "tabs": {
@@ -1126,7 +1227,9 @@
       "visualizer": "Visualizer",
       "user": "User",
       "usage": "Usage",
-      "battery": "Battery"
+      "battery": "Battery",
+      "github": "Github",
+      "time": "Time"
     },
     "variants": {
       "digital": "Digital",
@@ -1139,7 +1242,12 @@
       "rounded": "Rounded",
       "bars": "Bars",
       "continuous": "Continuous",
-      "default": "Default"
+      "default": "Default",
+      "material": "Material",
+      "materialAnalog": "Material Analog",
+      "lumen": "Lumen",
+      "lyrics": "Lyrics",
+      "simpleLyrics": "Simple Lyrics"
     },
     "presets": {
       "minimal": {
@@ -1151,10 +1259,30 @@
       "dashboard": {
         "name": "Dashboard"
       }
+    },
+    "github": {
+      "set_user": "Set user",
+      "error": "Error",
+      "commit": "commit",
+      "commits": "commits",
+      "no_day_selected": "No day selected",
+      "fetching": "Fetching GitHub contributions...",
+      "fetch_error": "Could not fetch user @{user}",
+      "enter_username": "Enter a GitHub username",
+      "no_contributions": "No contributions found"
+    },
+    "settings": {
+      "lyricsLines": "Lines",
+      "lyricsAlignment": "Alignment"
+    },
+    "align": {
+      "left": "Left",
+      "center": "Center",
+      "right": "Right"
     }
   },
   "cli": {
-    "usage": "Usage: serpantinum [command] [options...]",
+    "usage": "Usage: ghost [command] [options...]",
     "description": "A desktop shell for wayland compositors.",
     "commands": "Commands:",
     "script_commands": "Script commands:",
@@ -1168,22 +1296,22 @@
     "help_desc": "Show this help message and exit",
     "examples": "Examples:",
     "daemon_stopped": "Ghost daemon stopped.",
-    "starting_daemon": "Daemon not running. Starting serpantinumd in the background...",
+    "starting_daemon": "Daemon not running. Starting ghostd in the background...",
     "error_missing_qml": "Error: missing target to launch.",
-    "launch_usage": "Usage: serpantinum launch <start|widgetredactor> [args...]",
+    "launch_usage": "Usage: ghost launch <start|widgetredactor> [args...]",
     "error_qml_not_found": "Error: could not resolve {NAME}.qml in {DIR}",
     "error_shell_qml_not_found": "Error: could not resolve path to shell.qml in {DIR}",
     "error_unknown_command": "Error: unknown command '{CMD}'.",
     "error_unknown_target": "Error: unknown target '{TARGET}'.",
     "launch_help": {
-      "usage": "Usage: serpantinum launch <start|widgetredactor> [arguments...]",
+      "usage": "Usage: ghost launch <start|widgetredactor> [arguments...]",
       "description": "Launch standalone components directly in runner mode.",
       "available_targets": "Available targets:",
       "target_start": "Launch the start setup interface",
       "target_widgetredactor": "Launch the desktop widget editor interface"
     },
     "msg_help": {
-      "usage": "Usage: serpantinum msg <command|workspace> [arguments...]",
+      "usage": "Usage: ghost msg <command|workspace> [arguments...]",
       "description": "Send layout, workspace, and window management messages directly.",
       "available_commands": "Available messages:",
       "cmd_workspace": "Switch to workspace <num> (append 'move' to send active window)",
@@ -1192,7 +1320,7 @@
       "cmd_close": "Close any active shell overlay"
     },
     "ipc_help": {
-      "usage": "Usage: serpantinum ipc call <target> <method> [arguments...]",
+      "usage": "Usage: ghost ipc call <target> <method> [arguments...]",
       "description": "Send an IPC call directly to the running quickshell instance."
     },
     "scripts": {
@@ -1213,11 +1341,11 @@
   },
   "daemon": {
     "already_running": "Daemon is already running. Exiting...",
-    "shutting_down": "Shutting down serpantinum daemon...",
-    "launching": "Launching serpantinum daemon...",
+    "shutting_down": "Shutting down ghost daemon...",
+    "launching": "Launching ghost daemon...",
     "cli": {
-      "usage": "Usage: serpantinumd <command> [options...]",
-      "description": "Background service daemon for serpantinum desktop shell.",
+      "usage": "Usage: ghostd <command> [options...]",
+      "description": "Background service daemon for ghost desktop shell.",
       "commands": "Commands:",
       "cmd_start": "Start the daemon service and launch background workers",
       "cmd_stop": "Stop the running daemon service",
@@ -1297,7 +1425,7 @@
       "tagline": "A desktop shell built for you",
       "installed_success": "✔ Ghost {ver} ({commit}) installed successfully.",
       "failed_packages": "The following packages encountered errors during installation:",
-      "restart_prompt": "Restart your compositor or run 'serpantinumd start' to begin.",
+      "restart_prompt": "Restart your compositor or run 'ghostd start' to begin.",
       "ask_reboot": "Do you want to restart? [y/n] "
     },
     "deps": {

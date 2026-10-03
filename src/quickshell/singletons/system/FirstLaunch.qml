@@ -7,14 +7,14 @@ import "../../"
 Item {
     id: root
 
-    readonly property string serpantinumDir: {
-        if (typeof Caching !== "undefined" && Caching.serpantinumDir) {
-            return Caching.serpantinumDir;
+    readonly property string ghostDir: {
+        if (typeof Caching !== "undefined" && Caching.ghostDir) {
+            return Caching.ghostDir;
         }
         return "";
     }
 
-    readonly property string helperScript: root.serpantinumDir + "/scripts/first_launch.sh"
+    readonly property string helperScript: root.ghostDir + "/scripts/first_launch.sh"
 
     property bool isFirstLaunch: false
     property bool executed: false
@@ -44,7 +44,7 @@ Item {
             if (root.pendingStartQml.length > 0) {
                 startLoader.source = "file://" + root.pendingStartQml;
             } else {
-                startLoader.source = Qt.resolvedUrl("../serp/Start.qml");
+                startLoader.source = Qt.resolvedUrl("../ghost/Start.qml");
             }
             startLoader.active = true;
         }

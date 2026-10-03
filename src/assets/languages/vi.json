@@ -148,23 +148,24 @@
       },
       "dim": {
         "title": "Làm mờ màn hình",
-        "desc": "Thời gian trước khi làm mờ màn hình"
+        "desc": "Giảm độ sáng màn hình trước khi khóa"
       },
       "dpms": {
         "title": "Tắt màn hình (DPMS)",
-        "desc": "Thời gian trước khi tắt hoàn toàn màn hình"
+        "desc": "Tắt tín hiệu màn hình hiển thị"
       },
       "lock": {
         "title": "Khóa phiên",
-        "desc": "Thời gian trước khi yêu cầu nhập mật khẩu"
+        "desc": "Khóa phiên làm việc sau một khoảng thời gian không hoạt động"
       },
       "suspend": {
         "title": "Ngủ đông hệ thống",
-        "desc": "Thời gian trước khi đưa máy vào chế độ ngủ"
+        "desc": "Đưa hệ thống vào chế độ ngủ"
       },
       "hooks": {
         "title": "Hook (lệnh shell)"
-      }
+      },
+      "custom_action_desc": "Hành động và lệnh hết thời gian tùy chỉnh"
     },
     "welcome": {
       "by_author": "bởi @{author}",
@@ -271,7 +272,8 @@
         "save_preset": {
           "title": "Lưu preset"
         },
-        "preset_name_placeholder": "Nhập tên preset..."
+        "preset_name_placeholder": "Nhập tên preset...",
+        "screen_desc": "Cấu hình và chỉnh sửa tiện ích màn hình nền"
       }
     },
     "bar": {
@@ -325,7 +327,15 @@
       "workspaces": {
         "title": "Chọn số lượng không gian làm việc để hiển thị",
         "disc": "Lưu ý: điều này không ảnh hưởng đến số lượng không gian làm việc thực tế trong compositor",
-        "desc": "Số lượng không gian làm việc hiển thị"
+        "desc": "Số lượng không gian làm việc hiển thị",
+        "hide_empty": {
+          "title": "Ẩn không gian làm việc trống",
+          "desc": "Chỉ hiển thị không gian đang dùng và không gian hiện tại"
+        },
+        "style": {
+          "title": "Kiểu",
+          "desc": "Chọn kiểu hiển thị cho các chỉ báo không gian làm việc"
+        }
       },
       "opacity": {
         "title": "Độ mờ thanh tác vụ",
@@ -371,13 +381,82 @@
         "show_date": {
           "title": "Hiển thị ngày",
           "desc": "Hiển thị văn bản ngày bên cạnh đồng hồ"
+        },
+        "style": {
+          "title": "Kiểu",
+          "desc": "Chọn kiểu hiển thị cho đồng hồ và ngày"
+        }
+      },
+      "vis": {
+        "bars": {
+          "title": "Số lượng thanh",
+          "desc": "Số lượng thanh tần số hiển thị"
+        },
+        "alignment": {
+          "title": "Căn chỉnh",
+          "desc": "Căn giữa bộ trực quan hoặc căn theo phía trên hoặc dưới"
+        },
+        "align": {
+          "center": "Giữa",
+          "top": "Trên",
+          "bottom": "Dưới",
+          "left": "Trái",
+          "right": "Phải"
+        },
+        "continuous": {
+          "title": "Sóng liên tục",
+          "desc": "Hiển thị dạng sóng mượt mà thay vì các thanh riêng biệt"
+        }
+      },
+      "sysmon": {
+        "style": {
+          "title": "Kiểu vòng tròn",
+          "desc": "Giao diện vòng tiến trình",
+          "wave": "Sóng",
+          "circle": "Vòng tròn"
+        },
+        "cpu": {
+          "title": "Sử dụng CPU",
+          "desc": "Hiển thị vòng mức sử dụng bộ vi xử lý"
+        },
+        "ram": {
+          "title": "Sử dụng bộ nhớ",
+          "desc": "Hiển thị vòng mức sử dụng RAM"
+        },
+        "temp": {
+          "title": "Nhiệt độ",
+          "desc": "Hiển thị vòng nhiệt độ hệ thống"
+        },
+        "disk": {
+          "title": "Sử dụng ổ đĩa",
+          "desc": "Hiển thị vòng mức sử dụng bộ nhớ lưu trữ"
+        }
+      },
+      "bat": {
+        "show_percent": {
+          "title": "Hiển thị phần trăm",
+          "desc": "Hiển thị phần trăm pin dạng số"
+        },
+        "show_icon": {
+          "title": "Hiển thị biểu tượng",
+          "desc": "Hiển thị biểu tượng pin hoặc chỉ báo đồ họa"
+        },
+        "style": {
+          "title": "Kiểu pin",
+          "desc": "Chọn giao diện hiển thị của chỉ báo pin",
+          "name": {
+            "classic": "Cổ điển",
+            "minimal": "Tối giản"
+          },
+          "classic": "Dạng viên thuốc với sóng chuyển màu",
+          "minimal": "Dạng thỏi iOS/Android có nắp"
         }
       }
     },
     "theme": {
       "font": {
         "title": "Phông chữ",
-        "desc": "Chọn phông chữ mặc định cho serpantinum",
+        "desc": "Chọn phông chữ mặc định cho ghost",
         "select": "Chọn..."
       },
       "radius": {
@@ -395,7 +474,8 @@
         "desc": "Thư mục để tìm kiếm hình nền",
         "select_dir": "Chọn thư mục...",
         "select_wallpaper": "Chọn hình nền",
-        "no_wallpaper_selected": "Chưa chọn hình nền nào"
+        "no_wallpaper_selected": "Chưa chọn hình nền nào",
+        "select": "Hình nền"
       }
     },
     "file_picker": {
@@ -407,7 +487,9 @@
       "places": {
         "home": "Thư mục cá nhân",
         "downloads": "Tải xuống",
-        "pictures": "Hình ảnh"
+        "pictures": "Hình ảnh",
+        "music": "Âm nhạc",
+        "documents": "Tài liệu"
       }
     },
     "font_picker": {
@@ -637,6 +719,16 @@
         "title": "Tự động ẩn thông minh",
         "desc": "Chỉ ẩn dock khi có cửa sổ mở, giữ hiển thị trên màn hình chính"
       }
+    },
+    "lyrics_picker": {
+      "title": "Chọn tệp lời bài hát",
+      "no_lyrics_selected": "Chưa chọn tệp lời bài hát"
+    },
+    "settings": "Cài đặt",
+    "search": {
+      "placeholder": "Tìm kiếm cài đặt...",
+      "prompt": "Nhập để tìm kiếm cài đặt...",
+      "no_results": "Không tìm thấy cài đặt"
     }
   },
   "sysnotif": {
@@ -667,7 +759,12 @@
   },
   "applauncher": {
     "search": "Tìm kiếm",
-    "placeholder": "Bắt đầu bằng dấu > để nhập lệnh..."
+    "placeholder": "Bắt đầu bằng dấu > để nhập lệnh...",
+    "tab_applications": "Ứng dụng",
+    "tab_files": "Tệp",
+    "placeholder_files": "Tìm kiếm tệp hoặc nhập đường dẫn...",
+    "tab_emojis": "Biểu tượng cảm xúc",
+    "placeholder_emojis": "Tìm kiếm biểu tượng cảm xúc hoặc nhập từ khóa..."
   },
   "calendar": {
     "loading": "Đang tải...",
@@ -736,7 +833,11 @@
       "jazz": "Jazz",
       "classic": "Cổ điển",
       "custom": "Tùy chỉnh"
-    }
+    },
+    "searching_lyrics": "Đang tìm lời bài hát...",
+    "no_lyrics": "Không tìm thấy lời bài hát",
+    "select_local_file": "Chọn tệp cục bộ",
+    "lyrics": "Lời bài hát"
   },
   "network": {
     "tabs": {
@@ -1020,7 +1121,9 @@
       "visualizer": "Trình trực quan hóa",
       "user": "Người dùng",
       "usage": "Mức sử dụng",
-      "battery": "Pin"
+      "battery": "Pin",
+      "github": "Github",
+      "time": "Thời gian"
     },
     "variants": {
       "digital": "Điện tử",
@@ -1033,7 +1136,12 @@
       "rounded": "Bo tròn",
       "bars": "Thanh",
       "continuous": "Liên tục",
-      "default": "Mặc định"
+      "default": "Mặc định",
+      "material": "Material",
+      "materialAnalog": "Material kim",
+      "lumen": "Lumen",
+      "lyrics": "Lời bài hát",
+      "simpleLyrics": "Lời bài hát đơn giản"
     },
     "presets": {
       "minimal": {
@@ -1048,10 +1156,30 @@
         "name": "Bảng Điều Khiển",
         "desc": "Bảng theo dõi toàn diện với đồng hồ số, mức sử dụng phần cứng và trạng thái pin."
       }
+    },
+    "github": {
+      "set_user": "Đặt người dùng",
+      "error": "Lỗi",
+      "commit": "commit",
+      "commits": "commit",
+      "no_day_selected": "Chưa chọn ngày",
+      "fetching": "Đang tải đóng góp GitHub...",
+      "fetch_error": "Không thể tải người dùng @{user}",
+      "enter_username": "Nhập tên người dùng GitHub",
+      "no_contributions": "Không tìm thấy đóng góp nào"
+    },
+    "settings": {
+      "lyricsLines": "Dòng",
+      "lyricsAlignment": "Căn chỉnh"
+    },
+    "align": {
+      "left": "Trái",
+      "center": "Giữa",
+      "right": "Phải"
     }
   },
   "cli": {
-    "usage": "Cách dùng: serpantinum [lệnh] [tùy chọn...]",
+    "usage": "Cách dùng: ghost [lệnh] [tùy chọn...]",
     "description": "Một desktop shell dành cho các Wayland compositor.",
     "commands": "Các lệnh:",
     "script_commands": "Các lệnh tập lệnh:",
@@ -1065,22 +1193,22 @@
     "help_desc": "Hiển thị thông báo trợ giúp này và thoát",
     "examples": "Ví dụ:",
     "daemon_stopped": "Đã dừng daemon Ghost.",
-    "starting_daemon": "Daemon không chạy. Đang khởi động serpantinumd ở nền...",
+    "starting_daemon": "Daemon không chạy. Đang khởi động ghostd ở nền...",
     "error_missing_qml": "Lỗi: thiếu mục tiêu để khởi chạy.",
-    "launch_usage": "Cách dùng: serpantinum launch <start|widgetredactor> [đối số...]",
+    "launch_usage": "Cách dùng: ghost launch <start|widgetredactor> [đối số...]",
     "error_qml_not_found": "Lỗi: không tìm thấy {NAME}.qml trong {DIR}",
     "error_shell_qml_not_found": "Lỗi: không tìm thấy đường dẫn đến shell.qml trong {DIR}",
     "error_unknown_command": "Lỗi: lệnh không xác định '{CMD}'.",
     "error_unknown_target": "Lỗi: mục tiêu không xác định '{TARGET}'.",
     "launch_help": {
-      "usage": "Cách dùng: serpantinum launch <start|widgetredactor> [đối số...]",
+      "usage": "Cách dùng: ghost launch <start|widgetredactor> [đối số...]",
       "description": "Khởi chạy trực tiếp các thành phần độc lập ở chế độ chạy.",
       "available_targets": "Các mục tiêu khả dụng:",
       "target_start": "Khởi chạy giao diện thiết lập ban đầu",
       "target_widgetredactor": "Khởi chạy giao diện chỉnh sửa tiện ích màn hình"
     },
     "msg_help": {
-      "usage": "Cách dùng: serpantinum msg <lệnh|không_gian_làm_việc> [đối số...]",
+      "usage": "Cách dùng: ghost msg <lệnh|không_gian_làm_việc> [đối số...]",
       "description": "Gửi trực tiếp thông điệp quản lý bố cục, không gian làm việc và cửa sổ.",
       "available_commands": "Các thông điệp khả dụng:",
       "cmd_workspace": "Chuyển đến không gian làm việc <số> (thêm 'move' để chuyển cửa sổ đang hoạt động)",
@@ -1089,7 +1217,7 @@
       "cmd_close": "Đóng mọi lớp phủ shell đang hoạt động"
     },
     "ipc_help": {
-      "usage": "Cách dùng: serpantinum ipc call <mục_tiêu> <phương_thức> [đối số...]",
+      "usage": "Cách dùng: ghost ipc call <mục_tiêu> <phương_thức> [đối số...]",
       "description": "Gửi lệnh gọi IPC trực tiếp đến phiên bản quickshell đang chạy."
     },
     "scripts": {
@@ -1110,11 +1238,11 @@
   },
   "daemon": {
     "already_running": "Daemon đang chạy rồi. Đang thoát...",
-    "shutting_down": "Đang tắt daemon serpantinum...",
-    "launching": "Đang khởi chạy daemon serpantinum...",
+    "shutting_down": "Đang tắt daemon ghost...",
+    "launching": "Đang khởi chạy daemon ghost...",
     "cli": {
-      "usage": "Cách dùng: serpantinumd <lệnh> [tùy chọn...]",
-      "description": "Daemon dịch vụ nền cho desktop shell serpantinum.",
+      "usage": "Cách dùng: ghostd <lệnh> [tùy chọn...]",
+      "description": "Daemon dịch vụ nền cho desktop shell ghost.",
       "commands": "Các lệnh:",
       "cmd_start": "Khởi động dịch vụ daemon và các tiến trình nền",
       "cmd_stop": "Dừng dịch vụ daemon đang chạy",
@@ -1190,7 +1318,7 @@
       "tagline": "Một desktop shell được xây dựng cho bạn",
       "installed_success": "✔ Đã cài đặt thành công Ghost {ver} ({commit}).",
       "failed_packages": "Các gói sau đã gặp lỗi trong quá trình cài đặt:",
-      "restart_prompt": "Hãy khởi động lại compositor hoặc chạy 'serpantinumd start' để bắt đầu.",
+      "restart_prompt": "Hãy khởi động lại compositor hoặc chạy 'ghostd start' để bắt đầu.",
       "ask_reboot": "Bạn có muốn khởi động lại không? [y/n] "
     },
     "deps": {

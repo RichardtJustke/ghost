@@ -12,11 +12,11 @@ Item {
     property string matugenBaseDir: {
         let dir = "";
         if (typeof Caching !== "undefined" && Caching.qsDir) {
-            dir = Caching.serpantinumDir + "/assets/matugen";
-        } else if (typeof Caching !== "undefined" && Caching.serpantinumDir) {
-            dir = Caching.serpantinumDir + "/src/assets/matugen";
+            dir = Caching.ghostDir + "/assets/matugen";
+        } else if (typeof Caching !== "undefined" && Caching.ghostDir) {
+            dir = Caching.ghostDir + "/src/assets/matugen";
         } else {
-            dir = Quickshell.env("HOME") + "/.local/share/serpantinum/src/assets/matugen";
+            dir = Quickshell.env("HOME") + "/.local/share/ghost/src/assets/matugen";
         }
         return dir;
     }
@@ -260,7 +260,7 @@ Item {
         let md3Json = JSON.stringify(md3Obj);
 
         let script =
-            "STATE_DIR=\"$HOME/.local/state/serpantinum\"; " +
+            "STATE_DIR=\"$HOME/.local/state/ghost\"; " +
             "TMP_MD3=\"/tmp/matugen_synthetic_colors.json\"; " +
             "mkdir -p \"$STATE_DIR\" && " +
             "echo '" + rawJson.replace(/'/g, "'\\''") + "' > \"$STATE_DIR/qs_colors.json\" && " +
@@ -291,7 +291,7 @@ Item {
                 root._lastGeneratedStaticJson = root._currentStaticJson;
 
                 if (matugenProcess.reqType === "image") {
-                    let stateDir = (typeof Caching !== "undefined" && Caching.stateDir) ? Caching.stateDir : (Quickshell.env("HOME") + "/.local/state/serpantinum");
+                    let stateDir = (typeof Caching !== "undefined" && Caching.stateDir) ? Caching.stateDir : (Quickshell.env("HOME") + "/.local/state/ghost");
                     Quickshell.execDetached(["bash", "-c", "mkdir -p \"" + stateDir + "\" && cp -f \"" + stateDir + "/qs_colors.json\" \"" + stateDir + "/qs_matugen_colors.json\" 2>/dev/null || true"]);
                 }
                 Quickshell.execDetached(["bash", "-c", "killall -USR1 .kitty-wrapped 2>/dev/null || pkill -SIGUSR1 kitty 2>/dev/null || true"]);

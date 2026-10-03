@@ -2,3 +2,5 @@ src/assets/languages/add.py
 changelog.py
 __pycache__/
 *.pyc
+.agents/
+AGENTS.md

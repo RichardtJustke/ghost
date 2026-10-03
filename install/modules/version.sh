@@ -1,33 +1,33 @@
 #!/usr/bin/env bash
 
 MODULE_DIR="$(dirname "$(realpath "${BASH_SOURCE[0]}")")"
-if [ -z "$SERPANTINUM_DIR" ]; then
+if [ -z "$GHOST_DIR" ]; then
     if [ -d "$(dirname "$(dirname "$MODULE_DIR")")/src" ]; then
-        export SERPANTINUM_DIR="$(dirname "$(dirname "$MODULE_DIR")")/src"
+        export GHOST_DIR="$(dirname "$(dirname "$MODULE_DIR")")/src"
     fi
 fi
 
-if [ -n "$SERPANTINUM_DIR" ] && [ -f "$SERPANTINUM_DIR/scripts/caching.sh" ]; then
-    source "$SERPANTINUM_DIR/scripts/caching.sh"
+if [ -n "$GHOST_DIR" ] && [ -f "$GHOST_DIR/scripts/caching.sh" ]; then
+    source "$GHOST_DIR/scripts/caching.sh"
 fi
 
-STATE_DIR="${QS_STATE_DIR:-${XDG_STATE_HOME:-$HOME/.local/state}/serpantinum}"
+STATE_DIR="${QS_STATE_DIR:-${XDG_STATE_HOME:-$HOME/.local/state}/ghost}"
 VERSION_FILE="$STATE_DIR/version"
 DEFAULT_FALLBACK_VERSION="2.0.0"
 
 get_installed_version() {
     local ver=""
     if [ -f "$VERSION_FILE" ]; then
-        ver=$(awk -F= '/^SERPANTINUM_VERSION=/{gsub(/"/, "", $2); print $2}' "$VERSION_FILE")
+        ver=$(awk -F= '/^GHOST_VERSION=/{gsub(/"/, "", $2); print $2}' "$VERSION_FILE")
     fi
-    if [ -z "$ver" ] && [ -n "$SERPANTINUM_VERSION" ]; then
-        ver="$SERPANTINUM_VERSION"
+    if [ -z "$ver" ] && [ -n "$GHOST_VERSION" ]; then
+        ver="$GHOST_VERSION"
     fi
     if [ -z "$ver" ]; then
-        if [ -n "$SERPANTINUM_DIR" ] && [ -f "$SERPANTINUM_DIR/version.txt" ]; then
-            ver=$(cat "$SERPANTINUM_DIR/version.txt" 2>/dev/null | xargs)
-        elif [ -n "$SERPANTINUM_DIR" ] && [ -f "$(dirname "$SERPANTINUM_DIR")/version.txt" ]; then
-            ver=$(cat "$(dirname "$SERPANTINUM_DIR")/version.txt" 2>/dev/null | xargs)
+        if [ -n "$GHOST_DIR" ] && [ -f "$GHOST_DIR/version.txt" ]; then
+            ver=$(cat "$GHOST_DIR/version.txt" 2>/dev/null | xargs)
+        elif [ -n "$GHOST_DIR" ] && [ -f "$(dirname "$GHOST_DIR")/version.txt" ]; then
+            ver=$(cat "$(dirname "$GHOST_DIR")/version.txt" 2>/dev/null | xargs)
         elif [ -n "$REPO_ROOT" ] && [ -f "$REPO_ROOT/version.txt" ]; then
             ver=$(cat "$REPO_ROOT/version.txt" 2>/dev/null | xargs)
         fi
@@ -40,7 +40,7 @@ get_installed_version() {
 
 get_installed_commit() {
     if [ -f "$VERSION_FILE" ]; then
-        awk -F= '/^SERPANTINUM_COMMIT=/{gsub(/"/, "", $2); print $2}' "$VERSION_FILE"
+        awk -F= '/^GHOST_COMMIT=/{gsub(/"/, "", $2); print $2}' "$VERSION_FILE"
     fi
 }
 
@@ -100,8 +100,8 @@ write_version_state() {
     mkdir -p "$STATE_DIR"
     local tmp_file="${VERSION_FILE}.tmp.$$"
     cat <<EOF > "$tmp_file"
-SERPANTINUM_VERSION="$version"
-SERPANTINUM_COMMIT="$commit"
+GHOST_VERSION="$version"
+GHOST_COMMIT="$commit"
 SELECTED_COMPOSITORS="$compositors"
 EOF
     mv -f "$tmp_file" "$VERSION_FILE"

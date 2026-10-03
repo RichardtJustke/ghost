@@ -1,12 +1,12 @@
-CONFIG_DIR="$HOME/.config/serpantinum"
+CONFIG_DIR="$HOME/.config/ghost"
 CONFIG_FILE="$CONFIG_DIR/settings.json"
 
-init_serpantinum_config() {
+init_ghost_config() {
     local project_root="$1"
     local wallpaper_dir="$2"
     local install_state="$3"
     local is_reinstall="$4"
-    local template_json="$project_root/config/serpantinum/settings.json"
+    local template_json="$project_root/config/ghost/settings.json"
     local script_path="$project_root/src/scripts/location.sh"
 
     if [[ "$install_state" == "current" && "$is_reinstall" != "true" ]]; then
@@ -15,19 +15,25 @@ init_serpantinum_config() {
 
     mkdir -p "$CONFIG_DIR"
 
+    local sys_lang="en"
+    command -v detect_system_language &>/dev/null && sys_lang="$(detect_system_language)"
+
     if [ -f "$template_json" ]; then
         if [ -f "$CONFIG_FILE" ] && [ -s "$CONFIG_FILE" ]; then
             local merged_json
-            merged_json=$(jq -s --arg wp "$wallpaper_dir" '
-                (.[0] * .[1]) * (if ($wp | length > 0) then {wallpaperDir: $wp} else {} end)
+            merged_json=$(jq -s --arg wp "$wallpaper_dir" --arg lang "$sys_lang" '
+                (.[0] * .[1])
+                * (if ($wp | length > 0) then {wallpaperDir: $wp} else {} end)
+                * (if (.[1].general.language // null) == null then {general: {language: $lang}} else {} end)
             ' "$template_json" "$CONFIG_FILE" 2>/dev/null)
             if [ -n "$merged_json" ]; then
                 echo "$merged_json" > "$CONFIG_FILE"
             fi
         else
             local initial_json
-            initial_json=$(jq --arg wp "$wallpaper_dir" '
+            initial_json=$(jq --arg wp "$wallpaper_dir" --arg lang "$sys_lang" '
                 . * (if ($wp | length > 0) then {wallpaperDir: $wp} else {} end)
+                  * {general: {language: $lang}}
             ' "$template_json" 2>/dev/null)
             if [ -n "$initial_json" ]; then
                 echo "$initial_json" > "$CONFIG_FILE"
@@ -46,8 +52,8 @@ init_serpantinum_config() {
     if [[ "$is_reinstall" == "true" || "$install_state" == "fresh" || "$install_state" == "legacy" ]]; then
         if [ -f "$script_path" ]; then
             bash "$script_path" --refresh >/dev/null 2>&1 || true
-        elif [ -f "$HOME/.local/share/serpantinum/src/scripts/location.sh" ]; then
-            bash "$HOME/.local/share/serpantinum/src/scripts/location.sh" --refresh >/dev/null 2>&1 || true
+        elif [ -f "$HOME/.local/share/ghost/src/scripts/location.sh" ]; then
+            bash "$HOME/.local/share/ghost/src/scripts/location.sh" --refresh >/dev/null 2>&1 || true
         fi
     fi
 }

@@ -152,19 +152,20 @@
       },
       "dpms": {
         "title": "화면 끄기 (DPMS)",
-        "desc": "화면을 완전히 끄기까지의 시간"
+        "desc": "모니터 디스플레이 신호 끄기"
       },
       "lock": {
         "title": "세션 잠금",
-        "desc": "비밀번호를 요구하기까지의 시간"
+        "desc": "일정 시간 비활성 후 세션 잠금"
       },
       "suspend": {
         "title": "시스템 절전",
-        "desc": "시스템을 절전 모드로 전환하기까지의 시간"
+        "desc": "시스템을 절전 모드로 전환"
       },
       "hooks": {
         "title": "훅 (셸 명령)"
-      }
+      },
+      "custom_action_desc": "사용자 정의 시간 초과 동작 및 명령"
     },
     "welcome": {
       "by_author": "@{author} 제작",
@@ -271,7 +272,8 @@
         "save_preset": {
           "title": "프리셋 저장"
         },
-        "preset_name_placeholder": "프리셋 이름 입력..."
+        "preset_name_placeholder": "프리셋 이름 입력...",
+        "screen_desc": "바탕화면 위젯 설정 및 편집"
       }
     },
     "bar": {
@@ -325,7 +327,15 @@
       "workspaces": {
         "title": "표시할 작업 공간 개수를 선택하세요",
         "disc": "참고: 이 설정은 컴포지터의 실제 작업 공간 개수에는 영향을 주지 않습니다",
-        "desc": "표시할 작업 공간 개수"
+        "desc": "표시할 작업 공간 개수",
+        "hide_empty": {
+          "title": "빈 작업 공간 숨기기",
+          "desc": "사용 중인 작업 공간과 현재 작업 공간만 표시"
+        },
+        "style": {
+          "title": "스타일",
+          "desc": "워크스페이스 표시기의 시각적 스타일을 선택합니다"
+        }
       },
       "opacity": {
         "title": "바 불투명도",
@@ -371,13 +381,82 @@
         "show_date": {
           "title": "날짜 표시",
           "desc": "시계 옆에 날짜 텍스트를 표시합니다"
+        },
+        "style": {
+          "title": "스타일",
+          "desc": "시계 및 날짜 표시의 시각적 스타일을 선택합니다"
+        }
+      },
+      "vis": {
+        "bars": {
+          "title": "막대 개수",
+          "desc": "표시할 주파수 막대의 개수"
+        },
+        "alignment": {
+          "title": "정렬",
+          "desc": "시각화 도구를 중앙, 상단 또는 하단에 정렬"
+        },
+        "align": {
+          "center": "중앙",
+          "top": "상단",
+          "bottom": "하단",
+          "left": "왼쪽",
+          "right": "오른쪽"
+        },
+        "continuous": {
+          "title": "연속 파동",
+          "desc": "개별 막대 대신 부드러운 파동으로 렌더링"
+        }
+      },
+      "sysmon": {
+        "style": {
+          "title": "원 스타일",
+          "desc": "진행률 링의 시각적 모양",
+          "wave": "웨이브",
+          "circle": "원형"
+        },
+        "cpu": {
+          "title": "CPU 사용량",
+          "desc": "프로세서 사용률 링 표시"
+        },
+        "ram": {
+          "title": "메모리 사용량",
+          "desc": "메모리(RAM) 사용률 링 표시"
+        },
+        "temp": {
+          "title": "온도",
+          "desc": "시스템 온도 링 표시"
+        },
+        "disk": {
+          "title": "디스크 사용량",
+          "desc": "스토리지 디스크 사용률 링 표시"
+        }
+      },
+      "bat": {
+        "show_percent": {
+          "title": "백분율 표시",
+          "desc": "배터리 충전 백분율을 숫자로 표시합니다"
+        },
+        "show_icon": {
+          "title": "아이콘 표시",
+          "desc": "배터리 아이콘 또는 그래픽 표시기를 표시합니다"
+        },
+        "style": {
+          "title": "배터리 스타일",
+          "desc": "배터리 표시기의 시각적 모양을 선택합니다",
+          "name": {
+            "classic": "클래식",
+            "minimal": "미니멀"
+          },
+          "classic": "그라디언트 웨이브 알약 스타일",
+          "minimal": "캡이 있는 iOS/Android 캡슐 스타일"
         }
       }
     },
     "theme": {
       "font": {
         "title": "글꼴",
-        "desc": "serpantinum이 사용할 기본 글꼴을 선택합니다",
+        "desc": "ghost이 사용할 기본 글꼴을 선택합니다",
         "select": "선택..."
       },
       "radius": {
@@ -395,7 +474,8 @@
         "desc": "배경화면을 검색할 디렉터리",
         "select_dir": "디렉터리 선택...",
         "select_wallpaper": "배경화면 선택",
-        "no_wallpaper_selected": "선택된 배경화면 없음"
+        "no_wallpaper_selected": "선택된 배경화면 없음",
+        "select": "배경화면"
       }
     },
     "file_picker": {
@@ -407,7 +487,9 @@
       "places": {
         "home": "홈",
         "downloads": "다운로드",
-        "pictures": "사진"
+        "pictures": "사진",
+        "music": "음악",
+        "documents": "문서"
       }
     },
     "font_picker": {
@@ -637,6 +719,16 @@
         "title": "스마트 자동 숨기기",
         "desc": "창이 열려 있을 때만 독을 숨기고 바탕화면에서는 항상 표시"
       }
+    },
+    "lyrics_picker": {
+      "title": "가사 파일 선택",
+      "no_lyrics_selected": "선택된 가사 없음"
+    },
+    "settings": "설정",
+    "search": {
+      "placeholder": "설정 검색...",
+      "prompt": "설정을 검색하려면 입력하세요...",
+      "no_results": "설정을 찾을 수 없습니다"
     }
   },
   "sysnotif": {
@@ -667,7 +759,12 @@
   },
   "applauncher": {
     "search": "검색",
-    "placeholder": "명령을 실행하려면 > 로 시작하세요..."
+    "placeholder": "명령을 실행하려면 > 로 시작하세요...",
+    "tab_applications": "애플리케이션",
+    "tab_files": "파일",
+    "placeholder_files": "파일 검색 또는 경로 입력...",
+    "tab_emojis": "이모지",
+    "placeholder_emojis": "이모지 검색 또는 키워드 입력..."
   },
   "calendar": {
     "loading": "불러오는 중...",
@@ -736,7 +833,11 @@
       "jazz": "재즈",
       "classic": "클래식",
       "custom": "사용자 지정"
-    }
+    },
+    "searching_lyrics": "가사 검색 중...",
+    "no_lyrics": "가사를 찾을 수 없음",
+    "select_local_file": "로컬 파일 선택",
+    "lyrics": "가사"
   },
   "network": {
     "tabs": {
@@ -1020,7 +1121,9 @@
       "visualizer": "시각화 도구",
       "user": "사용자",
       "usage": "사용량",
-      "battery": "배터리"
+      "battery": "배터리",
+      "github": "Github",
+      "time": "시간"
     },
     "variants": {
       "digital": "디지털",
@@ -1033,7 +1136,12 @@
       "rounded": "둥근 사각형",
       "bars": "막대",
       "continuous": "연속형",
-      "default": "기본"
+      "default": "기본",
+      "material": "머티리얼",
+      "materialAnalog": "머티리얼 아날로그",
+      "lumen": "루멘",
+      "lyrics": "가사",
+      "simpleLyrics": "단순 가사"
     },
     "presets": {
       "minimal": {
@@ -1048,10 +1156,30 @@
         "name": "대시보드",
         "desc": "디지털 시계, 하드웨어 리소스 사용량 및 배터리 상태를 보여주는 대시보드입니다."
       }
+    },
+    "github": {
+      "set_user": "사용자 설정",
+      "error": "오류",
+      "commit": "커밋",
+      "commits": "커밋",
+      "no_day_selected": "선택된 날짜 없음",
+      "fetching": "GitHub 기여 내역 가져오는 중...",
+      "fetch_error": "@{user} 사용자를 가져올 수 없습니다",
+      "enter_username": "GitHub 사용자명을 입력하세요",
+      "no_contributions": "기여 내역이 없습니다"
+    },
+    "settings": {
+      "lyricsLines": "줄 수",
+      "lyricsAlignment": "정렬"
+    },
+    "align": {
+      "left": "왼쪽",
+      "center": "가운데",
+      "right": "오른쪽"
     }
   },
   "cli": {
-    "usage": "사용법: serpantinum [명령] [옵션...]",
+    "usage": "사용법: ghost [명령] [옵션...]",
     "description": "wayland 컴포지터용 데스크톱 셸입니다.",
     "commands": "명령:",
     "script_commands": "스크립트 명령:",
@@ -1065,22 +1193,22 @@
     "help_desc": "이 도움말을 표시하고 종료합니다",
     "examples": "예시:",
     "daemon_stopped": "Ghost 데몬이 중지되었습니다.",
-    "starting_daemon": "데몬이 실행 중이 아닙니다. serpantinumd를 백그라운드에서 시작합니다...",
+    "starting_daemon": "데몬이 실행 중이 아닙니다. ghostd를 백그라운드에서 시작합니다...",
     "error_missing_qml": "오류: 실행할 대상이 지정되지 않았습니다.",
-    "launch_usage": "사용법: serpantinum launch <start|widgetredactor> [인자...]",
+    "launch_usage": "사용법: ghost launch <start|widgetredactor> [인자...]",
     "error_qml_not_found": "오류: {DIR}에서 {NAME}.qml을 찾을 수 없습니다",
     "error_shell_qml_not_found": "오류: {DIR}에서 shell.qml 경로를 찾을 수 없습니다",
     "error_unknown_command": "오류: 알 수 없는 명령 '{CMD}'.",
     "error_unknown_target": "오류: 알 수 없는 대상 '{TARGET}'.",
     "launch_help": {
-      "usage": "사용법: serpantinum launch <start|widgetredactor> [인자...]",
+      "usage": "사용법: ghost launch <start|widgetredactor> [인자...]",
       "description": "독립 실행 컴포넌트를 러너 모드로 바로 실행합니다.",
       "available_targets": "사용 가능한 대상:",
       "target_start": "초기 설정 인터페이스를 실행합니다",
       "target_widgetredactor": "데스크톱 위젯 편집기를 실행합니다"
     },
     "msg_help": {
-      "usage": "사용법: serpantinum msg <명령|작업공간> [인자...]",
+      "usage": "사용법: ghost msg <명령|작업공간> [인자...]",
       "description": "레이아웃, 작업 공간, 창 관리 메시지를 직접 전송합니다.",
       "available_commands": "사용 가능한 메시지:",
       "cmd_workspace": "<num>번 작업 공간으로 전환합니다 ('move'를 덧붙이면 활성 창도 함께 이동)",
@@ -1089,7 +1217,7 @@
       "cmd_close": "활성화된 셸 오버레이를 닫습니다"
     },
     "ipc_help": {
-      "usage": "사용법: serpantinum ipc call <대상> <메서드> [인자...]",
+      "usage": "사용법: ghost ipc call <대상> <메서드> [인자...]",
       "description": "실행 중인 quickshell 인스턴스에 IPC 호출을 직접 전송합니다."
     },
     "scripts": {
@@ -1110,11 +1238,11 @@
   },
   "daemon": {
     "already_running": "데몬이 이미 실행 중입니다. 종료합니다...",
-    "shutting_down": "serpantinum 데몬을 종료하는 중...",
-    "launching": "serpantinum 데몬을 시작하는 중...",
+    "shutting_down": "ghost 데몬을 종료하는 중...",
+    "launching": "ghost 데몬을 시작하는 중...",
     "cli": {
-      "usage": "사용법: serpantinumd <명령> [옵션...]",
-      "description": "serpantinum 데스크톱 셸의 백그라운드 서비스 데몬입니다.",
+      "usage": "사용법: ghostd <명령> [옵션...]",
+      "description": "ghost 데스크톱 셸의 백그라운드 서비스 데몬입니다.",
       "commands": "명령:",
       "cmd_start": "데몬 서비스를 시작하고 백그라운드 작업자를 실행합니다",
       "cmd_stop": "실행 중인 데몬 서비스를 중지합니다",
@@ -1190,7 +1318,7 @@
       "tagline": "당신을 위해 만든 데스크톱 셸",
       "installed_success": "✔ Ghost {ver} ({commit}) 설치가 완료되었습니다.",
       "failed_packages": "다음 패키지를 설치하는 중 오류가 발생했습니다:",
-      "restart_prompt": "컴포지터를 다시 시작하거나 'serpantinumd start'를 실행해 시작하세요.",
+      "restart_prompt": "컴포지터를 다시 시작하거나 'ghostd start'를 실행해 시작하세요.",
       "ask_reboot": "다시 시작하시겠습니까? [y/n] "
     },
     "deps": {

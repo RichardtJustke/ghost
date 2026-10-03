@@ -7,7 +7,7 @@ printf '\033[9;0]' 2>/dev/null || true
 
 RAW_SLUG="${REPO_SLUG:-RichardtJustke/ghost}"
 REPO_SLUG="$(printf '%s' "$RAW_SLUG" | tr -d '\r\n\t ' | sed 's/[^a-zA-Z0-9_\/-]//g')"
-CACHE_BASE="${XDG_CACHE_HOME:-$HOME/.cache}/serpantinum-installer"
+CACHE_BASE="${XDG_CACHE_HOME:-$HOME/.cache}/ghost-installer"
 export REPO_SLUG
 
 if [ -n "${BASH_SOURCE[0]}" ] && [ -f "${BASH_SOURCE[0]}" ]; then
@@ -33,7 +33,7 @@ if [[ -z "$PROJECT_ROOT" || ! -f "$PROJECT_ROOT/install/modules/deps.sh" || ! -d
     PROJECT_ROOT="$CACHE_BASE"
 fi
 
-export SERPANTINUM_DIR="$PROJECT_ROOT/src"
+export GHOST_DIR="$PROJECT_ROOT/src"
 export I18N_DIR="$PROJECT_ROOT/src/assets/languages"
 
 MODULES_DIR="$INSTALL_DIR/modules"
@@ -51,6 +51,7 @@ source "$MODULES_DIR/ui.sh"
 
 check_supported_os
 bootstrap_installer_deps
+migrate_old_names
 
 INSTALL_STATE=$(detect_install_state)
 TARGET_VERSION=$(get_target_version "$PROJECT_ROOT" "$REPO_SLUG")
@@ -77,14 +78,14 @@ setup_sddm "$PROJECT_ROOT" "$INSTALL_STATE" "$IS_REINSTALL"
 install_wallpapers "$INSTALL_FULL_WALLPAPERS"
 
 WALLPAPER_DIR=$(get_wallpaper_dir)
-init_serpantinum_config "$PROJECT_ROOT" "$WALLPAPER_DIR" "$INSTALL_STATE" "$IS_REINSTALL"
+init_ghost_config "$PROJECT_ROOT" "$WALLPAPER_DIR" "$INSTALL_STATE" "$IS_REINSTALL"
 
 setup_services
 setup_oh_my_zsh
 write_version_state "$TARGET_VERSION" "$TARGET_COMMIT" "${SELECTED_COMPOSITORS[*]}"
 
 if [[ "$INSTALL_STATE" == "legacy" || "$INSTALL_STATE" == "fresh" || "$IS_REINSTALL" == true ]]; then
-    rm -f "$HOME/.local/state/serpantinum/first_launch.done" "$HOME/.local/state/quickshell/first_launch.done"
+    rm -f "$HOME/.local/state/ghost/first_launch.done" "$HOME/.local/state/quickshell/first_launch.done"
 fi
 
 draw_completion_screen "$TARGET_VERSION" "$TARGET_COMMIT"

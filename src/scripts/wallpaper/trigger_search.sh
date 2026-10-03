@@ -9,7 +9,7 @@ DDG_SCRIPT="$7"
 
 mkdir -p "$LOG_DIR" "$RUN_DIR" "$SEARCH_DIR" "$CACHE_DIR"
 
-export PATH=$PATH:/usr/local/bin:/usr/bin:/bin:/run/current-system/sw/bin:$HOME/.nix-profile/bin:$HOME/.local/bin
+export PATH=$PATH:/usr/local/bin:/usr/bin:/bin:$HOME/.local/bin
 
 echo 'stop' > "$RUN_DIR/ddg_search_control"
 for p in $(pgrep -f ddg_search.sh); do

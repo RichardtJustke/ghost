@@ -152,23 +152,24 @@
       },
       "dim": {
         "title": "Escurecer tela",
-        "desc": "Tempo antes de escurecer a saída"
+        "desc": "Reduzir o brilho da tela antes de bloquear"
       },
       "dpms": {
         "title": "Desligar tela (DPMS)",
-        "desc": "Tempo antes de apagar a tela por completo"
+        "desc": "Desligar o sinal de vídeo do monitor"
       },
       "lock": {
         "title": "Bloquear sessão",
-        "desc": "Tempo antes de exigir senha"
+        "desc": "Bloquear a sessão após um período de inatividade"
       },
       "suspend": {
         "title": "Suspender sistema",
-        "desc": "Tempo antes de colocar a máquina pra dormir"
+        "desc": "Suspender o sistema para o modo de suspensão"
       },
       "hooks": {
         "title": "Hooks (comandos shell)"
-      }
+      },
+      "custom_action_desc": "Ação e comando personalizados por tempo limite"
     },
     "welcome": {
       "by_author": "por @{author}",
@@ -296,7 +297,8 @@
         "save_preset": {
           "title": "Salvar predefinição"
         },
-        "preset_name_placeholder": "Digite o nome da predefinição..."
+        "preset_name_placeholder": "Digite o nome da predefinição...",
+        "screen_desc": "Configurar e editar widgets da área de trabalho"
       }
     },
     "bar": {
@@ -350,7 +352,15 @@
       "workspaces": {
         "title": "Quantidade de workspaces a exibir",
         "disc": "Nota: isto não afeta a quantidade real de workspaces no compositor",
-        "desc": "Número de workspaces a exibir"
+        "desc": "Número de workspaces a exibir",
+        "hide_empty": {
+          "title": "Ocultar áreas de trabalho vazias",
+          "desc": "Mostrar apenas as áreas ocupadas e a ativa"
+        },
+        "style": {
+          "title": "Estilo",
+          "desc": "Escolha o estilo visual para os indicadores de áreas de trabalho"
+        }
       },
       "opacity": {
         "title": "Opacidade da barra",
@@ -396,13 +406,82 @@
         "show_date": {
           "title": "Mostrar data",
           "desc": "Exibir o texto da data ao lado do relógio"
+        },
+        "style": {
+          "title": "Estilo",
+          "desc": "Escolha o estilo visual para o relógio e a data"
+        }
+      },
+      "vis": {
+        "bars": {
+          "title": "Quantidade de barras",
+          "desc": "Número de barras de frequência a exibir"
+        },
+        "alignment": {
+          "title": "Alinhamento",
+          "desc": "Centralizar o visualizador ou alinhar ao topo ou à base"
+        },
+        "align": {
+          "center": "Centro",
+          "top": "Topo",
+          "bottom": "Base",
+          "left": "Esquerda",
+          "right": "Direita"
+        },
+        "continuous": {
+          "title": "Onda contínua",
+          "desc": "Exibir uma onda suave em vez de barras discretas"
+        }
+      },
+      "sysmon": {
+        "style": {
+          "title": "Estilo do círculo",
+          "desc": "Aparência visual dos anéis de progresso",
+          "wave": "Onda",
+          "circle": "Círculo"
+        },
+        "cpu": {
+          "title": "Uso da CPU",
+          "desc": "Exibir o anel de utilização do processador"
+        },
+        "ram": {
+          "title": "Uso de memória",
+          "desc": "Exibir o anel de utilização de memória (RAM)"
+        },
+        "temp": {
+          "title": "Temperatura",
+          "desc": "Exibir o anel de temperatura do sistema"
+        },
+        "disk": {
+          "title": "Uso do disco",
+          "desc": "Exibir o anel de utilização do disco"
+        }
+      },
+      "bat": {
+        "show_percent": {
+          "title": "Mostrar porcentagem",
+          "desc": "Exibe a porcentagem numérica de carga da bateria"
+        },
+        "show_icon": {
+          "title": "Mostrar ícone",
+          "desc": "Exibe o ícone da bateria ou indicador gráfico"
+        },
+        "style": {
+          "title": "Estilo da bateria",
+          "desc": "Escolha a aparência visual do indicador de bateria",
+          "name": {
+            "classic": "Clássico",
+            "minimal": "Minimalista"
+          },
+          "classic": "Pílula com onda gradiente",
+          "minimal": "Cápsula estilo iOS/Android com tampa"
         }
       }
     },
     "theme": {
       "font": {
         "title": "Fonte",
-        "desc": "Escolha a padrão usada pelo serpantinum",
+        "desc": "Escolha a padrão usada pelo ghost",
         "select": "Selecionar..."
       },
       "cursor": {
@@ -424,7 +503,8 @@
         "desc": "Pasta onde buscar papéis de parede",
         "select_dir": "Selecionar pasta...",
         "select_wallpaper": "Selecionar papel de parede",
-        "no_wallpaper_selected": "Nenhum papel de parede selecionado"
+        "no_wallpaper_selected": "Nenhum papel de parede selecionado",
+        "select": "Papel de parede"
       },
       "glass": {
         "title": "Vidro fosco",
@@ -446,7 +526,9 @@
       "places": {
         "home": "Início",
         "downloads": "Downloads",
-        "pictures": "Imagens"
+        "pictures": "Imagens",
+        "music": "Música",
+        "documents": "Documentos"
       }
     },
     "font_picker": {
@@ -732,6 +814,16 @@
         "title": "Ocultação automática inteligente",
         "desc": "Ocultar a dock apenas quando houver janelas abertas, mantendo-a visível na área de trabalho"
       }
+    },
+    "lyrics_picker": {
+      "title": "Selecionar arquivo de letras",
+      "no_lyrics_selected": "Nenhum arquivo de letras selecionado"
+    },
+    "settings": "Configurações",
+    "search": {
+      "placeholder": "Pesquisar configurações...",
+      "prompt": "Digite para pesquisar configurações...",
+      "no_results": "Nenhuma configuração encontrada"
     }
   },
   "sysnotif": {
@@ -763,7 +855,12 @@
   "applauncher": {
     "search": "Pesquisar",
     "placeholder": "Comece com > para um comando...",
-    "term_cmd": "Comando de terminal"
+    "term_cmd": "Comando de terminal",
+    "tab_applications": "Aplicativos",
+    "tab_files": "Arquivos",
+    "placeholder_files": "Buscar arquivos ou digitar caminho...",
+    "tab_emojis": "Emojis",
+    "placeholder_emojis": "Buscar emojis ou digitar palavra-chave..."
   },
   "calendar": {
     "loading": "Carregando...",
@@ -832,7 +929,11 @@
       "jazz": "Jazz",
       "classic": "Clássica",
       "custom": "Personalizado"
-    }
+    },
+    "searching_lyrics": "Procurando letra...",
+    "no_lyrics": "Nenhuma letra encontrada",
+    "select_local_file": "Selecionar um arquivo local",
+    "lyrics": "Letra"
   },
   "network": {
     "tabs": {
@@ -1126,7 +1227,9 @@
       "visualizer": "Visualizador",
       "user": "Usuário",
       "usage": "Uso",
-      "battery": "Bateria"
+      "battery": "Bateria",
+      "github": "Github",
+      "time": "Hora"
     },
     "variants": {
       "digital": "Digital",
@@ -1139,7 +1242,12 @@
       "rounded": "Arredondado",
       "bars": "Barras",
       "continuous": "Contínuo",
-      "default": "Padrão"
+      "default": "Padrão",
+      "material": "Material",
+      "materialAnalog": "Material analógico",
+      "lumen": "Lúmen",
+      "lyrics": "Letra",
+      "simpleLyrics": "Letra simples"
     },
     "presets": {
       "minimal": {
@@ -1154,10 +1262,30 @@
         "name": "Painel",
         "desc": "Monitor de sistema completo com relógio digital, uso de hardware e nível de bateria."
       }
+    },
+    "github": {
+      "set_user": "Definir usuário",
+      "error": "Erro",
+      "commit": "commit",
+      "commits": "commits",
+      "no_day_selected": "Nenhum dia selecionado",
+      "fetching": "Buscando contribuições do GitHub...",
+      "fetch_error": "Não foi possível carregar o usuário @{user}",
+      "enter_username": "Digite um nome de usuário do GitHub",
+      "no_contributions": "Nenhuma contribuição encontrada"
+    },
+    "settings": {
+      "lyricsLines": "Linhas",
+      "lyricsAlignment": "Alinhamento"
+    },
+    "align": {
+      "left": "Esquerda",
+      "center": "Centro",
+      "right": "Direita"
     }
   },
   "cli": {
-    "usage": "Uso: serpantinum [comando] [opções...]",
+    "usage": "Uso: ghost [comando] [opções...]",
     "description": "Um shell de desktop para compositores wayland.",
     "commands": "Comandos:",
     "script_commands": "Comandos de script:",
@@ -1170,23 +1298,23 @@
     "version_desc": "Mostra informações de versão e sai",
     "help_desc": "Mostra esta mensagem de ajuda e sai",
     "examples": "Exemplos:",
-    "daemon_stopped": "Daemon do serpantinum parado.",
-    "starting_daemon": "Daemon fora do ar. Iniciando serpantinumd em segundo plano...",
+    "daemon_stopped": "Daemon do ghost parado.",
+    "starting_daemon": "Daemon fora do ar. Iniciando ghostd em segundo plano...",
     "error_missing_qml": "Erro: alvo a iniciar não informado.",
-    "launch_usage": "Uso: serpantinum launch <start|widgetredactor> [args...]",
+    "launch_usage": "Uso: ghost launch <start|widgetredactor> [args...]",
     "error_qml_not_found": "Erro: não foi possível resolver {NAME}.qml em {DIR}",
     "error_shell_qml_not_found": "Erro: não foi possível resolver o caminho de shell.qml em {DIR}",
     "error_unknown_command": "Erro: comando desconhecido '{CMD}'.",
     "error_unknown_target": "Erro: alvo desconhecido '{TARGET}'.",
     "launch_help": {
-      "usage": "Uso: serpantinum launch <start|widgetredactor> [argumentos...]",
+      "usage": "Uso: ghost launch <start|widgetredactor> [argumentos...]",
       "description": "Inicia componentes avulsos direto em modo runner.",
       "available_targets": "Alvos disponíveis:",
       "target_start": "Inicia a interface de configuração inicial",
       "target_widgetredactor": "Inicia o editor de widgets do desktop"
     },
     "msg_help": {
-      "usage": "Uso: serpantinum msg <comando|workspace> [argumentos...]",
+      "usage": "Uso: ghost msg <comando|workspace> [argumentos...]",
       "description": "Envia mensagens de layout, workspace e gerenciamento de janelas diretamente.",
       "available_commands": "Mensagens disponíveis:",
       "cmd_workspace": "Vai para o workspace <num> (adicione 'move' para levar a janela ativa)",
@@ -1195,7 +1323,7 @@
       "cmd_close": "Fecha qualquer overlay ativo do shell"
     },
     "ipc_help": {
-      "usage": "Uso: serpantinum ipc call <alvo> <método> [argumentos...]",
+      "usage": "Uso: ghost ipc call <alvo> <método> [argumentos...]",
       "description": "Envia uma chamada IPC direto para a instância quickshell em execução."
     },
     "scripts": {
@@ -1216,11 +1344,11 @@
   },
   "daemon": {
     "already_running": "O daemon já está em execução. Saindo...",
-    "shutting_down": "Encerrando o daemon do serpantinum...",
-    "launching": "Iniciando o daemon do serpantinum...",
+    "shutting_down": "Encerrando o daemon do ghost...",
+    "launching": "Iniciando o daemon do ghost...",
     "cli": {
-      "usage": "Uso: serpantinumd <comando> [opções...]",
-      "description": "Daemon de serviço em segundo plano para o shell serpantinum.",
+      "usage": "Uso: ghostd <comando> [opções...]",
+      "description": "Daemon de serviço em segundo plano para o shell ghost.",
       "commands": "Comandos:",
       "cmd_start": "Inicia o serviço do daemon e os workers em segundo plano",
       "cmd_stop": "Para o serviço do daemon em execução",
@@ -1229,9 +1357,9 @@
       "opt_verbose": "Ativa registro detalhado",
       "opt_version": "Mostra informações de versão e sai",
       "opt_help": "Mostra esta mensagem de ajuda e sai",
-      "stopped": "Daemon do serpantinum parado.",
-      "status_running": "Daemon do serpantinum em execução (PID: {PID}).",
-      "status_stopped": "O daemon do serpantinum não está em execução.",
+      "stopped": "Daemon do ghost parado.",
+      "status_running": "Daemon do ghost em execução (PID: {PID}).",
+      "status_stopped": "O daemon do ghost não está em execução.",
       "unknown_arg": "Argumento desconhecido: {ARG}"
     }
   },
@@ -1300,7 +1428,7 @@
       "tagline": "Um shell de desktop feito para você",
       "installed_success": "✔ Ghost {ver} ({commit}) instalado com sucesso.",
       "failed_packages": "Os seguintes pacotes tiveram erro na instalação:",
-      "restart_prompt": "Reinicie o compositor ou execute 'serpantinumd start' para começar.",
+      "restart_prompt": "Reinicie o compositor ou execute 'ghostd start' para começar.",
       "ask_reboot": "Deseja reiniciar? [y/n] "
     },
     "deps": {

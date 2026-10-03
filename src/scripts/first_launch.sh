@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 
 SCRIPT_DIR="$(dirname "$(realpath "${BASH_SOURCE[0]}")")"
-SERPANTINUM_DIR="$(dirname "$SCRIPT_DIR")"
+GHOST_DIR="$(dirname "$SCRIPT_DIR")"
 
 source "$SCRIPT_DIR/caching.sh" 2>/dev/null || true
 source "$SCRIPT_DIR/config.sh" 2>/dev/null || true
 
-STATE_DIR="${QS_STATE_DIR:-$HOME/.local/state/serpantinum}"
+STATE_DIR="${QS_STATE_DIR:-$HOME/.local/state/ghost}"
 FLAG_FILE="$STATE_DIR/first_launch.done"
 
 check_status() {
@@ -30,19 +30,19 @@ check_status() {
     fi
 
     START_QML=""
-    if [ -f "$SERPANTINUM_DIR/quickshell/serp/Start.qml" ]; then
-        START_QML="$SERPANTINUM_DIR/quickshell/serp/Start.qml"
-    elif [ -f "$SERPANTINUM_DIR/quickshell/Start.qml" ]; then
-        START_QML="$SERPANTINUM_DIR/quickshell/Start.qml"
+    if [ -f "$GHOST_DIR/quickshell/ghost/Start.qml" ]; then
+        START_QML="$GHOST_DIR/quickshell/ghost/Start.qml"
+    elif [ -f "$GHOST_DIR/quickshell/Start.qml" ]; then
+        START_QML="$GHOST_DIR/quickshell/Start.qml"
     else
-        START_QML="$(find "$SERPANTINUM_DIR/quickshell" -type f -name "Start.qml" 2>/dev/null | head -n 1)"
+        START_QML="$(find "$GHOST_DIR/quickshell" -type f -name "Start.qml" 2>/dev/null | head -n 1)"
     fi
 
     echo "FIRST|$RANDOM_WP|$START_QML"
 }
 
 open_guide() {
-    local script_path="$SERPANTINUM_DIR/scripts/qs_manager.sh"
+    local script_path="$GHOST_DIR/scripts/qs_manager.sh"
     if [ -f "$script_path" ]; then
         bash "$script_path" open guide
     fi

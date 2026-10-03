@@ -44,7 +44,7 @@ if not os.path.exists(DB_PATH) and os.path.exists(OLD_DB_BASE):
         pass
 
 STATE_FILE = os.path.join(RUN_DIR, "focustime_state.json")
-CONFIG_PATH = os.environ.get("QS_SETTINGS", os.path.expanduser("~/.config/serpantinum/settings.json"))
+CONFIG_PATH = os.environ.get("QS_SETTINGS", os.path.expanduser("~/.config/ghost/settings.json"))
 
 SYSTEM_STATES = {"Desktop", "Locked", "Quickshell", "Unknown"}
 
