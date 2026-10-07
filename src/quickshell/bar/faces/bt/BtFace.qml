@@ -23,6 +23,7 @@ Item {
     property string btStatus: "Off"
     property string btIcon: "󰂲"
     property string btDevice: "Off"
+    property bool budsConnected: false
     property bool isBtOn: btStatus.toLowerCase() === "enabled" || btStatus.toLowerCase() === "on"
     property bool showLayout: (!module || module.moduleActive) && (barWindow ? (barWindow.isStartupReady && barWindow.isDataReady) : true)
     property alias btPill: btPill
@@ -75,6 +76,7 @@ Item {
             btStatus = "Off";
             btIcon = "󰂲";
             btDevice = "Off";
+            budsConnected = false;
             return;
         }
 
@@ -82,6 +84,13 @@ Item {
 
         let connectedDev = null;
         let devList = getBtDevicesList();
+
+        let buds = false;
+        for (let i = 0; i < devList.length; i++) {
+            let d = devList[i];
+            if (d && d.connected && (d.name || d.deviceName || "").toLowerCase().indexOf("buds") !== -1) buds = true;
+        }
+        budsConnected = buds;
 
         for (let i = 0; i < devList.length; i++) {
             let d = devList[i];
@@ -195,7 +204,9 @@ Item {
             transform: Translate { y: btPill.initAnimTrigger ? 0 : (barWindow ? barWindow.s(15) : 15); Behavior on y { NumberAnimation { duration: 620; easing.type: Easing.OutQuint } } }
             Behavior on opacity { NumberAnimation { duration: 450; easing.type: Easing.OutCubic } }
 
-            onClicked: Quickshell.execDetached(["bash", "-c", Caching.ghostDir + "/scripts/qs_manager.sh toggle network bt"])
+            acceptedButtons: Qt.LeftButton | Qt.RightButton
+            onClicked: Quickshell.execDetached(["bash", "-c", Caching.ghostDir + "/scripts/qs_manager.sh " + (root.budsConnected ? "toggle btdevice" : "toggle network bt")])
+            onRightClicked: Quickshell.execDetached(["bash", "-c", Caching.ghostDir + "/scripts/qs_manager.sh toggle network bt"])
         }
     }
 }

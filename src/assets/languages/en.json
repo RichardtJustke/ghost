@@ -1279,6 +1279,10 @@
       "left": "Left",
       "center": "Center",
       "right": "Right"
+    },
+    "btdevice": {
+      "name": "Bluetooth device",
+      "desc": "Battery, volume and audio profile of the connected Bluetooth device"
     }
   },
   "cli": {
@@ -1485,5 +1489,48 @@
   },
   "datetime": {
     "full_date": "dddd, MMMM dd"
+  },
+  "btdevice": {
+    "status": {
+      "connected": "Connected",
+      "connected_hifi": "Connected · Hi-Fi",
+      "connected_headset": "Connected · Headset",
+      "connecting": "Connecting…",
+      "disconnecting": "Disconnecting…",
+      "disconnected": "Disconnected"
+    },
+    "battery": "Battery",
+    "battery_unknown": "Battery not reported",
+    "waiting": "Waiting",
+    "waiting_hint": "Open the case near the computer",
+    "paired": "Paired",
+    "paired_trusted": "Paired and trusted",
+    "profile_hifi": "Hi-Fi (A2DP)",
+    "profile_headset": "Headset (HFP)",
+    "codec": "Codec",
+    "output": "Output",
+    "output_default": "Default ✓",
+    "output_use": "Use as default",
+    "connect": "Connect",
+    "disconnect": "Disconnect",
+    "cancel": "Cancel",
+    "forget": "Forget",
+    "confirm_forget": "Confirm?",
+    "view": "View",
+    "others": "Other paired devices",
+    "no_adapter": "No Bluetooth adapter found",
+    "adapter_off": "Bluetooth is off",
+    "turn_on": "Turn on",
+    "no_devices": "No paired devices yet",
+    "open_panel": "Open Bluetooth panel",
+    "left": "Left",
+    "right": "Right",
+    "lowest": "lowest of the two",
+    "case": "Case",
+    "case_unknown": "Case: put the buds in to read it",
+    "noise": "Noise control",
+    "noise_off": "Off",
+    "noise_ambient": "Ambient",
+    "noise_anc": "Noise cancelling"
   }
 }

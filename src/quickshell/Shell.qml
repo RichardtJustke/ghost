@@ -25,6 +25,7 @@ ShellRoot {
     Polkit {}
     PopoutManager {}
     UsbSound {}
+    BtAutoPopup {}
 
     Loader {
         active: dockEnabled

@@ -21,6 +21,7 @@ Item {
     property string btStatus: "Off"
     property string btIcon: "󰂲"
     property string btDevice: "Off"
+    property bool budsConnected: false
     property bool isBtOn: btStatus.toLowerCase() === "enabled" || btStatus.toLowerCase() === "on"
     property bool isConnected: false
 
@@ -59,6 +60,7 @@ Item {
             btIcon = "󰂲";
             btDevice = "Off";
             isConnected = false;
+            budsConnected = false;
             return;
         }
 
@@ -66,6 +68,13 @@ Item {
 
         let connectedDev = null;
         let devList = getBtDevicesList();
+
+        let buds = false;
+        for (let i = 0; i < devList.length; i++) {
+            let d = devList[i];
+            if (d && d.connected && (d.name || d.deviceName || "").toLowerCase().indexOf("buds") !== -1) buds = true;
+        }
+        budsConnected = buds;
 
         for (let i = 0; i < devList.length; i++) {
             let d = devList[i];
@@ -157,6 +166,8 @@ Item {
         iconFontSize: barWindow ? barWindow.s(root.isCompact ? 14 : 15) : (root.isCompact ? 14 : 15)
         accentColor: root.isBtOn ? (root.isCompact ? Qt.lighter(ThemeBackend.mauve, 1.08) : ThemeBackend.mauve) : (root.isCompact ? Qt.lighter(ThemeBackend.surface0, 1.18) : ThemeBackend.surface0)
         textColor: root.isBtOn ? ThemeBackend.base : (root.isCompact ? Qt.lighter(ThemeBackend.text, 1.05) : ThemeBackend.text)
-        onClicked: Quickshell.execDetached(["bash", "-c", Caching.ghostDir + "/scripts/qs_manager.sh toggle network bt"])
+        acceptedButtons: Qt.LeftButton | Qt.RightButton
+        onClicked: Quickshell.execDetached(["bash", "-c", Caching.ghostDir + "/scripts/qs_manager.sh " + (root.budsConnected ? "toggle btdevice" : "toggle network bt")])
+        onRightClicked: Quickshell.execDetached(["bash", "-c", Caching.ghostDir + "/scripts/qs_manager.sh toggle network bt"])
     }
 }

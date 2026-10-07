@@ -1282,6 +1282,10 @@
       "left": "Esquerda",
       "center": "Centro",
       "right": "Direita"
+    },
+    "btdevice": {
+      "name": "Dispositivo Bluetooth",
+      "desc": "Bateria, volume e perfil de áudio do dispositivo Bluetooth conectado"
     }
   },
   "cli": {
@@ -1488,5 +1492,48 @@
   },
   "datetime": {
     "full_date": "dddd, d 'de' MMMM"
+  },
+  "btdevice": {
+    "status": {
+      "connected": "Conectado",
+      "connected_hifi": "Conectado · Hi-Fi",
+      "connected_headset": "Conectado · Headset",
+      "connecting": "Conectando…",
+      "disconnecting": "Desconectando…",
+      "disconnected": "Desconectado"
+    },
+    "battery": "Bateria",
+    "battery_unknown": "Bateria não informada",
+    "waiting": "Aguardando",
+    "waiting_hint": "Abra o estojo perto do computador",
+    "paired": "Pareado",
+    "paired_trusted": "Pareado e confiável",
+    "profile_hifi": "Hi-Fi (A2DP)",
+    "profile_headset": "Headset (HFP)",
+    "codec": "Codec",
+    "output": "Saída",
+    "output_default": "Padrão ✓",
+    "output_use": "Usar como padrão",
+    "connect": "Conectar",
+    "disconnect": "Desconectar",
+    "cancel": "Cancelar",
+    "forget": "Esquecer",
+    "confirm_forget": "Confirmar?",
+    "view": "Ver",
+    "others": "Outros pareados",
+    "no_adapter": "Nenhum adaptador Bluetooth encontrado",
+    "adapter_off": "Bluetooth desligado",
+    "turn_on": "Ligar",
+    "no_devices": "Nenhum dispositivo pareado ainda",
+    "open_panel": "Abrir painel Bluetooth",
+    "left": "Esq.",
+    "right": "Dir.",
+    "lowest": "menor dos dois",
+    "case": "Estojo",
+    "case_unknown": "Estojo: coloque os fones para ler",
+    "noise": "Controle de ruído",
+    "noise_off": "Desligado",
+    "noise_ambient": "Ambiente",
+    "noise_anc": "Cancelar ruído"
   }
 }

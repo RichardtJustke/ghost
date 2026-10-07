@@ -93,6 +93,15 @@ function getLayout(name, mx, my, mw, mh, userScale, barPosition) {
                 "right": { anchor: "bottom-right", mr: 52, mb: 5 } 
             } 
         },
+        "btdevice": { 
+            w: 380, h: 480, comp: "bluetooth/BtDevicePopup.qml", 
+            pos: { 
+                "top": { anchor: "top-right", mt: 52, mr: 150 }, 
+                "bottom": { anchor: "bottom-right", mb: 52, mr: 150 }, 
+                "left": { anchor: "bottom-left", ml: 52, mb: 5 }, 
+                "right": { anchor: "bottom-right", mr: 52, mb: 5 } 
+            } 
+        },
         "guide": { 
             w: 1200, h: 750, comp: "guide/GuidePopup.qml", draggable: true,
             pos: { 
