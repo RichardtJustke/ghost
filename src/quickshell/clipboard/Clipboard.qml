@@ -1367,10 +1367,11 @@ PanelWindow {
                                     source: (clipDelegateCard.isImage && model.content) ? (model.content.startsWith("file://") ? model.content : "file://" + model.content) : ""
                                     fillMode: Image.PreserveAspectCrop
                                     asynchronous: true
-                                    cache: true
+                                    cache: false
                                     smooth: true
-                                    mipmap: true
-                                    visible: clipDelegateCard.isImage
+                                    sourceSize.width: Math.round(Math.max(100, clipDelegateCard.width * (Screen.devicePixelRatio || 1)))
+                                    sourceSize.height: Math.round(Math.max(100, clipDelegateCard.expandedH * (Screen.devicePixelRatio || 1)))
+                                    visible: clipDelegateCard.isImage && opacity > 0.01
                                     opacity: 1.0 - (clipDelegateWrapper.itemExpandProgress * 0.85)
                                 }
 
@@ -1378,12 +1379,13 @@ PanelWindow {
                                     id: clipCardFitImg
                                     anchors.fill: parent
                                     anchors.margins: clipboardWindow.s(6) * clipDelegateWrapper.itemExpandProgress
-                                    source: (clipDelegateCard.isImage && model.content) ? (model.content.startsWith("file://") ? model.content : "file://" + model.content) : ""
+                                    source: (clipDelegateCard.isImage && model.content && clipDelegateWrapper.itemExpandProgress > 0.01) ? (model.content.startsWith("file://") ? model.content : "file://" + model.content) : ""
                                     fillMode: Image.PreserveAspectFit
                                     asynchronous: true
-                                    cache: true
+                                    cache: false
                                     smooth: true
-                                    mipmap: true
+                                    sourceSize.width: Math.round(Math.max(100, clipDelegateCard.width * (Screen.devicePixelRatio || 1)))
+                                    sourceSize.height: Math.round(Math.max(100, clipDelegateCard.expandedH * (Screen.devicePixelRatio || 1)))
                                     visible: clipDelegateCard.isImage && clipDelegateWrapper.itemExpandProgress > 0.01
                                     opacity: clipDelegateWrapper.itemExpandProgress
                                 }
@@ -1538,9 +1540,10 @@ PanelWindow {
                                         source: (!clipDelegateCard.isImage && model.type === "image" && model.content) ? (model.content.startsWith("file://") ? model.content : "file://" + model.content) : ""
                                         fillMode: Image.PreserveAspectCrop
                                         asynchronous: true
-                                        cache: true
+                                        cache: false
                                         smooth: true
-                                        mipmap: true
+                                        sourceSize.width: Math.round(clipboardWindow.s(60) * (Screen.devicePixelRatio || 1))
+                                        sourceSize.height: Math.round(clipboardWindow.s(60) * (Screen.devicePixelRatio || 1))
                                         visible: model.type === "image" && status === Image.Ready
                                     }
 
