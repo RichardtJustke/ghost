@@ -471,10 +471,88 @@
           "desc": "Choose the visual appearance of the battery indicator",
           "name": {
             "classic": "Classic",
-            "minimal": "Minimal"
+            "minimal": "Minimal",
+            "text": "Text"
           },
           "classic": "Pill with gradient wave fill",
-          "minimal": "iOS/Android capsule with cap"
+          "minimal": "iOS/Android capsule with cap",
+          "text": "Clean text and icon without background"
+        }
+      },
+      "wifi": {
+        "show_icon": {
+          "title": "Show Icon",
+          "desc": "Display the network icon or signal indicator"
+        },
+        "show_name": {
+          "title": "Show Name",
+          "desc": "Display the network SSID or connection status text"
+        },
+        "style": {
+          "title": "Style",
+          "desc": "Choose the visual appearance of the network module",
+          "name": {
+            "button": "Button",
+            "text": "Text"
+          },
+          "button": "Interactive button pill with background",
+          "text": "Clean text and icon without background"
+        }
+      },
+      "bt": {
+        "show_icon": {
+          "title": "Show Icon",
+          "desc": "Display the bluetooth status icon"
+        },
+        "show_name": {
+          "title": "Show Name",
+          "desc": "Display the connected bluetooth device name"
+        },
+        "style": {
+          "title": "Style",
+          "desc": "Choose the visual appearance of the bluetooth module",
+          "name": {
+            "button": "Button",
+            "text": "Text"
+          },
+          "button": "Interactive button pill with background",
+          "text": "Clean text and icon without background"
+        }
+      },
+      "vol": {
+        "show_icon": {
+          "title": "Show Icon",
+          "desc": "Display the volume speaker icon"
+        },
+        "show_percent": {
+          "title": "Show Percentage",
+          "desc": "Display the numeric audio volume percentage"
+        },
+        "style": {
+          "title": "Style",
+          "desc": "Choose the visual appearance of the volume module",
+          "name": {
+            "button": "Button",
+            "text": "Text"
+          },
+          "button": "Interactive button pill with background",
+          "text": "Clean text and icon without background"
+        }
+      },
+      "kb": {
+        "show_icon": {
+          "title": "Show Icon",
+          "desc": "Display the keyboard layout icon"
+        },
+        "style": {
+          "title": "Style",
+          "desc": "Choose the visual appearance of the keyboard module",
+          "name": {
+            "button": "Button",
+            "text": "Text"
+          },
+          "button": "Interactive button pill with background",
+          "text": "Clean text and icon without background"
         }
       }
     },
@@ -1032,6 +1110,50 @@
         "pomo_skipped_focus_body": "Focus session skipped. Moving to break.",
         "pomo_skipped_break_body": "Break skipped. Moving back to focus."
       }
+    },
+    "draw": {
+      "hex": "Hex",
+      "notification": {
+        "app_name": "DrawAction",
+        "saved_title": "Drawing saved",
+        "copied_title": "Drawing copied",
+        "copied_body": "Drawing copied to clipboard",
+        "failed_title": "Export failed",
+        "failed_body": "Could not save drawing"
+      },
+      "palette": "Palette",
+      "palette_default": "Default"
+    },
+    "notes": {
+      "title": "Notes",
+      "add_note": "Add note",
+      "new_note_title": "New note",
+      "edit_note": "Edit note",
+      "preview_note": "Preview markdown",
+      "delete_selected": "Delete selected ({count})",
+      "no_notes": "No notes yet. Click \"Add note\" to create one.",
+      "search_placeholder": "Search notes...",
+      "title_placeholder": "Note title...",
+      "content_placeholder": "Write your note here in markdown...",
+      "back": "Back",
+      "save": "Done",
+      "cancel": "Cancel",
+      "delete": "Delete",
+      "select_all": "Select all",
+      "deselect_all": "Deselect",
+      "selected_count": "{count} selected",
+      "pinned": "Pinned",
+      "recent": "Recent",
+      "pin": "Pin",
+      "unpin": "Unpin"
+    },
+    "tabs": {
+      "draw": "Draw",
+      "system": "System",
+      "timer": "Timer",
+      "notes": "Notes",
+      "tab": "Tab",
+      "habits": "Habits"
     }
   },
   "screenshot": {
@@ -1430,7 +1552,15 @@
       "installed_success": "✔ Ghost {ver} ({commit}) installed successfully.",
       "failed_packages": "The following packages encountered errors during installation:",
       "restart_prompt": "Restart your compositor or run 'ghostd start' to begin.",
-      "ask_reboot": "Do you want to restart? [y/n] "
+      "ask_reboot": "Do you want to restart? [y/n] ",
+      "twitter": "Twitter:",
+      "reddit": "Reddit:",
+      "telegram": "Telegram:",
+      "donate": "Donate:",
+      "donate_sub": "(Support the project!)",
+      "menu_telemetry": "Anonymous telemetry",
+      "support_creator": "Support the creator:",
+      "buy_coffee": "If you enjoy this project, consider buying me a coffee!"
     },
     "deps": {
       "syncing": "Synchronizing and updating system packages (pacman -syyu)...",

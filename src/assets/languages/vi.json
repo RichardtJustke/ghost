@@ -446,10 +446,88 @@
           "desc": "Chọn giao diện hiển thị của chỉ báo pin",
           "name": {
             "classic": "Cổ điển",
-            "minimal": "Tối giản"
+            "minimal": "Tối giản",
+            "text": "Văn bản"
           },
           "classic": "Dạng viên thuốc với sóng chuyển màu",
-          "minimal": "Dạng thỏi iOS/Android có nắp"
+          "minimal": "Dạng thỏi iOS/Android có nắp",
+          "text": "Biểu tượng và văn bản không có nền"
+        }
+      },
+      "wifi": {
+        "show_icon": {
+          "title": "Hiển thị biểu tượng",
+          "desc": "Hiển thị biểu tượng mạng hoặc chỉ báo tín hiệu"
+        },
+        "show_name": {
+          "title": "Hiển thị tên",
+          "desc": "Hiển thị SSID mạng hoặc trạng thái kết nối"
+        },
+        "style": {
+          "title": "Kiểu dáng",
+          "desc": "Chọn giao diện trực quan của mô-đun mạng",
+          "name": {
+            "button": "Nút bấm",
+            "text": "Văn bản"
+          },
+          "button": "Nút tương tác có nền",
+          "text": "Biểu tượng và văn bản không có nền"
+        }
+      },
+      "bt": {
+        "show_icon": {
+          "title": "Hiển thị biểu tượng",
+          "desc": "Hiển thị biểu tượng trạng thái Bluetooth"
+        },
+        "show_name": {
+          "title": "Hiển thị tên",
+          "desc": "Hiển thị tên thiết bị Bluetooth đã kết nối"
+        },
+        "style": {
+          "title": "Kiểu dáng",
+          "desc": "Chọn giao diện trực quan của mô-đun Bluetooth",
+          "name": {
+            "button": "Nút bấm",
+            "text": "Văn bản"
+          },
+          "button": "Nút tương tác có nền",
+          "text": "Biểu tượng và văn bản không có nền"
+        }
+      },
+      "vol": {
+        "show_icon": {
+          "title": "Hiển thị biểu tượng",
+          "desc": "Hiển thị biểu tượng loa âm lượng"
+        },
+        "show_percent": {
+          "title": "Hiển thị phần trăm",
+          "desc": "Hiển thị phần trăm âm lượng dạng số"
+        },
+        "style": {
+          "title": "Kiểu dáng",
+          "desc": "Chọn giao diện trực quan của mô-đun âm lượng",
+          "name": {
+            "button": "Nút bấm",
+            "text": "Văn bản"
+          },
+          "button": "Nút tương tác có nền",
+          "text": "Biểu tượng và văn bản không có nền"
+        }
+      },
+      "kb": {
+        "show_icon": {
+          "title": "Hiển thị biểu tượng",
+          "desc": "Hiển thị biểu tượng bố cục bàn phím"
+        },
+        "style": {
+          "title": "Kiểu dáng",
+          "desc": "Chọn giao diện trực quan của mô-đun bàn phím",
+          "name": {
+            "button": "Nút bấm",
+            "text": "Văn bản"
+          },
+          "button": "Nút tương tác có nền",
+          "text": "Biểu tượng và văn bản không có nền"
         }
       }
     },
@@ -926,6 +1004,47 @@
         "pomo_skipped_focus_body": "Đã bỏ qua phiên tập trung. Chuyển sang giờ nghỉ.",
         "pomo_skipped_break_body": "Đã bỏ qua giờ nghỉ. Quay lại phiên tập trung."
       }
+    },
+    "draw": {
+      "notification": {
+        "app_name": "DrawAction",
+        "saved_title": "Drawing saved",
+        "copied_title": "Drawing copied",
+        "copied_body": "Drawing copied to clipboard",
+        "failed_title": "Export failed",
+        "failed_body": "Could not save drawing"
+      }
+    },
+    "notes": {
+      "title": "Ghi chú",
+      "add_note": "Thêm ghi chú",
+      "new_note_title": "Ghi chú mới",
+      "edit_note": "Chỉnh sửa",
+      "preview_note": "Xem trước markdown",
+      "delete_selected": "Xóa đã chọn ({count})",
+      "no_notes": "Chưa có ghi chú nào. Nhấn «Thêm ghi chú».",
+      "search_placeholder": "Tìm kiếm ghi chú...",
+      "title_placeholder": "Tiêu đề ghi chú...",
+      "content_placeholder": "Nội dung ghi chú dạng markdown...",
+      "back": "Quay lại",
+      "save": "Xong",
+      "cancel": "Hủy",
+      "delete": "Xóa",
+      "select_all": "Chọn tất cả",
+      "deselect_all": "Bỏ chọn",
+      "selected_count": "Đã chọn {count}",
+      "pinned": "Đã ghim",
+      "recent": "Gần đây",
+      "pin": "Ghim",
+      "unpin": "Bỏ ghim"
+    },
+    "tabs": {
+      "draw": "Vẽ",
+      "system": "Hệ thống",
+      "timer": "Hẹn giờ",
+      "notes": "Ghi chú",
+      "tab": "Tab",
+      "habits": "Habits"
     }
   },
   "screenshot": {
@@ -1319,7 +1438,15 @@
       "installed_success": "✔ Đã cài đặt thành công Ghost {ver} ({commit}).",
       "failed_packages": "Các gói sau đã gặp lỗi trong quá trình cài đặt:",
       "restart_prompt": "Hãy khởi động lại compositor hoặc chạy 'ghostd start' để bắt đầu.",
-      "ask_reboot": "Bạn có muốn khởi động lại không? [y/n] "
+      "ask_reboot": "Bạn có muốn khởi động lại không? [y/n] ",
+      "twitter": "Twitter:",
+      "reddit": "Reddit:",
+      "telegram": "Telegram:",
+      "donate": "Ủng hộ:",
+      "donate_sub": "(Ủng hộ dự án!)",
+      "menu_telemetry": "Gửi dữ liệu chẩn đoán ẩn danh",
+      "support_creator": "Ủng hộ tác giả:",
+      "buy_coffee": "Nếu bạn thích dự án này, hãy cân nhắc mời tôi một ly cà phê!"
     },
     "deps": {
       "syncing": "Đang đồng bộ hóa và cập nhật các gói hệ thống (pacman -syyu)...",

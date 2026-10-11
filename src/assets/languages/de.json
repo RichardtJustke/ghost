@@ -447,10 +447,88 @@
           "desc": "Wählen Sie das visuelle Design der Batterieanzeige",
           "name": {
             "classic": "Klassisch",
-            "minimal": "Minimal"
+            "minimal": "Minimal",
+            "text": "Text"
           },
           "classic": "Pille mit Farbverlaufswelle",
-          "minimal": "iOS/Android-Kapsel mit Kappe"
+          "minimal": "iOS/Android-Kapsel mit Kappe",
+          "text": "Kompakter Text und Symbol ohne Hintergrund"
+        }
+      },
+      "wifi": {
+        "show_icon": {
+          "title": "Symbol anzeigen",
+          "desc": "Netzwerksymbol oder Signalanzeige anzeigen"
+        },
+        "show_name": {
+          "title": "Name anzeigen",
+          "desc": "Netzwerk-SSID oder Verbindungsstatustext anzeigen"
+        },
+        "style": {
+          "title": "Stil",
+          "desc": "Wählen Sie das visuelle Erscheinungsbild des Netzwerkmoduls",
+          "name": {
+            "button": "Schaltfläche",
+            "text": "Text"
+          },
+          "button": "Interaktive Pillen-Schaltfläche mit Hintergrund",
+          "text": "Kompakter Text und Symbol ohne Hintergrund"
+        }
+      },
+      "bt": {
+        "show_icon": {
+          "title": "Symbol anzeigen",
+          "desc": "Bluetooth-Statussymbol anzeigen"
+        },
+        "show_name": {
+          "title": "Name anzeigen",
+          "desc": "Name des verbundenen Bluetooth-Geräts anzeigen"
+        },
+        "style": {
+          "title": "Stil",
+          "desc": "Wählen Sie das visuelle Erscheinungsbild des Bluetooth-Moduls",
+          "name": {
+            "button": "Schaltfläche",
+            "text": "Text"
+          },
+          "button": "Interaktive Pillen-Schaltfläche mit Hintergrund",
+          "text": "Kompakter Text und Symbol ohne Hintergrund"
+        }
+      },
+      "vol": {
+        "show_icon": {
+          "title": "Symbol anzeigen",
+          "desc": "Lautsprecher-Symbol anzeigen"
+        },
+        "show_percent": {
+          "title": "Prozent anzeigen",
+          "desc": "Numerische Lautstärke in Prozent anzeigen"
+        },
+        "style": {
+          "title": "Stil",
+          "desc": "Wählen Sie das visuelle Erscheinungsbild des Lautstärkemoduls",
+          "name": {
+            "button": "Schaltfläche",
+            "text": "Text"
+          },
+          "button": "Interaktive Pillen-Schaltfläche mit Hintergrund",
+          "text": "Kompakter Text und Symbol ohne Hintergrund"
+        }
+      },
+      "kb": {
+        "show_icon": {
+          "title": "Symbol anzeigen",
+          "desc": "Tastaturlayout-Symbol anzeigen"
+        },
+        "style": {
+          "title": "Stil",
+          "desc": "Wählen Sie das visuelle Erscheinungsbild des Tastaturmoduls",
+          "name": {
+            "button": "Schaltfläche",
+            "text": "Text"
+          },
+          "button": "Interaktive Pillen-Schaltfläche mit Hintergrund",
+          "text": "Kompakter Text und Symbol ohne Hintergrund"
         }
       }
     },
@@ -970,6 +1048,50 @@
         "pomo_skipped_focus_body": "Fokussitzung übersprungen. Weiter zur Pause.",
         "pomo_skipped_break_body": "Pause übersprungen. Zurück zum Fokus."
       }
+    },
+    "draw": {
+      "hex": "Hex",
+      "notification": {
+        "app_name": "DrawAction",
+        "saved_title": "Zeichnung gespeichert",
+        "copied_title": "Zeichnung kopiert",
+        "copied_body": "Zeichnung in die Zwischenablage kopiert",
+        "failed_title": "Export fehlgeschlagen",
+        "failed_body": "Zeichnung konnte nicht gespeichert werden"
+      },
+      "palette": "Palette",
+      "palette_default": "Standard"
+    },
+    "notes": {
+      "title": "Notizen",
+      "add_note": "Notiz hinzufügen",
+      "new_note_title": "Neue Notiz",
+      "edit_note": "Bearbeiten",
+      "preview_note": "Markdown-Vorschau",
+      "delete_selected": "Ausgewählte löschen ({count})",
+      "no_notes": "Noch keine Notizen. Klicken Sie auf „Notiz hinzufügen“.",
+      "search_placeholder": "Notizen suchen...",
+      "title_placeholder": "Notiztitel...",
+      "content_placeholder": "Notizinhalt in Markdown...",
+      "back": "Zurück",
+      "save": "Fertig",
+      "cancel": "Abbrechen",
+      "delete": "Löschen",
+      "select_all": "Alle auswählen",
+      "deselect_all": "Auswahl aufheben",
+      "selected_count": "{count} ausgewählt",
+      "pinned": "Angeheftet",
+      "recent": "Zuletzt verwendet",
+      "pin": "Anheften",
+      "unpin": "Lösen"
+    },
+    "tabs": {
+      "draw": "Zeichnen",
+      "system": "System",
+      "timer": "Timer",
+      "notes": "Notizen",
+      "tab": "Tab",
+      "habits": "Habits"
     }
   },
   "screenshot": {
@@ -1363,7 +1485,15 @@
       "installed_success": "✔ Ghost {ver} ({commit}) erfolgreich installiert.",
       "failed_packages": "Bei den folgenden Paketen sind während der Installation Fehler aufgetreten:",
       "restart_prompt": "Compositor neu starten oder 'ghostd start' ausführen, um zu beginnen.",
-      "ask_reboot": "Möchten Sie jetzt neu starten? [y/n] "
+      "ask_reboot": "Möchten Sie jetzt neu starten? [y/n] ",
+      "twitter": "Twitter:",
+      "reddit": "Reddit:",
+      "telegram": "Telegram:",
+      "donate": "Spenden:",
+      "donate_sub": "(Projekt unterstützen!)",
+      "menu_telemetry": "Anonyme Telemetrie",
+      "support_creator": "Entwickler unterstützen:",
+      "buy_coffee": "Wenn dir dieses Projekt gefällt, spendiere mir gerne einen Kaffee!"
     },
     "deps": {
       "syncing": "Systempakete werden synchronisiert und aktualisiert (pacman -Syyu)...",

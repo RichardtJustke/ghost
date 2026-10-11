@@ -191,8 +191,9 @@ Variants {
 
                 property bool isNiri: false
                 property bool isSway: false
-                property int niriActiveIndex: 0
-                property var niriOccupiedMap: ({})
+                readonly property string myOutput: (dockWindow.screen && dockWindow.screen.name) ? dockWindow.screen.name : ""
+                readonly property int niriActiveIndex: NiriState.activeIndexFor(myOutput)
+                readonly property var niriOccupiedMap: NiriState.occupiedMap
                 property int swayActiveIndex: 0
                 property var swayOccupiedMap: ({})
 
@@ -249,87 +250,6 @@ Variants {
                 onEffectiveAutohideChanged: hideTimer.stop()
                 onActiveIndexChanged: hideTimer.stop()
 
-                Timer {
-                    id: niriDebounceTimer
-                    interval: 50
-                    repeat: false
-                    onTriggered: {
-                        if (dockWindow.isNiri) {
-                            niriPoller.running = false;
-                            niriPoller.running = true;
-                        }
-                    }
-                }
-
-                Timer {
-                    id: niriRestartTimer
-                    interval: 1000
-                    repeat: false
-                    onTriggered: {
-                        if (dockWindow.isNiri) {
-                            niriEventStream.running = false;
-                            niriEventStream.running = true;
-                        }
-                    }
-                }
-
-                Process {
-                    id: niriEventStream
-                    running: false
-                    command: ["niri", "msg", "--json", "event-stream"]
-                    stdout: SplitParser {
-                        splitMarker: "\n"
-                        onRead: data => {
-                            if (data.trim().length > 0) {
-                                niriDebounceTimer.restart();
-                            }
-                        }
-                    }
-                    onExited: {
-                        if (dockWindow.isNiri) {
-                            niriRestartTimer.restart();
-                        }
-                    }
-                }
-
-                Process {
-                    id: niriPoller
-                    running: false
-                    command: [
-                        "bash",
-                        "-c",
-                        "workspaces=$(niri msg -j workspaces 2>/dev/null || echo '[]'); windows=$(niri msg -j windows 2>/dev/null || echo '[]'); echo \"{\\\"workspaces\\\": $workspaces, \\\"windows\\\": $windows}\""
-                    ]
-                    stdout: StdioCollector {
-                        onStreamFinished: {
-                            try {
-                                let data = JSON.parse(this.text);
-                                let wsList = data.workspaces || [];
-                                let winList = data.windows || [];
-                                let occ = {};
-                                for (let i = 0; i < winList.length; i++) {
-                                    let win = winList[i];
-                                    if (win.workspace_id !== undefined && win.workspace_id !== null) {
-                                        occ[win.workspace_id] = true;
-                                    }
-                                }
-                                let activeIdx = 0;
-                                for (let j = 0; j < wsList.length; j++) {
-                                    let w = wsList[j];
-                                    let idx = (w.idx !== undefined ? w.idx : (w.id !== undefined ? w.id : 1)) - 1;
-                                    if (w.is_focused || w.is_active) {
-                                        activeIdx = idx;
-                                    }
-                                    if (w.active_window_id !== null || occ[w.id] || occ[w.idx]) {
-                                        occ[idx] = true;
-                                    }
-                                }
-                                dockWindow.niriActiveIndex = activeIdx;
-                                dockWindow.niriOccupiedMap = occ;
-                            } catch (e) {}
-                        }
-                    }
-                }
 
                 Process {
                     id: swayPoller
@@ -409,6 +329,8 @@ Variants {
                     if (typeof val === "string") return val.toLowerCase() === "true" || val === "1";
                     return Boolean(val);
                 }
+
+                readonly property real hoverExpansion: Math.round(Math.max(s(24), s(dockElementSize) * (dockHoverScaleMultiplier - 1.0) + s(12)))
 
                 property bool enableScrolling: {
                     let val = undefined;
@@ -827,8 +749,7 @@ Variants {
                     dockWindow.isNiri = de.indexOf("niri") !== -1;
                     dockWindow.isSway = de.indexOf("sway") !== -1;
                     if (dockWindow.isNiri) {
-                        niriPoller.running = true;
-                        niriEventStream.running = true;
+                        NiriState.subscribe();
                     }
                     if (dockWindow.isSway) {
                         swayPoller.running = true;
@@ -836,6 +757,12 @@ Variants {
                     loadApps();
                     loadAllDesktopApps();
                     initTimer.start();
+                }
+
+                Component.onDestruction: {
+                    if (dockWindow.isNiri) {
+                        NiriState.unsubscribe();
+                    }
                 }
 
                 onConfigRevisionChanged: loadApps()
@@ -919,10 +846,10 @@ Variants {
 
                 Item {
                     id: dockMaskArea
-                    x: dockContainer.x - (dockContainer.isAttached && !dockWindow.isVertical ? dockWindow.outerCornerRadius : 0) + dockTransform.x - dockWindow.s(6)
-                    y: dockContainer.y - (dockContainer.isAttached && dockWindow.isVertical ? dockWindow.outerCornerRadius : 0) + dockTransform.y - dockWindow.s(6)
-                    width: dockContainer.width + (dockContainer.isAttached && !dockWindow.isVertical ? dockWindow.outerCornerRadius * 2 : 0) + dockWindow.s(12)
-                    height: dockContainer.height + (dockContainer.isAttached && dockWindow.isVertical ? dockWindow.outerCornerRadius * 2 : 0) + dockWindow.s(12)
+                    x: dockContainer.x - (dockContainer.isAttached && !dockWindow.isVertical ? dockWindow.outerCornerRadius : 0) + dockTransform.x - dockWindow.hoverExpansion
+                    y: dockContainer.y - (dockContainer.isAttached && dockWindow.isVertical ? dockWindow.outerCornerRadius : 0) + dockTransform.y - dockWindow.hoverExpansion
+                    width: dockContainer.width + (dockContainer.isAttached && !dockWindow.isVertical ? dockWindow.outerCornerRadius * 2 : 0) + dockWindow.hoverExpansion * 2
+                    height: dockContainer.height + (dockContainer.isAttached && dockWindow.isVertical ? dockWindow.outerCornerRadius * 2 : 0) + dockWindow.hoverExpansion * 2
                 }
 
                 Item {
@@ -1110,6 +1037,7 @@ Variants {
                     HoverHandler {
                         id: dockHover
                         acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
+                        margin: dockWindow.hoverExpansion
                         onHoveredChanged: {
                             if (!hovered) {
                                 dockContainer.hoveredItemIndex = -1;
@@ -1246,239 +1174,73 @@ Variants {
                             }
                         }
 
-                        Shape {
-                            visible: dockContainer.outerCornerProgress > 0.001 && dockWindow.dockPosition === "bottom" && dockWindow.outerCornerRadius > 0.5 && (!dockWindow.sameSideAsBar || dockContainer.height >= dockWindow.outerCornerRadius)
+                        ShaderEffect {
+                            visible: dockContainer.outerCornerProgress > 0.001 && dockWindow.outerCornerRadius > 0.5 && (!dockWindow.sameSideAsBar || (dockWindow.isVertical ? dockContainer.width : dockContainer.height) >= dockWindow.outerCornerRadius)
                             opacity: dockContainer.outerCornerProgress * (dockWindow.sameSideAsBar ? dockContainer.revealProgress : 1.0)
-                            x: -dockWindow.outerCornerRadius
-                            y: parent.height - dockWindow.outerCornerRadius
+                            x: {
+                                if (dockWindow.dockPosition === "left") return 0;
+                                if (dockWindow.dockPosition === "right") return parent.width - dockWindow.outerCornerRadius;
+                                return -dockWindow.outerCornerRadius;
+                            }
+                            y: {
+                                if (dockWindow.dockPosition === "bottom") return parent.height - dockWindow.outerCornerRadius;
+                                if (dockWindow.dockPosition === "left" || dockWindow.dockPosition === "right") return -dockWindow.outerCornerRadius;
+                                return 0;
+                            }
                             width: dockWindow.outerCornerRadius
                             height: dockWindow.outerCornerRadius
-                            preferredRendererType: Shape.CurveRenderer
-                            ShapePath {
-                                fillColor: ThemeBackend.base
-                                strokeColor: "transparent"
-                                startX: 0
-                                startY: dockWindow.outerCornerRadius
-                                PathLine { x: dockWindow.outerCornerRadius; y: dockWindow.outerCornerRadius }
-                                PathLine { x: dockWindow.outerCornerRadius; y: 0 }
-                                PathArc {
-                                    x: 0
-                                    y: dockWindow.outerCornerRadius
-                                    radiusX: dockWindow.outerCornerRadius
-                                    radiusY: dockWindow.outerCornerRadius
-                                    direction: PathArc.Clockwise
-                                }
+                            property vector2d itemSize: Qt.vector2d(width, height)
+                            property real cornerIndex: {
+                                if (dockWindow.dockPosition === "bottom") return 3.0;
+                                if (dockWindow.dockPosition === "left") return 2.0;
+                                if (dockWindow.dockPosition === "right") return 3.0;
+                                return 1.0; // top
                             }
+                            property color color: ThemeBackend.base
+                            fragmentShader: "file://" + Caching.ghostDir + "/assets/shaders/ui/corner_cutout.frag.qsb"
                         }
 
-                        Shape {
-                            visible: dockContainer.outerCornerProgress > 0.001 && dockWindow.dockPosition === "bottom" && dockWindow.outerCornerRadius > 0.5 && (!dockWindow.sameSideAsBar || dockContainer.height >= dockWindow.outerCornerRadius)
+                        ShaderEffect {
+                            visible: dockContainer.outerCornerProgress > 0.001 && dockWindow.outerCornerRadius > 0.5 && (!dockWindow.sameSideAsBar || (dockWindow.isVertical ? dockContainer.width : dockContainer.height) >= dockWindow.outerCornerRadius)
                             opacity: dockContainer.outerCornerProgress * (dockWindow.sameSideAsBar ? dockContainer.revealProgress : 1.0)
-                            x: parent.width
-                            y: parent.height - dockWindow.outerCornerRadius
+                            x: {
+                                if (dockWindow.dockPosition === "left") return 0;
+                                if (dockWindow.dockPosition === "right") return parent.width - dockWindow.outerCornerRadius;
+                                return parent.width;
+                            }
+                            y: {
+                                if (dockWindow.dockPosition === "bottom") return parent.height - dockWindow.outerCornerRadius;
+                                if (dockWindow.dockPosition === "left" || dockWindow.dockPosition === "right") return parent.height;
+                                return 0;
+                            }
                             width: dockWindow.outerCornerRadius
                             height: dockWindow.outerCornerRadius
-                            preferredRendererType: Shape.CurveRenderer
-                            ShapePath {
-                                fillColor: ThemeBackend.base
-                                strokeColor: "transparent"
-                                startX: dockWindow.outerCornerRadius
-                                startY: dockWindow.outerCornerRadius
-                                PathLine { x: 0; y: dockWindow.outerCornerRadius }
-                                PathLine { x: 0; y: 0 }
-                                PathArc {
-                                    x: dockWindow.outerCornerRadius
-                                    y: dockWindow.outerCornerRadius
-                                    radiusX: dockWindow.outerCornerRadius
-                                    radiusY: dockWindow.outerCornerRadius
-                                    direction: PathArc.Counterclockwise
-                                }
+                            property vector2d itemSize: Qt.vector2d(width, height)
+                            property real cornerIndex: {
+                                if (dockWindow.dockPosition === "bottom") return 2.0;
+                                if (dockWindow.dockPosition === "left") return 0.0;
+                                if (dockWindow.dockPosition === "right") return 1.0;
+                                return 0.0; // top
                             }
-                        }
-
-                        Shape {
-                            visible: dockContainer.outerCornerProgress > 0.001 && dockWindow.dockPosition === "top" && dockWindow.outerCornerRadius > 0.5 && (!dockWindow.sameSideAsBar || dockContainer.height >= dockWindow.outerCornerRadius)
-                            opacity: dockContainer.outerCornerProgress * (dockWindow.sameSideAsBar ? dockContainer.revealProgress : 1.0)
-                            x: -dockWindow.outerCornerRadius
-                            y: 0
-                            width: dockWindow.outerCornerRadius
-                            height: dockWindow.outerCornerRadius
-                            preferredRendererType: Shape.CurveRenderer
-                            ShapePath {
-                                fillColor: ThemeBackend.base
-                                strokeColor: "transparent"
-                                startX: 0
-                                startY: 0
-                                PathLine { x: dockWindow.outerCornerRadius; y: 0 }
-                                PathLine { x: dockWindow.outerCornerRadius; y: dockWindow.outerCornerRadius }
-                                PathArc {
-                                    x: 0
-                                    y: 0
-                                    radiusX: dockWindow.outerCornerRadius
-                                    radiusY: dockWindow.outerCornerRadius
-                                    direction: PathArc.Counterclockwise
-                                }
-                            }
-                        }
-
-                        Shape {
-                            visible: dockContainer.outerCornerProgress > 0.001 && dockWindow.dockPosition === "top" && dockWindow.outerCornerRadius > 0.5 && (!dockWindow.sameSideAsBar || dockContainer.height >= dockWindow.outerCornerRadius)
-                            opacity: dockContainer.outerCornerProgress * (dockWindow.sameSideAsBar ? dockContainer.revealProgress : 1.0)
-                            x: parent.width
-                            y: 0
-                            width: dockWindow.outerCornerRadius
-                            height: dockWindow.outerCornerRadius
-                            preferredRendererType: Shape.CurveRenderer
-                            ShapePath {
-                                fillColor: ThemeBackend.base
-                                strokeColor: "transparent"
-                                startX: dockWindow.outerCornerRadius
-                                startY: 0
-                                PathLine { x: 0; y: 0 }
-                                PathLine { x: 0; y: dockWindow.outerCornerRadius }
-                                PathArc {
-                                    x: dockWindow.outerCornerRadius
-                                    y: 0
-                                    radiusX: dockWindow.outerCornerRadius
-                                    radiusY: dockWindow.outerCornerRadius
-                                    direction: PathArc.Clockwise
-                                }
-                            }
-                        }
-
-                        Shape {
-                            visible: dockContainer.outerCornerProgress > 0.001 && dockWindow.dockPosition === "left" && dockWindow.outerCornerRadius > 0.5 && (!dockWindow.sameSideAsBar || dockContainer.width >= dockWindow.outerCornerRadius)
-                            opacity: dockContainer.outerCornerProgress * (dockWindow.sameSideAsBar ? dockContainer.revealProgress : 1.0)
-                            x: 0
-                            y: -dockWindow.outerCornerRadius
-                            width: dockWindow.outerCornerRadius
-                            height: dockWindow.outerCornerRadius
-                            preferredRendererType: Shape.CurveRenderer
-                            ShapePath {
-                                fillColor: ThemeBackend.base
-                                strokeColor: "transparent"
-                                startX: 0
-                                startY: 0
-                                PathLine { x: 0; y: dockWindow.outerCornerRadius }
-                                PathLine { x: dockWindow.outerCornerRadius; y: dockWindow.outerCornerRadius }
-                                PathArc {
-                                    x: 0
-                                    y: 0
-                                    radiusX: dockWindow.outerCornerRadius
-                                    radiusY: dockWindow.outerCornerRadius
-                                    direction: PathArc.Clockwise
-                                }
-                            }
-                        }
-
-                        Shape {
-                            visible: dockContainer.outerCornerProgress > 0.001 && dockWindow.dockPosition === "left" && dockWindow.outerCornerRadius > 0.5 && (!dockWindow.sameSideAsBar || dockContainer.width >= dockWindow.outerCornerRadius)
-                            opacity: dockContainer.outerCornerProgress * (dockWindow.sameSideAsBar ? dockContainer.revealProgress : 1.0)
-                            x: 0
-                            y: parent.height
-                            width: dockWindow.outerCornerRadius
-                            height: dockWindow.outerCornerRadius
-                            preferredRendererType: Shape.CurveRenderer
-                            ShapePath {
-                                fillColor: ThemeBackend.base
-                                strokeColor: "transparent"
-                                startX: 0
-                                startY: dockWindow.outerCornerRadius
-                                PathLine { x: 0; y: 0 }
-                                PathLine { x: dockWindow.outerCornerRadius; y: 0 }
-                                PathArc {
-                                    x: 0
-                                    y: dockWindow.outerCornerRadius
-                                    radiusX: dockWindow.outerCornerRadius
-                                    radiusY: dockWindow.outerCornerRadius
-                                    direction: PathArc.Counterclockwise
-                                }
-                            }
-                        }
-
-                        Shape {
-                            visible: dockContainer.outerCornerProgress > 0.001 && dockWindow.dockPosition === "right" && dockWindow.outerCornerRadius > 0.5 && (!dockWindow.sameSideAsBar || dockContainer.width >= dockWindow.outerCornerRadius)
-                            opacity: dockContainer.outerCornerProgress * (dockWindow.sameSideAsBar ? dockContainer.revealProgress : 1.0)
-                            x: parent.width - dockWindow.outerCornerRadius
-                            y: -dockWindow.outerCornerRadius
-                            width: dockWindow.outerCornerRadius
-                            height: dockWindow.outerCornerRadius
-                            preferredRendererType: Shape.CurveRenderer
-                            ShapePath {
-                                fillColor: ThemeBackend.base
-                                strokeColor: "transparent"
-                                startX: dockWindow.outerCornerRadius
-                                startY: 0
-                                PathLine { x: dockWindow.outerCornerRadius; y: dockWindow.outerCornerRadius }
-                                PathLine { x: 0; y: dockWindow.outerCornerRadius }
-                                PathArc {
-                                    x: dockWindow.outerCornerRadius
-                                    y: 0
-                                    radiusX: dockWindow.outerCornerRadius
-                                    radiusY: dockWindow.outerCornerRadius
-                                    direction: PathArc.Counterclockwise
-                                }
-                            }
-                        }
-
-                        Shape {
-                            visible: dockContainer.outerCornerProgress > 0.001 && dockWindow.dockPosition === "right" && dockWindow.outerCornerRadius > 0.5 && (!dockWindow.sameSideAsBar || dockContainer.width >= dockWindow.outerCornerRadius)
-                            opacity: dockContainer.outerCornerProgress * (dockWindow.sameSideAsBar ? dockContainer.revealProgress : 1.0)
-                            x: parent.width - dockWindow.outerCornerRadius
-                            y: parent.height
-                            width: dockWindow.outerCornerRadius
-                            height: dockWindow.outerCornerRadius
-                            preferredRendererType: Shape.CurveRenderer
-                            ShapePath {
-                                fillColor: ThemeBackend.base
-                                strokeColor: "transparent"
-                                startX: dockWindow.outerCornerRadius
-                                startY: dockWindow.outerCornerRadius
-                                PathLine { x: dockWindow.outerCornerRadius; y: 0 }
-                                PathLine { x: 0; y: 0 }
-                                PathArc {
-                                    x: dockWindow.outerCornerRadius
-                                    y: dockWindow.outerCornerRadius
-                                    radiusX: dockWindow.outerCornerRadius
-                                    radiusY: dockWindow.outerCornerRadius
-                                    direction: PathArc.Clockwise
-                                }
-                            }
+                            property color color: ThemeBackend.base
+                            fragmentShader: "file://" + Caching.ghostDir + "/assets/shaders/ui/corner_cutout.frag.qsb"
                         }
                     }
 
                     Item {
                         id: dockContentClipper
                         anchors.fill: parent
-                        clip: true
+                        clip: dockWindow.sameSideAsBar && dockContainer.revealProgress < 0.999
                         opacity: dockWindow.sameSideAsBar ? dockContainer.revealProgress : 1.0
                         visible: !dockWindow.sameSideAsBar || dockContainer.revealProgress > 0.001
 
                         Item {
                             id: dockViewport
-                            x: {
-                                if (dockWindow.isVertical) {
-                                    if (dockWindow.sameSideAsBar) {
-                                        if (dockWindow.dockPosition === "left") return Math.round(dockContainer.width - width);
-                                        if (dockWindow.dockPosition === "right") return 0;
-                                    }
-                                    return Math.round((dockContainer.width - width) / 2);
-                                }
-                                return Math.round((dockContainer.width - width) / 2);
-                            }
-                            y: {
-                                if (!dockWindow.isVertical) {
-                                    if (dockWindow.sameSideAsBar) {
-                                        if (dockWindow.dockPosition === "top") return Math.round(dockContainer.height - height);
-                                        if (dockWindow.dockPosition === "bottom") return 0;
-                                    }
-                                    return Math.round((dockContainer.height - height) / 2);
-                                }
-                                return Math.round((dockContainer.height - height) / 2);
-                            }
+                            x: Math.round((dockContainer.width - width) / 2)
+                            y: Math.round((dockContainer.height - height) / 2)
 
-                            width: dockWindow.isVertical ? Math.round(dockContainer.dockThickness + dockWindow.s(16)) : dockContainer.dockContentLength
-                            height: dockWindow.isVertical ? dockContainer.dockContentLength : Math.round(dockContainer.dockThickness + dockWindow.s(16))
+                            width: dockWindow.isVertical ? Math.round(dockContainer.dockThickness + dockWindow.s(16) + dockWindow.hoverExpansion * 2) : dockContainer.dockContentLength
+                            height: dockWindow.isVertical ? dockContainer.dockContentLength : Math.round(dockContainer.dockThickness + dockWindow.s(16) + dockWindow.hoverExpansion * 2)
                             clip: dockWindow.enableScrolling && (dockContainer.totalItemCount > dockContainer.effectiveItemCount)
                             visible: width > 0 && height > 0
 
@@ -1760,6 +1522,7 @@ Variants {
                                             MouseArea {
                                                 id: btnMa
                                                 anchors.fill: parent
+                                                anchors.margins: -Math.max(dockContainer.itemSpacing / 2, (btnShape.scale - 1.0) * dockButton.btnSize / 2)
                                                 hoverEnabled: true
                                                 cursorShape: (dockWindow.editMode || inDragHold)
                                                     ? (drag.active ? Qt.ClosedHandCursor : Qt.OpenHandCursor)

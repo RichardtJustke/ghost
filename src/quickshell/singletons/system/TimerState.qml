@@ -5,10 +5,8 @@ import "../../"
 QtObject {
     id: root
 
-    property bool isActive: false
-    property string timeFormatted: ""
-    property string icon: ""
-    property string colorType: "mauve"
+    property var entries: []
+    readonly property bool isActive: entries.length > 0
 
     // -1 = no pomodoro session loaded, 0 = focus, 1 = short break, 2 = long break
     property int pomoPhase: -1

@@ -471,10 +471,88 @@
           "desc": "Escolha a aparência visual do indicador de bateria",
           "name": {
             "classic": "Clássico",
-            "minimal": "Minimalista"
+            "minimal": "Minimalista",
+            "text": "Texto"
           },
           "classic": "Pílula com onda gradiente",
-          "minimal": "Cápsula estilo iOS/Android com tampa"
+          "minimal": "Cápsula estilo iOS/Android com tampa",
+          "text": "Texto e ícone limpos sem fundo"
+        }
+      },
+      "wifi": {
+        "show_icon": {
+          "title": "Mostrar ícone",
+          "desc": "Exibe o ícone da rede ou indicador de sinal"
+        },
+        "show_name": {
+          "title": "Mostrar nome",
+          "desc": "Exibe o SSID da rede ou status da conexão"
+        },
+        "style": {
+          "title": "Estilo",
+          "desc": "Escolha a aparência visual do módulo de rede",
+          "name": {
+            "button": "Botão",
+            "text": "Texto"
+          },
+          "button": "Botão interativo com fundo",
+          "text": "Texto e ícone limpos sem fundo"
+        }
+      },
+      "bt": {
+        "show_icon": {
+          "title": "Mostrar ícone",
+          "desc": "Exibe o ícone de status do Bluetooth"
+        },
+        "show_name": {
+          "title": "Mostrar nome",
+          "desc": "Exibe o nome do dispositivo Bluetooth conectado"
+        },
+        "style": {
+          "title": "Estilo",
+          "desc": "Escolha a aparência visual do módulo Bluetooth",
+          "name": {
+            "button": "Botão",
+            "text": "Texto"
+          },
+          "button": "Botão interativo com fundo",
+          "text": "Texto e ícone limpos sem fundo"
+        }
+      },
+      "vol": {
+        "show_icon": {
+          "title": "Mostrar ícone",
+          "desc": "Exibe o ícone de alto-falante de volume"
+        },
+        "show_percent": {
+          "title": "Mostrar porcentagem",
+          "desc": "Exibe a porcentagem numérica de volume"
+        },
+        "style": {
+          "title": "Estilo",
+          "desc": "Escolha a aparência visual do módulo de volume",
+          "name": {
+            "button": "Botão",
+            "text": "Texto"
+          },
+          "button": "Botão interativo com fundo",
+          "text": "Texto e ícone limpos sem fundo"
+        }
+      },
+      "kb": {
+        "show_icon": {
+          "title": "Mostrar ícone",
+          "desc": "Exibe o ícone de layout do teclado"
+        },
+        "style": {
+          "title": "Estilo",
+          "desc": "Escolha a aparência visual do módulo de teclado",
+          "name": {
+            "button": "Botão",
+            "text": "Texto"
+          },
+          "button": "Botão interativo com fundo",
+          "text": "Texto e ícone limpos sem fundo"
         }
       }
     },
@@ -1032,6 +1110,47 @@
         "pomo_skipped_focus_body": "Sessão de foco pulada. Indo para a pausa.",
         "pomo_skipped_break_body": "Pausa pulada. De volta ao foco."
       }
+    },
+    "draw": {
+      "notification": {
+        "app_name": "DrawAction",
+        "saved_title": "Desenho salvo",
+        "copied_title": "Desenho copiado",
+        "copied_body": "Desenho copiado para a área de transferência",
+        "failed_title": "Falha na exportação",
+        "failed_body": "Não foi possível salvar o desenho"
+      }
+    },
+    "notes": {
+      "title": "Notas",
+      "add_note": "Adicionar nota",
+      "new_note_title": "Nova nota",
+      "edit_note": "Editar",
+      "preview_note": "Pré-visualizar markdown",
+      "delete_selected": "Eliminar selecionadas ({count})",
+      "no_notes": "Nenhuma nota ainda. Clique em «Adicionar nota».",
+      "search_placeholder": "Pesquisar notas...",
+      "title_placeholder": "Título da nota...",
+      "content_placeholder": "Conteúdo da nota em markdown...",
+      "back": "Voltar",
+      "save": "Concluído",
+      "cancel": "Cancelar",
+      "delete": "Eliminar",
+      "select_all": "Selecionar tudo",
+      "deselect_all": "Desmarcar tudo",
+      "selected_count": "{count} selecionadas",
+      "pinned": "Fixados",
+      "recent": "Recentes",
+      "pin": "Fixar",
+      "unpin": "Desafixar"
+    },
+    "tabs": {
+      "draw": "Desenho",
+      "system": "Sistema",
+      "timer": "Temporizador",
+      "notes": "Notas",
+      "tab": "Aba",
+      "habits": "Hábitos"
     }
   },
   "screenshot": {
@@ -1433,7 +1552,15 @@
       "installed_success": "✔ Ghost {ver} ({commit}) instalado com sucesso.",
       "failed_packages": "Os seguintes pacotes tiveram erro na instalação:",
       "restart_prompt": "Reinicie o compositor ou execute 'ghostd start' para começar.",
-      "ask_reboot": "Deseja reiniciar? [y/n] "
+      "ask_reboot": "Deseja reiniciar? [y/n] ",
+      "twitter": "Twitter:",
+      "reddit": "Reddit:",
+      "telegram": "Telegram:",
+      "donate": "Doar:",
+      "donate_sub": "(Apoie o projeto!)",
+      "menu_telemetry": "Telemetria anônima",
+      "support_creator": "Apoie o criador:",
+      "buy_coffee": "Se curte este projeto, considere me pagar um café!"
     },
     "deps": {
       "syncing": "Sincronizando e atualizando pacotes do sistema (pacman -syyu)...",

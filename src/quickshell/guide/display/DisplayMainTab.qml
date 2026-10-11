@@ -611,15 +611,26 @@ Item {
         onTriggered: displayTabRoot.reloadMonitors()
     }
 
+    Timer {
+        id: reloadMonitorsDebounceTimer
+        interval: 220
+        repeat: false
+        onTriggered: displayTabRoot.reloadMonitors()
+    }
+
     Component.onCompleted: {
         displayTabRoot.refreshDisplaySettings();
-        displayTabRoot.reloadMonitors();
+        if (visible) {
+            reloadMonitorsDebounceTimer.restart();
+        }
     }
 
     onVisibleChanged: {
         if (visible) {
             displayTabRoot.refreshDisplaySettings();
-            displayTabRoot.reloadMonitors();
+            reloadMonitorsDebounceTimer.restart();
+        } else {
+            reloadMonitorsDebounceTimer.stop();
         }
     }
 

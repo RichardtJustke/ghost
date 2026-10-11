@@ -1,3 +1,14 @@
+### 2.4.0
+
+- merge: sync the Quickshell modules with upstream 2.2.7 (clipboard, quickactions, bar faces, shaders, translations); lock screen and Ghost-only features kept as they were
+- feat(clipboard): corner cutouts drawn by a shader, full RTL layout
+- feat(quickactions): new Notes tab, labelled tabs and keyboard focus handling in the floating overlay
+- feat(bar): style variants and show icon/name/percent options for battery, network, bluetooth, volume and keyboard; redesigned system monitor
+- feat(idle): apps that use the ScreenSaver inhibit interface (games, Steam, Wine) now block the idle lock; media inhibit on by default
+- feat: shader-based visualizer, wavy seek bar, widget selection outline and NiriState singleton
+- feat(i18n): add Arabic, French, Hindi, Indonesian, Japanese, Dutch, Persian, Polish, Turkish and Chinese (simplified and traditional)
+- chore: bump version to 2.4.0
+
 ### 2.3.0
 
 - merge: sync with upstream 2.2.4 (see the "(upstream)" entries below for everything that came in: face-based bar modules with a central registry, settings search, lyrics view, file and emoji tabs in the launcher, desktop menu, reorganized reusables and widget faces)

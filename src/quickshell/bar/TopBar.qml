@@ -9,6 +9,7 @@ import Quickshell.Services.SystemTray
 import "../reusables"
 import "../"
 import "."
+import "../WindowRegistry.js" as WindowRegistry
 
 Item {
     id: contentWrapper
@@ -321,20 +322,38 @@ Item {
     property real screenMinLeft: isFill ? fillInset : (barWindow ? (barWindow.s(1) + distinctEdgePadding) : distinctEdgePadding)
     property real screenMaxRight: isFill ? (contentWrapper.width - fillInset) : (barWindow ? (contentWrapper.width - barWindow.s(1) - distinctEdgePadding) : (contentWrapper.width - distinctEdgePadding))
 
+    property real sysPanelWidth: {
+        let fallback = (barWindow && typeof barWindow.s === "function") ? barWindow.s(500) : 500;
+        if (typeof WindowRegistry !== "undefined" && typeof WindowRegistry.getLayout === "function") {
+            let scrW = (barWindow && barWindow.screen) ? barWindow.screen.width : (contentWrapper.width || 1920);
+            let scrH = (barWindow && barWindow.screen) ? barWindow.screen.height : 1080;
+            let scale = (typeof Scaler !== "undefined" && Scaler.uiScale !== undefined) ? Scaler.uiScale : 1.0;
+            let bp = (barWindow && barWindow.barPosition) ? barWindow.barPosition : "top";
+            let layout = WindowRegistry.getLayout("system", 0, 0, scrW, scrH, scale, bp);
+            if (layout && layout.w) return layout.w;
+        }
+        return fallback;
+    }
+
+    property real sysBoundary: Math.max(0, contentWrapper.width - sysPanelWidth)
+    property real sysMaxRight: isFill ? (contentWrapper.width - fillInset) : Math.max(screenMinLeft, sysBoundary - (barWindow ? barWindow.s(1) : 0) - distinctEdgePadding)
+    property real sysEffectiveMaxRight: Math.min(baseMaxRight, sysMaxRight)
+    property real effectiveMaxRight: (layoutState === "sys") ? sysEffectiveMaxRight : screenMaxRight
+
     property real rawCNaturalX: {
         if (layoutState === "settings") return screenMaxRight - rWidthTarget - crGap - cWidthTarget;
-        if (layoutState === "sys") return screenMinLeft + lWidthTarget + lcGap;
+        if (layoutState === "sys") return (sysBoundary - cWidthTarget) / 2;
         return (contentWrapper.width - cWidthTarget) / 2;
     }
 
     property real absMinC: (lWidthTarget > 0) ? (screenMinLeft + lWidthTarget + lcGap) : screenMinLeft
-    property real absMaxC: (rWidthTarget > 0) ? (screenMaxRight - rWidthTarget - crGap - cWidthTarget) : (screenMaxRight - cWidthTarget)
+    property real absMaxC: (rWidthTarget > 0) ? (effectiveMaxRight - rWidthTarget - crGap - cWidthTarget) : (effectiveMaxRight - cWidthTarget)
 
     property real cResolvedX: {
         if (absMinC <= absMaxC) {
             return Math.max(absMinC, Math.min(absMaxC, rawCNaturalX));
         }
-        return Math.max(screenMinLeft, Math.min(screenMaxRight - cWidthTarget, rawCNaturalX));
+        return absMinC;
     }
 
     property real cFinalX: cResolvedX
@@ -349,11 +368,10 @@ Item {
     }
 
     property real rFinalX: {
-        if (rWidthTarget <= 0) return baseMaxRight;
-        if (layoutState === "sys") {
-            return Math.min(screenMaxRight - rWidthTarget, cFinalX + cWidthTarget + crGap);
-        }
-        let pushedX = Math.max(baseMaxRight - rWidthTarget, cFinalX + cWidthTarget + crGap);
+        if (rWidthTarget <= 0) return (layoutState === "sys" ? sysEffectiveMaxRight : baseMaxRight);
+        let naturalR = (layoutState === "sys") ? (sysEffectiveMaxRight - rWidthTarget) : (baseMaxRight - rWidthTarget);
+        let minR = (cWidthTarget > 0) ? (cFinalX + cWidthTarget + crGap) : ((lWidthTarget > 0) ? (lFinalX + lWidthTarget + lcGap) : screenMinLeft);
+        let pushedX = Math.max(naturalR, minR);
         return Math.min(screenMaxRight - rWidthTarget, pushedX);
     }
     property real rFinalClampedX: Math.max(screenMinLeft, Math.min(screenMaxRight - rWidthTarget, rFinalX))
@@ -569,7 +587,7 @@ Item {
         }
     }
 
-    Canvas {
+    ShaderEffect {
         id: leftOuterCorner
         x: 0
         y: barWindow ? (barWindow.barPosition === "bottom" ? (barWindow.baseOffsetY - height) : (barWindow.baseOffsetY + barWindow.barHeight)) : 0
@@ -579,41 +597,11 @@ Item {
         opacity: (visible && (!barWindow || barWindow.isRevealed)) ? 1.0 : 0.0
         z: 0
 
-        Connections {
-            target: ThemeBackend
-            function onBaseChanged() { leftOuterCorner.requestPaint(); }
-        }
-        Connections {
-            target: contentWrapper
-            function onIsFillChanged() { leftOuterCorner.requestPaint(); }
-        }
-        Connections {
-            target: contentWrapper.barWindow || null
-            function onBarPositionChanged() { leftOuterCorner.requestPaint(); }
-            function onBarOpacityChanged() { leftOuterCorner.requestPaint(); }
-        }
-        onWidthChanged: requestPaint()
-        onHeightChanged: requestPaint()
+        property vector2d itemSize: Qt.vector2d(width, height)
+        property real cornerIndex: (barWindow && barWindow.barPosition === "bottom") ? 2.0 : 0.0
+        property color color: Qt.alpha(ThemeBackend.base, (barWindow && barWindow.barOpacity !== undefined) ? barWindow.barOpacity : 1.0)
 
-        onPaint: {
-            var ctx = getContext("2d");
-            ctx.reset();
-            ctx.fillStyle = Qt.alpha(ThemeBackend.base, (barWindow && barWindow.barOpacity !== undefined) ? barWindow.barOpacity : 1.0);
-            ctx.beginPath();
-            if (barWindow && barWindow.barPosition === "bottom") {
-                ctx.moveTo(0, height);
-                ctx.lineTo(width, height);
-                ctx.arcTo(0, height, 0, 0, width);
-                ctx.lineTo(0, 0);
-            } else {
-                ctx.moveTo(0, 0);
-                ctx.lineTo(width, 0);
-                ctx.arcTo(0, 0, 0, height, width);
-                ctx.lineTo(0, height);
-            }
-            ctx.closePath();
-            ctx.fill();
-        }
+        fragmentShader: "file://" + Caching.ghostDir + "/assets/shaders/ui/corner_cutout.frag.qsb"
 
         Behavior on opacity {
             enabled: barWindow && !barWindow.positionChanging && barWindow.startupCascadeFinished && !contentWrapper.suppressAnimation
@@ -621,7 +609,7 @@ Item {
         }
     }
 
-    Canvas {
+    ShaderEffect {
         id: rightOuterCorner
         x: parent.width - width
         y: barWindow ? (barWindow.barPosition === "bottom" ? (barWindow.baseOffsetY - height) : (barWindow.baseOffsetY + barWindow.barHeight)) : 0
@@ -631,41 +619,11 @@ Item {
         opacity: (visible && (!barWindow || barWindow.isRevealed)) ? 1.0 : 0.0
         z: 0
 
-        Connections {
-            target: ThemeBackend
-            function onBaseChanged() { rightOuterCorner.requestPaint(); }
-        }
-        Connections {
-            target: contentWrapper
-            function onIsFillChanged() { rightOuterCorner.requestPaint(); }
-        }
-        Connections {
-            target: contentWrapper.barWindow || null
-            function onBarPositionChanged() { rightOuterCorner.requestPaint(); }
-            function onBarOpacityChanged() { rightOuterCorner.requestPaint(); }
-        }
-        onWidthChanged: requestPaint()
-        onHeightChanged: requestPaint()
+        property vector2d itemSize: Qt.vector2d(width, height)
+        property real cornerIndex: (barWindow && barWindow.barPosition === "bottom") ? 3.0 : 1.0
+        property color color: Qt.alpha(ThemeBackend.base, (barWindow && barWindow.barOpacity !== undefined) ? barWindow.barOpacity : 1.0)
 
-        onPaint: {
-            var ctx = getContext("2d");
-            ctx.reset();
-            ctx.fillStyle = Qt.alpha(ThemeBackend.base, (barWindow && barWindow.barOpacity !== undefined) ? barWindow.barOpacity : 1.0);
-            ctx.beginPath();
-            if (barWindow && barWindow.barPosition === "bottom") {
-                ctx.moveTo(width, height);
-                ctx.lineTo(0, height);
-                ctx.arcTo(width, height, width, 0, width);
-                ctx.lineTo(width, 0);
-            } else {
-                ctx.moveTo(width, 0);
-                ctx.lineTo(0, 0);
-                ctx.arcTo(width, 0, width, height, width);
-                ctx.lineTo(width, height);
-            }
-            ctx.closePath();
-            ctx.fill();
-        }
+        fragmentShader: "file://" + Caching.ghostDir + "/assets/shaders/ui/corner_cutout.frag.qsb"
 
         Behavior on opacity {
             enabled: barWindow && !barWindow.positionChanging && barWindow.startupCascadeFinished && !contentWrapper.suppressAnimation

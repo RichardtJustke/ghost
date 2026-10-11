@@ -387,23 +387,32 @@ Item {
         }
     }
 
+    Timer {
+        id: activateDebounceTimer
+        interval: 220
+        repeat: false
+        onTriggered: {
+            wallpaperDirScanner.running = false;
+            wallpaperDirScanner.running = true;
+            wallFetcher.running = false;
+            wallFetcher.running = true;
+            if (themeTabRoot._needsReload) {
+                themeTabRoot._needsReload = false;
+                themeTabRoot.reloadThemes();
+            }
+        }
+    }
+
     function activateTab() {
         themeTabRoot.loadAvailableFonts();
-        wallpaperDirScanner.running = false;
-        wallpaperDirScanner.running = true;
-        wallFetcher.running = false;
-        wallFetcher.running = true;
-        if (themeTabRoot._needsReload) {
-            themeTabRoot._needsReload = false;
-            themeTabRoot.reloadThemes();
-        }
+        activateDebounceTimer.restart();
     }
 
     onVisibleChanged: {
         if (visible) {
             activateTab();
-            Qt.callLater(function() { themesGrid.forceLayout(); });
         } else {
+            activateDebounceTimer.stop();
             if (fontDropdown.isOpen) fontDropdown.closePopup();
             if (wpDirDropdown.isOpen) wpDirDropdown.closePopup();
             themeEditorPopup.close();
@@ -715,14 +724,13 @@ Item {
                         Image {
                             id: matugenWall
                             anchors.fill: parent
-                            source: themeTabRoot.isWallpaperVideo ? ("file://" + Caching.getCacheDir("wallpaper") + "/current_wallpaper.png?rev=" + themeTabRoot.wallpaperRevision) : ("file://" + themeTabRoot.currentWallpaperPath)
+                            source: themeTabRoot.isWallpaperVideo ? ("file://" + Caching.getCacheDir("wallpaper") + "/current_wallpaper.png?rev=" + themeTabRoot.wallpaperRevision) : ("file://" + themeTabRoot.currentWallpaperPath + (themeTabRoot.wallpaperRevision > 0 ? ("?rev=" + themeTabRoot.wallpaperRevision) : ""))
                             fillMode: Image.PreserveAspectCrop
                             asynchronous: true
                             smooth: true
                             mipmap: true
-                            cache: false
-                            sourceSize.width: delegateContainer.width
-                            sourceSize.height: delegateContainer.height
+                            cache: true
+                            sourceSize: Qt.size(Math.round(rootObj.s(360)), Math.round(rootObj.s(120)))
                         }
 
                         MultiEffect {

@@ -16,17 +16,74 @@ Item {
     property var module: null
     property var widget: module
 
-    readonly property bool isCompact: module ? module.isCompact : false
-    readonly property var barWindow: module ? module.barWindow : null
+    readonly property var activeTarget: widget || module
+    readonly property bool isCompact: activeTarget ? activeTarget.isCompact : false
+    readonly property var barWindow: activeTarget ? activeTarget.barWindow : null
+    readonly property bool isPreview: activeTarget ? Boolean(activeTarget.isPreview) : false
+
+    function s(val) {
+        if (barWindow && typeof barWindow.s === "function") return barWindow.s(val);
+        if (activeTarget && typeof activeTarget.s === "function") return activeTarget.s(val);
+        if (typeof Scaler !== "undefined" && typeof Scaler.s === "function") return Math.round(Scaler.s(val));
+        return val;
+    }
+
+    property int configRevision: 0
+
+    Connections {
+        target: (typeof Config !== "undefined") ? Config : null
+        function onSettingsLoaded() { root.configRevision++; }
+        function onRawSettingsChanged() { root.configRevision++; }
+    }
+
+    property string wifiStyle: {
+        if (widget && widget !== root && widget.wifiStyle !== undefined) return widget.wifiStyle;
+        if (module && module.wifiStyle !== undefined) return module.wifiStyle;
+        let dummy = configRevision;
+        if (typeof Config !== "undefined" && Config.rawSettings && Config.rawSettings.bar) {
+            let bs = Config.rawSettings.bar;
+            if (bs.wifiStyle) return bs.wifiStyle;
+            if (bs.wifi && bs.wifi.style) return bs.wifi.style;
+        }
+        return "button";
+    }
+
+    property bool showIcon: {
+        if (widget && widget !== root && widget.wifiShowIcon !== undefined) return widget.wifiShowIcon;
+        if (widget && widget !== root && widget.showIcon !== undefined) return widget.showIcon;
+        if (module && module.wifiShowIcon !== undefined) return module.wifiShowIcon;
+        if (module && module.showIcon !== undefined) return module.showIcon;
+        let dummy = configRevision;
+        if (typeof Config !== "undefined" && Config.rawSettings && Config.rawSettings.bar) {
+            let bs = Config.rawSettings.bar;
+            if (bs.wifiShowIcon !== undefined) return Boolean(bs.wifiShowIcon);
+            if (bs.wifi && bs.wifi.showIcon !== undefined) return Boolean(bs.wifi.showIcon);
+        }
+        return true;
+    }
+
+    property bool showName: {
+        if (widget && widget !== root && widget.wifiShowName !== undefined) return widget.wifiShowName;
+        if (widget && widget !== root && widget.showName !== undefined) return widget.showName;
+        if (module && module.wifiShowName !== undefined) return module.wifiShowName;
+        if (module && module.showName !== undefined) return module.showName;
+        let dummy = configRevision;
+        if (typeof Config !== "undefined" && Config.rawSettings && Config.rawSettings.bar) {
+            let bs = Config.rawSettings.bar;
+            if (bs.wifiShowName !== undefined) return Boolean(bs.wifiShowName);
+            if (bs.wifi && bs.wifi.showName !== undefined) return Boolean(bs.wifi.showName);
+        }
+        return true;
+    }
 
     property bool isDesktop: false
     property string ethStatus: "Ethernet"
-    property string wifiStatus: "Off"
-    property string wifiIcon: "󰤮"
-    property string wifiSsid: ""
-    property bool isWifiOn: Networking.wifiEnabled
-    property bool showEthernet: ethStatus === "Connected" || (isDesktop && !isWifiOn)
-    property bool showLayout: (!module || module.moduleActive) && (!barWindow || (barWindow.isStartupReady && barWindow.isDataReady))
+    property string wifiStatus: isPreview ? "Enabled" : "Off"
+    property string wifiIcon: isPreview ? "󰤨" : "󰤮"
+    property string wifiSsid: isPreview ? "Home-WiFi" : ""
+    property bool isWifiOn: isPreview ? true : Networking.wifiEnabled
+    property bool showEthernet: !isPreview && (ethStatus === "Connected" || (isDesktop && !isWifiOn))
+    property bool showLayout: (!barWindow || isPreview) ? true : ((!module || module.moduleActive) && barWindow.isStartupReady && barWindow.isDataReady)
     property alias wifiPill: wifiPill
 
     property var ethDevice: null
@@ -240,47 +297,97 @@ Item {
         }
     }
 
-    property real targetWidth: ((!module || module.moduleActive) && sysLayout.implicitWidth > 0) ? (sysLayout.implicitWidth + (barWindow ? barWindow.s(isCompact ? 8 : 10) : (isCompact ? 8 : 10))) : 0
+    property string effectiveIcon: root.showEthernet ? "󰈀" : root.wifiIcon
+    property string effectiveName: root.showEthernet ? root.ethStatus : ((root.isWifiOn ? (root.wifiSsid !== "" ? root.wifiSsid : "On") : "Off"))
+    readonly property bool isActive: root.showEthernet ? (root.ethStatus === "Connected") : root.isWifiOn
+
+    property real targetWidth: {
+        if (module && !module.moduleActive) return 0;
+        if (root.wifiStyle === "text") {
+            return (textRow.implicitWidth > 0) ? (textRow.implicitWidth + s(root.isCompact ? 16 : 20)) : 0;
+        }
+        return (sysLayout.implicitWidth > 0) ? (sysLayout.implicitWidth + s(root.isCompact ? 8 : 10)) : 0;
+    }
     property bool isFaceVisible: showLayout && targetWidth > 0
 
     implicitWidth: targetWidth
     implicitHeight: parent ? parent.height : 0
 
     transform: Translate {
-        x: root.showLayout ? 0 : (barWindow ? barWindow.s(60) : 60)
+        x: root.showLayout ? 0 : s(60)
         Behavior on x { NumberAnimation { duration: 800; easing.type: Easing.OutQuint } }
+    }
+
+    MouseArea {
+        id: textMouseArea
+        anchors.fill: parent
+        hoverEnabled: true
+        cursorShape: Qt.PointingHandCursor
+        enabled: root.wifiStyle === "text" && !root.isPreview
+        onClicked: Quickshell.execDetached(["bash", "-c", Caching.ghostDir + "/scripts/qs_manager.sh toggle network wifi"])
+    }
+
+    Row {
+        id: textRow
+        visible: root.wifiStyle === "text"
+        anchors.centerIn: parent
+        spacing: s(root.isCompact ? 5 : 6)
+        opacity: root.showLayout ? 1.0 : 0.0
+        Behavior on opacity { NumberAnimation { duration: 450; easing.type: Easing.OutCubic } }
+
+        Text {
+            visible: root.showIcon
+            text: root.effectiveIcon
+            font.family: ThemeBackend.iconFont
+            font.pixelSize: s(root.isCompact ? 14 : 15)
+            color: textMouseArea.containsMouse ? Qt.lighter(ThemeBackend.blue, 1.15) : (root.isActive ? ThemeBackend.blue : ThemeBackend.subtext0)
+            anchors.verticalCenter: parent.verticalCenter
+            Behavior on color { ColorAnimation { duration: 150 } }
+        }
+
+        Text {
+            visible: root.showName
+            text: root.effectiveName
+            font.family: ThemeBackend.fontFamily
+            font.pixelSize: s(root.isCompact ? 11 : 12)
+            font.bold: true
+            color: textMouseArea.containsMouse ? Qt.lighter(ThemeBackend.text, 1.15) : ThemeBackend.text
+            anchors.verticalCenter: parent.verticalCenter
+            Behavior on color { ColorAnimation { duration: 150 } }
+        }
     }
 
     Row {
         id: sysLayout
+        visible: root.wifiStyle !== "text"
         anchors.centerIn: parent
-        property int pillHeight: barWindow ? barWindow.s(root.isCompact ? 28 : 30) : (root.isCompact ? 28 : 30)
+        property int pillHeight: s(root.isCompact ? 28 : 30)
 
         ClickButton {
             id: wifiPill
             property bool initAnimTrigger: root.showLayout
-            property bool isActive: root.showEthernet ? (root.ethStatus === "Connected") : root.isWifiOn
+            property bool isActive: root.isActive
 
             height: sysLayout.pillHeight
-            maxWidth: barWindow ? barWindow.s(root.isCompact ? 156 : 160) : (root.isCompact ? 156 : 160)
-            cornerRadius: Math.max(0, ThemeBackend.borderRadius - (barWindow ? barWindow.s(2) : 2))
-            horizontalPadding: barWindow ? barWindow.s(root.isCompact ? 10 : 12) : (root.isCompact ? 10 : 12)
-            buttonIcon: root.showEthernet ? "󰈀" : root.wifiIcon
-            iconFontSize: barWindow ? barWindow.s(root.isCompact ? 14 : 15) : (root.isCompact ? 14 : 15)
-            buttonText: root.showEthernet ? root.ethStatus : ((root.isWifiOn ? (root.wifiSsid !== "" ? root.wifiSsid : "On") : "Off"))
-            textFontSize: barWindow ? barWindow.s(root.isCompact ? 11 : 12) : (root.isCompact ? 11 : 12)
+            maxWidth: s(root.isCompact ? 156 : 160)
+            cornerRadius: Math.max(0, ThemeBackend.borderRadius - s(2))
+            horizontalPadding: s(root.isCompact ? 10 : 12)
+            buttonIcon: root.showIcon ? root.effectiveIcon : ""
+            iconFontSize: s(root.isCompact ? 14 : 15)
+            buttonText: root.showName ? root.effectiveName : ""
+            textFontSize: s(root.isCompact ? 11 : 12)
             accentColor: isActive ? (root.isCompact ? Qt.lighter(ThemeBackend.blue, 1.08) : ThemeBackend.blue) : (root.isCompact ? Qt.lighter(ThemeBackend.surface0, 1.18) : ThemeBackend.surface0)
             textColor: isActive ? ThemeBackend.base : (root.isCompact ? Qt.lighter(ThemeBackend.text, 1.05) : ThemeBackend.text)
 
-            property real targetWidth: implicitWidth
+            property real targetWidth: (root.showIcon || root.showName) ? implicitWidth : 0
             width: targetWidth
             Behavior on width { NumberAnimation { duration: 480; easing.type: Easing.OutQuint } }
 
             opacity: initAnimTrigger ? 1.0 : 0.0
-            transform: Translate { y: wifiPill.initAnimTrigger ? 0 : (barWindow ? barWindow.s(15) : 15); Behavior on y { NumberAnimation { duration: 620; easing.type: Easing.OutQuint } } }
+            transform: Translate { y: wifiPill.initAnimTrigger ? 0 : s(15); Behavior on y { NumberAnimation { duration: 620; easing.type: Easing.OutQuint } } }
             Behavior on opacity { NumberAnimation { duration: 450; easing.type: Easing.OutCubic } }
 
-            onClicked: Quickshell.execDetached(["bash", "-c", Caching.ghostDir + "/scripts/qs_manager.sh toggle network wifi"])
+            onClicked: if (!root.isPreview) Quickshell.execDetached(["bash", "-c", Caching.ghostDir + "/scripts/qs_manager.sh toggle network wifi"])
         }
     }
 }

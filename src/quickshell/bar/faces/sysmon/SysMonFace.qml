@@ -113,7 +113,7 @@ Item {
         property color accentColor: root.basePrimary
         property bool showText: textVal !== ""
         property bool useSineWave: root.useSineWave
-        property bool initAnimTrigger: (!barWindow || (root.activeTarget && root.activeTarget.isPreview))
+        property bool initAnimTrigger: (!barWindow || !!(root.activeTarget && root.activeTarget.isPreview))
 
         property real animValue: initAnimTrigger ? value : 0
         Behavior on animValue { NumberAnimation { duration: 600; easing.type: Easing.OutQuint } }
@@ -141,127 +141,33 @@ Item {
         }
         Behavior on opacity { NumberAnimation { duration: 450; easing.type: Easing.OutCubic } }
 
-        Canvas {
-            id: circleCanvas
+        ShaderEffect {
+            id: circleGauge
             anchors.fill: parent
-            renderTarget: Canvas.FramebufferObject
-            renderStrategy: Canvas.Cooperative
-            antialiasing: true
 
-            onPaint: {
-                var ctx = getContext("2d");
-                ctx.clearRect(0, 0, width, height);
+            property vector2d itemSize: Qt.vector2d(width, height)
+            property real fillRatio: circleRoot.fillRatio
+            property real strokeWidth: barWindow ? barWindow.s(2.2) : 2.2
+            property real useSineWave: circleRoot.useSineWave ? 1.0 : 0.0
+            property color accentColor: circleRoot.accentColor
+            property vector4d params: Qt.vector4d(barWindow ? barWindow.s(0.9) : 0.9, 0.0, 0.0, 0.0)
 
-                var cx = width / 2;
-                var cy = height / 2;
-                var strokeW = barWindow ? barWindow.s(2.2) : 2.2;
-                var amp = barWindow ? barWindow.s(0.9) : 0.9;
-                var radius = Math.min(cx, cy) - amp - (strokeW / 2) - (barWindow ? barWindow.s(0.4) : 0.4);
-                if (radius <= 0) return;
+            fragmentShader: "file://" + Caching.ghostDir + "/assets/shaders/gauges/circular_wave_gauge.frag.qsb"
+        }
 
-                ctx.save();
-
-                ctx.beginPath();
-                ctx.arc(cx, cy, radius, 0, Math.PI * 2, false);
-                ctx.strokeStyle = Qt.rgba(circleRoot.accentColor.r, circleRoot.accentColor.g, circleRoot.accentColor.b, 0.22);
-                ctx.lineWidth = strokeW;
-                ctx.stroke();
-
-                if (circleRoot.fillRatio > 0.001) {
-                    var startAngle = -Math.PI / 2;
-                    var sweepAngle = Math.PI * 2 * circleRoot.fillRatio;
-
-                    if (circleRoot.useSineWave) {
-                        var totalP = 2 * Math.PI * radius;
-                        var cycles = Math.max(5, Math.round(totalP / 8.5));
-                        var freq = (Math.PI * 2 * cycles) / totalP;
-                        var arcLen = totalP * circleRoot.fillRatio;
-                        var steps = Math.max(6, Math.ceil(arcLen / 1.2));
-
-                        ctx.beginPath();
-                        for (var i = 0; i <= steps; i++) {
-                            var t = i / steps;
-                            var a = startAngle + sweepAngle * t;
-                            var arcDist = (a - startAngle) * radius;
-                            var wOff = amp * Math.sin(freq * arcDist);
-                            var px = cx + (radius + wOff) * Math.cos(a);
-                            var py = cy + (radius + wOff) * Math.sin(a);
-
-                            if (i === 0) {
-                                ctx.moveTo(px, py);
-                            } else {
-                                ctx.lineTo(px, py);
-                            }
-                        }
-
-                        if (circleRoot.fillRatio >= 0.999) {
-                            ctx.closePath();
-                        }
-
-                        ctx.strokeStyle = circleRoot.accentColor;
-                        ctx.lineWidth = strokeW;
-                        ctx.lineCap = "round";
-                        ctx.lineJoin = "round";
-                        ctx.stroke();
-                    } else {
-                        ctx.beginPath();
-                        ctx.arc(cx, cy, radius, startAngle, startAngle + sweepAngle, false);
-                        ctx.strokeStyle = circleRoot.accentColor;
-                        ctx.lineWidth = strokeW;
-                        ctx.lineCap = "round";
-                        ctx.stroke();
-                    }
-                }
-
-                var displayText = circleRoot.showText ? circleRoot.textVal : circleRoot.icon;
-                var fontSize = circleRoot.showText
-                    ? (barWindow ? barWindow.s(root.isCompact ? 7.5 : 9) : (root.isCompact ? 7.5 : 9))
-                    : (barWindow ? barWindow.s(root.isCompact ? 9 : 11) : (root.isCompact ? 9 : 11));
-
-                var fontFam = (ThemeBackend.fontFamily !== undefined && ThemeBackend.fontFamily !== "") ? ThemeBackend.fontFamily : "sans-serif";
-                if (circleRoot.showText) {
-                    ctx.font = "bold " + Math.round(fontSize) + "px \"" + fontFam + "\", sans-serif";
-                } else {
-                    ctx.font = "normal " + Math.round(fontSize) + "px \"" + ThemeBackend.iconFont + "\"";
-                }
-
-                var baseTextColor = (ThemeBackend.text !== undefined && ThemeBackend.text !== "") ? ThemeBackend.text : "#ffffff";
-
-                ctx.textAlign = "center";
-                ctx.textBaseline = "middle";
-                ctx.fillStyle = baseTextColor;
-                ctx.fillText(displayText, cx, cy);
-
-                ctx.restore();
-            }
-
-            Component.onCompleted: circleCanvas.requestPaint()
-            onWidthChanged: circleCanvas.requestPaint()
-            onHeightChanged: circleCanvas.requestPaint()
-
-            Connections {
-                target: circleRoot
-                enabled: root.isSysVisible
-                function onFillRatioChanged() { circleCanvas.requestPaint(); }
-                function onAccentColorChanged() { circleCanvas.requestPaint(); }
-                function onTextValChanged() { circleCanvas.requestPaint(); }
-                function onIconChanged() { circleCanvas.requestPaint(); }
-                function onShowTextChanged() { circleCanvas.requestPaint(); }
-                function onUseSineWaveChanged() { circleCanvas.requestPaint(); }
-            }
-
-            Connections {
-                target: root
-                enabled: root.isSysVisible
-                function onBasePrimaryChanged() { circleCanvas.requestPaint(); }
-                function onUseSineWaveChanged() { circleCanvas.requestPaint(); }
-            }
-
-            Connections {
-                target: ThemeBackend
-                enabled: root.isSysVisible
-                function onIconFontChanged() { circleCanvas.requestPaint(); }
-            }
+        Text {
+            anchors.centerIn: parent
+            text: circleRoot.showText ? circleRoot.textVal : circleRoot.icon
+            font.pixelSize: Math.round(circleRoot.showText
+                ? (barWindow ? barWindow.s(root.isCompact ? 7.5 : 9) : (root.isCompact ? 7.5 : 9))
+                : (barWindow ? barWindow.s(root.isCompact ? 9 : 11) : (root.isCompact ? 9 : 11)))
+            font.bold: circleRoot.showText
+            font.family: circleRoot.showText
+                ? ((ThemeBackend.fontFamily !== undefined && ThemeBackend.fontFamily !== "") ? ThemeBackend.fontFamily : "sans-serif")
+                : ThemeBackend.iconFont
+            color: (ThemeBackend.text !== undefined && ThemeBackend.text !== "") ? ThemeBackend.text : "#ffffff"
+            horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
         }
     }
 

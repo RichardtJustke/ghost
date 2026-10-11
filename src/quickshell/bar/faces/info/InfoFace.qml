@@ -24,10 +24,9 @@ Item {
     property string recTimeFormatted: String(Math.floor(recSeconds / 60)).padStart(2, "0") + ":" + String(recSeconds % 60).padStart(2, "0")
     readonly property string recCacheDir: Caching.cacheDir ? Caching.getCacheDir("recording") : ""
 
-    readonly property bool isTimerActive: TimerState.isActive
-    readonly property string timerTimeFormatted: TimerState.timeFormatted
-    readonly property string timerIcon: TimerState.icon
-    readonly property color timerColor: TimerState.colorType === "green" ? ((typeof ThemeBackend !== "undefined" && ThemeBackend.green !== undefined) ? ThemeBackend.green : Qt.rgba(166/255, 227/255, 161/255, 1.0)) : ThemeBackend.mauve
+    readonly property var timerEntries: TimerState.entries
+    readonly property bool isTimerActive: timerEntries.length > 0
+    readonly property color greenColor: (typeof ThemeBackend !== "undefined" && ThemeBackend.green !== undefined) ? ThemeBackend.green : Qt.rgba(166/255, 227/255, 161/255, 1.0)
 
     readonly property bool hasActiveContent: isRecording || isTimerActive
 
@@ -125,7 +124,6 @@ Item {
     property real recWidth: isRecording ? recRow.implicitWidth : 0
     property real timerWidth: isTimerActive ? timerRow.implicitWidth : 0
     property real activeSpacing: (isRecording && isTimerActive) ? innerSpacing : 0
-
     property real targetWidth: hasActiveContent ? (recWidth + timerWidth + activeSpacing + (horizontalPadding * 2)) : 0
     property bool showLayout: false
     property bool isFaceVisible: showLayout && hasActiveContent && targetWidth > 0
@@ -187,32 +185,37 @@ Item {
 
             Row {
                 id: timerRow
-                spacing: barWindow ? barWindow.s(root.isCompact ? 5 : 6) : (root.isCompact ? 5 : 6)
+                spacing: root.innerSpacing
                 visible: root.isTimerActive
-                opacity: root.isTimerActive ? 1.0 : 0.0
-                Behavior on opacity {
-                    enabled: barWindow ? !barWindow.positionChanging : true
-                    NumberAnimation { duration: 300 }
-                }
 
-                Text {
-                    text: root.timerIcon
-                    font.family: "Font Awesome 6 Free Solid"
-                    font.pixelSize: barWindow ? barWindow.s(root.isCompact ? 11 : 12) : (root.isCompact ? 11 : 12)
-                    color: root.isCompact ? Qt.lighter(root.timerColor, 1.08) : root.timerColor
-                    anchors.verticalCenter: parent.verticalCenter
-                    Behavior on color { ColorAnimation { duration: 250 } }
-                }
+                Repeater {
+                    model: root.timerEntries
 
-                Text {
-                    id: timerText
-                    text: root.timerTimeFormatted
-                    font.family: ThemeBackend.fontFamily
-                    font.pixelSize: barWindow ? barWindow.s(root.isCompact ? 13 : 14) : (root.isCompact ? 13 : 14)
-                    font.weight: Font.Bold
-                    color: root.isCompact ? Qt.lighter(root.timerColor, 1.08) : root.timerColor
-                    anchors.verticalCenter: parent.verticalCenter
-                    Behavior on color { ColorAnimation { duration: 250 } }
+                    Row {
+                        id: timerItem
+                        required property var modelData
+                        readonly property color entryColor: modelData.colorType === "green" ? root.greenColor : ThemeBackend.mauve
+                        spacing: barWindow ? barWindow.s(root.isCompact ? 5 : 6) : (root.isCompact ? 5 : 6)
+
+                        Text {
+                            text: timerItem.modelData.icon
+                            font.family: "Font Awesome 6 Free Solid"
+                            font.pixelSize: barWindow ? barWindow.s(root.isCompact ? 11 : 12) : (root.isCompact ? 11 : 12)
+                            color: root.isCompact ? Qt.lighter(timerItem.entryColor, 1.08) : timerItem.entryColor
+                            anchors.verticalCenter: parent.verticalCenter
+                            Behavior on color { ColorAnimation { duration: 250 } }
+                        }
+
+                        Text {
+                            text: timerItem.modelData.time
+                            font.family: ThemeBackend.fontFamily
+                            font.pixelSize: barWindow ? barWindow.s(root.isCompact ? 13 : 14) : (root.isCompact ? 13 : 14)
+                            font.weight: Font.Bold
+                            color: root.isCompact ? Qt.lighter(timerItem.entryColor, 1.08) : timerItem.entryColor
+                            anchors.verticalCenter: parent.verticalCenter
+                            Behavior on color { ColorAnimation { duration: 250 } }
+                        }
+                    }
                 }
             }
         }

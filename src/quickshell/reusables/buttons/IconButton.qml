@@ -23,8 +23,10 @@ Item {
 
     property bool action_highlight: false
     property string clickSound: "reusables/iconbutton/click.wav"
+    property int acceptedButtons: Qt.LeftButton
 
     signal clicked()
+    signal rightClicked()
     signal triggered()
 
     property real flashOpacity: 0.0
@@ -77,10 +79,15 @@ Item {
             anchors.fill: parent
             hoverEnabled: root.enabled
             enabled: root.enabled
+            acceptedButtons: root.acceptedButtons
             cursorShape: root.enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
 
-            onClicked: {
+            onClicked: (mouse) => {
                 if (!root.enabled) return;
+                if (mouse.button === Qt.RightButton) {
+                    root.rightClicked();
+                    return;
+                }
                 btnPopAnim.start();
                 root.flashOpacity = 0.4;
                 btnFlashAnim.start();

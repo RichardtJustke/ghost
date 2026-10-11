@@ -82,10 +82,51 @@ Item {
     property bool isDesktop: isPreview ? false : (UPower.displayDevice.ready ? !UPower.displayDevice.isLaptopBattery : SystemInfo.isDesktop)
     readonly property int batCap: isPreview ? 82 : (UPower.displayDevice.ready ? Math.round(UPower.displayDevice.percentage * 100) : 0)
     readonly property string batPercent: batCap + "%"
+    readonly property bool isCharging: isPreview ? false : (UPower.displayDevice.ready && (UPower.displayDevice.state === UPowerDeviceState.Charging || UPower.displayDevice.state === UPowerDeviceState.FullyCharged))
+    readonly property bool isActivelyCharging: isCharging && UPower.displayDevice.changeRate > 0.5
 
     readonly property string batStatus: isPreview ? "Discharging" : (UPower.displayDevice.ready ? (UPower.displayDevice.state === UPowerDeviceState.FullyCharged ? "Full" : (UPower.displayDevice.state === UPowerDeviceState.Charging ? "Charging" : "Unknown")) : "Unknown")
-    readonly property bool isCharging: isPreview ? false : (UPower.displayDevice.ready && (UPower.displayDevice.state === UPowerDeviceState.Charging || UPower.displayDevice.state === UPowerDeviceState.FullyCharged))
     readonly property string batIcon: isDesktop ? "󰐥" : (isCharging ? "󰂄" : (batCap > 20 ? "󰁹" : "󰂃"))
+
+    property real wavePhase: 0.8
+
+    Timer {
+        id: waveSettleTimer
+        interval: root.isCharging ? 30000 : 1800
+        repeat: false
+        onTriggered: {
+            if (!root.isActivelyCharging) waveAnimation.stop();
+        }
+    }
+
+    NumberAnimation {
+        id: waveAnimation
+        target: root
+        property: "wavePhase"
+        from: 0
+        to: Math.PI * 2
+        duration: root.isCharging ? 1200 : 2200
+        loops: Animation.Infinite
+        running: root.visible && (!root.isDesktop) && root.batStyle !== "text" && (typeof batPill !== "undefined" && batPill ? (batPill.fillRatio > 0.0 && batPill.fillRatio < 1.0) : false) && root.isActivelyCharging
+    }
+
+    onIsChargingChanged: {
+        if (isCharging && visible && !isDesktop && root.batStyle !== "text" && typeof batPill !== "undefined" && batPill && batPill.fillRatio > 0.0 && batPill.fillRatio < 1.0) {
+            waveAnimation.start();
+            waveSettleTimer.restart();
+        } else if (!isCharging) {
+            waveSettleTimer.restart();
+        }
+    }
+
+    onVisibleChanged: {
+        if (!visible) {
+            waveAnimation.stop();
+            waveSettleTimer.stop();
+        } else if (isActivelyCharging && !isDesktop && root.batStyle !== "text" && typeof batPill !== "undefined" && batPill && batPill.fillRatio > 0.0 && batPill.fillRatio < 1.0) {
+            waveAnimation.start();
+        }
+    }
 
     property color batDynamicColor: {
         if (isDesktop) return ThemeBackend.red;
@@ -114,7 +155,13 @@ Item {
     property bool showLayout: (!barWindow || isPreview) ? true : false
     property alias batPill: batPill
 
-    property real targetWidth: ((!module || module.moduleActive) && sysLayout.implicitWidth > 0) ? (sysLayout.implicitWidth + (isPreview ? 0 : s(isCompact ? 8 : 10))) : 0
+    property real targetWidth: {
+        if (module && !module.moduleActive) return 0;
+        if (root.batStyle === "text") {
+            return (textRow.implicitWidth > 0) ? (textRow.implicitWidth + (isPreview ? 0 : s(isCompact ? 16 : 20))) : 0;
+        }
+        return (sysLayout.implicitWidth > 0) ? (sysLayout.implicitWidth + (isPreview ? 0 : s(isCompact ? 8 : 10))) : 0;
+    }
     property bool isFaceVisible: showLayout && targetWidth > 0
 
     implicitWidth: targetWidth
@@ -131,8 +178,48 @@ Item {
         Behavior on x { NumberAnimation { duration: 800; easing.type: Easing.OutQuint } }
     }
 
+    MouseArea {
+        id: textMouseArea
+        anchors.fill: parent
+        hoverEnabled: true
+        cursorShape: Qt.PointingHandCursor
+        enabled: root.batStyle === "text" && !root.isPreview
+        onClicked: Quickshell.execDetached(["bash", "-c", Caching.ghostDir + "/scripts/qs_manager.sh toggle system"])
+    }
+
+    Row {
+        id: textRow
+        visible: root.batStyle === "text"
+        anchors.centerIn: parent
+        spacing: root.isDesktop ? 0 : s(root.isCompact ? 5 : 6)
+        opacity: root.showLayout ? 1.0 : 0.0
+        Behavior on opacity { NumberAnimation { duration: 450; easing.type: Easing.OutCubic } }
+
+        Text {
+            visible: root.effectiveShowIcon
+            text: root.batIcon
+            font.family: ThemeBackend.fontFamily
+            font.pixelSize: root.isDesktop ? s(root.isCompact ? 15 : 16) : s(root.isCompact ? 13 : 14.5)
+            color: textMouseArea.containsMouse ? Qt.lighter(root.batDynamicColor, 1.15) : root.batDynamicColor
+            anchors.verticalCenter: parent.verticalCenter
+            Behavior on color { ColorAnimation { duration: 150 } }
+        }
+
+        Text {
+            visible: !root.isDesktop && root.effectiveShowPercent
+            text: root.batPercent
+            font.family: ThemeBackend.fontFamily
+            font.pixelSize: s(root.isCompact ? 11 : 12.6)
+            font.bold: true
+            color: textMouseArea.containsMouse ? Qt.lighter(ThemeBackend.text, 1.15) : ThemeBackend.text
+            anchors.verticalCenter: parent.verticalCenter
+            Behavior on color { ColorAnimation { duration: 150 } }
+        }
+    }
+
     Row {
         id: sysLayout
+        visible: root.batStyle !== "text"
         anchors.centerIn: parent
         spacing: 0
         property int pillHeight: s(root.isCompact ? 28 : 30)
@@ -147,6 +234,15 @@ Item {
 
             property real fillRatio: Math.max(0.0, Math.min(1.0, isNaN(animValue) ? 0.0 : animValue))
             property real fillWidth: width * fillRatio
+
+            readonly property real maxWaveAmp: root.isCharging ? root.s(4.5) : root.s(2.5)
+            readonly property real waveAmp: (fillRatio < 0.99 && fillRatio > 0.01) ? maxWaveAmp * Math.sin(fillRatio * Math.PI) : 0
+            onFillRatioChanged: {
+                if (root.visible && (!root.isDesktop) && fillRatio > 0.0 && fillRatio < 1.0) {
+                    if (!waveAnimation.running) waveAnimation.start();
+                    if (!root.isActivelyCharging) waveSettleTimer.restart();
+                }
+            }
 
             property color baseAccentColor: root.batDynamicColor
             property color accentColor: batMouseArea.pressed ? Qt.darker(baseAccentColor, 1.15) : (batMouseArea.containsMouse ? Qt.lighter(baseAccentColor, 1.08) : baseAccentColor)
@@ -201,70 +297,17 @@ Item {
             }
             Behavior on opacity { NumberAnimation { duration: 450; easing.type: Easing.OutCubic } }
 
-            Canvas {
-                id: pillCanvas
+            FluidWave {
+                id: pillWave
                 anchors.fill: parent
-                renderTarget: Canvas.FramebufferObject
-                renderStrategy: Canvas.Cooperative
-                visible: !root.isDesktop && batPill.fillRatio > 0
-
-                onWidthChanged: requestPaint()
-                onHeightChanged: requestPaint()
-
-                onPaint: {
-                    var ctx = getContext("2d");
-                    ctx.clearRect(0, 0, width, height);
-                    if (root.isDesktop || batPill.fillRatio <= 0) return;
-
-                    ctx.save();
-                    var r = Math.max(0, Math.min(batPill.radius, Math.min(width / 2, height / 2)));
-                    ctx.beginPath();
-                    ctx.moveTo(r, 0);
-                    ctx.lineTo(width - r, 0);
-                    ctx.quadraticCurveTo(width, 0, width, r);
-                    ctx.lineTo(width, height - r);
-                    ctx.quadraticCurveTo(width, height, width - r, height);
-                    ctx.lineTo(r, height);
-                    ctx.quadraticCurveTo(0, height, 0, height - r);
-                    ctx.lineTo(0, r);
-                    ctx.quadraticCurveTo(0, 0, r, 0);
-                    ctx.closePath();
-                    ctx.clip();
-
-                    ctx.beginPath();
-                    ctx.rect(0, 0, batPill.fillWidth, height);
-                    ctx.closePath();
-
-                    if (root.batStyle === "minimal") {
-                        ctx.fillStyle = root.calmBatFillColor.toString();
-                        ctx.globalAlpha = 0.92;
-                    } else {
-                        var grad = ctx.createLinearGradient(0, 0, 0, height);
-                        grad.addColorStop(0, Qt.lighter(batPill.accentColor, 1.25).toString());
-                        grad.addColorStop(1, batPill.accentColor.toString());
-                        ctx.fillStyle = grad;
-                        ctx.globalAlpha = 0.95;
-                    }
-                    ctx.fill();
-                    ctx.restore();
-                }
-
-                Connections {
-                    target: batPill
-                    enabled: root.showLayout && (!module || module.moduleActive) && !root.isDesktop
-                    function onRadiusChanged() { pillCanvas.requestPaint(); }
-                    function onFillRatioChanged() { pillCanvas.requestPaint(); }
-                    function onFillWidthChanged() { pillCanvas.requestPaint(); }
-                    function onAccentColorChanged() { pillCanvas.requestPaint(); }
-                }
-
-                Connections {
-                    target: root
-                    enabled: root.showLayout && (!module || module.moduleActive) && !root.isDesktop
-                    function onBatStyleChanged() { pillCanvas.requestPaint(); }
-                    function onCalmBatFillColorChanged() { pillCanvas.requestPaint(); }
-                    function onIsDesktopChanged() { pillCanvas.requestPaint(); }
-                }
+                visible: !root.isDesktop && batPill.fillRatio > 0.001
+                radius: batPill.radius
+                fillLevel: batPill.fillRatio
+                waveAmp: (batPill.fillRatio < 0.99 && batPill.waveAmp > 0) ? Math.min(batPill.waveAmp, Math.min(width * batPill.fillRatio, width * (1.0 - batPill.fillRatio))) : 0
+                phase: root.wavePhase
+                vertical: 0.0
+                color1: (root.batStyle === "minimal") ? root.calmBatFillColor : Qt.lighter(batPill.accentColor, 1.20)
+                color2: (root.batStyle === "minimal") ? root.calmBatFillColor : batPill.accentColor
             }
 
             Row {

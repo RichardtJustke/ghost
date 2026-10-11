@@ -19,13 +19,14 @@ Item {
     property var currentTime: new Date()
 
     Timer {
-        interval: 16
-        running: true
+        interval: root.showSeconds ? 40 : 1000
+        running: root.visible
         repeat: true
-        onTriggered: {
-            root.currentTime = new Date();
-            dialCanvas.requestPaint();
-        }
+        onTriggered: root.currentTime = new Date()
+    }
+
+    onVisibleChanged: {
+        if (root.visible) root.currentTime = new Date();
     }
 
     function resolveColor(token, fallback) {
@@ -91,56 +92,24 @@ Item {
     Item {
         anchors.fill: parent
 
-        Canvas {
+        ShaderEffect {
             id: dialCanvas
             anchors.fill: parent
-            antialiasing: true
 
+            property vector2d itemSize: Qt.vector2d(width, height)
             property color fillColor: root.dialColor
 
-            onWidthChanged: requestPaint()
-            onHeightChanged: requestPaint()
-            onFillColorChanged: requestPaint()
-
-            onPaint: {
-                var ctx = getContext("2d");
-                ctx.reset();
-                var cx = width / 2;
-                var cy = height / 2;
-                var size = Math.min(width, height);
-                var rBase = size * 0.435;
-                var rAmp = size * 0.042;
-                var steps = 240;
-
-                var w = new Array(12);
-                for (var k = 0; k < 12; k++) {
-                    var degTarget = (k === 0 ? 12 : k) * 30;
-                    w[k] = root.getIllumination(degTarget).intensity;
-                }
-
-                ctx.beginPath();
-                for (var i = 0; i <= steps; i++) {
-                    var a = (i / steps) * Math.PI * 2;
-                    var deg = (a * 180 / Math.PI) % 360;
-                    var h = Math.round(deg / 30) % 12;
-                    var diff = Math.abs(deg - (h * 30));
-                    if (diff > 180) diff = 360 - diff;
-                    var bump = 0.5 * (1 + Math.cos((diff / 15) * Math.PI));
-                    var bumpScale = 0.28 + 0.72 * w[h];
-                    var r = rBase + (rAmp * bumpScale) * bump;
-                    var x = cx + r * Math.sin(a);
-                    var y = cy - r * Math.cos(a);
-
-                    if (i === 0) {
-                        ctx.moveTo(x, y);
-                    } else {
-                        ctx.lineTo(x, y);
-                    }
-                }
-                ctx.closePath();
-                ctx.fillStyle = fillColor;
-                ctx.fill();
+            function w(k) {
+                var degTarget = (k === 0 ? 12 : k) * 30;
+                return root.getIllumination(degTarget).intensity;
             }
+
+            property vector4d weights0: Qt.vector4d(w(0), w(1), w(2), w(3))
+            property vector4d weights1: Qt.vector4d(w(4), w(5), w(6), w(7))
+            property vector4d weights2: Qt.vector4d(w(8), w(9), w(10), w(11))
+            property vector4d params: Qt.vector4d(Math.min(width, height) * 0.435, Math.min(width, height) * 0.042, 0.0, 0.0)
+
+            fragmentShader: "file://" + Caching.ghostDir + "/assets/shaders/gauges/clock_lumen_dial.frag.qsb"
         }
 
         Item {

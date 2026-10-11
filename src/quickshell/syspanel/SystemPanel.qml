@@ -14,6 +14,7 @@ import "../reusables"
 
 Item {
     id: root
+    visible: false
     focus: true
     enabled: visible
 
@@ -88,6 +89,22 @@ Item {
 
     property bool wifiRadioEnabled: Networking.wifiEnabled
     property bool btRadioEnabled: Boolean(Bluetooth.defaultAdapter && Bluetooth.defaultAdapter.enabled)
+
+    Connections {
+        target: Bluetooth
+        ignoreUnknownSignals: true
+        function onDefaultAdapterChanged() {
+            root.btRadioEnabled = Boolean(Bluetooth.defaultAdapter && Bluetooth.defaultAdapter.enabled);
+        }
+    }
+
+    Connections {
+        target: Bluetooth.defaultAdapter || null
+        ignoreUnknownSignals: true
+        function onEnabledChanged() {
+            root.btRadioEnabled = Boolean(Bluetooth.defaultAdapter && Bluetooth.defaultAdapter.enabled);
+        }
+    }
 
     property bool isDraggingVol: false
     property bool isDraggingBri: false
@@ -168,9 +185,6 @@ Item {
             resetAndPlayIntro();
 
             animCapacity = batCapacity;
-            if (typeof waveCanvas !== "undefined" && waveCanvas) {
-                waveCanvas.requestPaint();
-            }
 
             if (typeof volSlider !== "undefined" && volSlider && !root.isDraggingVol) {
                 volSlider.value = root.sysVolume;
@@ -289,6 +303,14 @@ Item {
         }
     }
 
+    property var exitCallback: null
+
+    function startExit(onFinished) {
+        startupSequence.stop();
+        exitCallback = onFinished;
+        closeSequence.restart();
+    }
+
     SequentialAnimation {
         id: closeSequence
         ParallelAnimation {
@@ -302,13 +324,23 @@ Item {
         }
         ScriptAction {
             script: {
-                Quickshell.execDetached(["bash", Caching.ghostDir + "/scripts/qs_manager.sh", "close"]);
+                if (root.exitCallback) {
+                    let cb = root.exitCallback;
+                    root.exitCallback = null;
+                    cb();
+                } else {
+                    Quickshell.execDetached(["bash", Caching.ghostDir + "/scripts/qs_manager.sh", "close"]);
+                }
             }
         }
     }
 
     Keys.onEscapePressed: (event) => {
-        closeSequence.start();
+        if (typeof masterWindow !== "undefined" && masterWindow.switchWidget) {
+            masterWindow.switchWidget("hidden", "");
+        } else {
+            closeSequence.restart();
+        }
         event.accepted = true;
     }
 
@@ -1157,12 +1189,10 @@ Item {
                                 shakeAnim.start();
                             }
 
-                            Canvas {
+                            FluidWave {
                                 id: actionWaveCanvas
                                 anchors.fill: parent
                                 visible: root.visible && actionCapsule.fillLevel > 0.001
-                                renderTarget: Canvas.Image
-                                renderStrategy: Canvas.Immediate
 
                                 property real wavePhase: 0.0
                                 NumberAnimation on wavePhase {
@@ -1170,57 +1200,14 @@ Item {
                                     loops: Animation.Infinite
                                     from: 0; to: Math.PI * 2; duration: 800
                                 }
-                                onWavePhaseChanged: requestPaint()
 
-                                Connections {
-                                    target: actionCapsule
-                                    enabled: root.visible
-                                    function onFillLevelChanged() { actionWaveCanvas.requestPaint() }
-                                    function onRadiusChanged() { actionWaveCanvas.requestPaint() }
-                                }
-
-                                onPaint: {
-                                    var ctx = getContext("2d");
-                                    ctx.clearRect(0, 0, width, height);
-                                    if (actionCapsule.fillLevel <= 0.001) return;
-
-                                    var r = Math.min(actionCapsule.radius, Math.min(width, height) / 2);
-                                    var fillY = height * (1.0 - actionCapsule.fillLevel);
-                                    ctx.save();
-                                    ctx.beginPath();
-                                    ctx.moveTo(r, 0);
-                                    ctx.lineTo(width - r, 0);
-                                    ctx.arcTo(width, 0, width, r, r);
-                                    ctx.lineTo(width, height - r);
-                                    ctx.arcTo(width, height, width - r, height, r);
-                                    ctx.lineTo(r, height);
-                                    ctx.arcTo(0, height, 0, height - r, r);
-                                    ctx.lineTo(0, r);
-                                    ctx.arcTo(0, 0, r, 0, r);
-                                    ctx.closePath();
-                                    ctx.clip();
-
-                                    ctx.beginPath();
-                                    ctx.moveTo(0, fillY);
-                                    if (actionCapsule.fillLevel < 0.99) {
-                                        var waveAmp = root.s(10) * Math.sin(actionCapsule.fillLevel * Math.PI);
-                                        var cp1y = fillY + Math.sin(wavePhase) * waveAmp;
-                                        var cp2y = fillY + Math.cos(wavePhase + Math.PI) * waveAmp;
-                                        ctx.bezierCurveTo(width * 0.33, cp2y, width * 0.66, cp1y, width, fillY);
-                                        ctx.lineTo(width, height);
-                                        ctx.lineTo(0, height);
-                                        ctx.lineTo(0, height);
-                                    } else {
-                                        ctx.lineTo(width, 0);
-                                        ctx.lineTo(width, height);
-                                        ctx.lineTo(0, height);
-                                    }
-                                    ctx.closePath();
-
-                                    ctx.fillStyle = (cmd === "poweroff" || cmd === "hibernate" ? ThemeBackend.red : ThemeBackend.blue).toString();
-                                    ctx.fill();
-                                    ctx.restore();
-                                }
+                                radius: actionCapsule.radius
+                                fillLevel: actionCapsule.fillLevel
+                                waveAmp: actionCapsule.fillLevel < 0.99 ? (root.s(10) * Math.sin(actionCapsule.fillLevel * Math.PI)) : 0
+                                phase: wavePhase
+                                vertical: 1.0
+                                color1: (cmd === "poweroff" || cmd === "hibernate" ? ThemeBackend.red : ThemeBackend.blue)
+                                color2: color1
                             }
 
                             Rectangle {
@@ -1375,94 +1362,28 @@ Item {
                     transform: Translate { x: (root.isLeftAnchored ? -root.rowSlideDistance : root.rowSlideDistance) * (1.0 - root.introCore) }
 
                     property real fillLevel: root.animCapacity / 100
-                    property real maxWaveAmp: root.isCharging ? root.s(9) : root.s(1.8)
+                    property real maxWaveAmp: root.isCharging ? root.s(10) : root.s(6.5)
                     property real waveAmp: (fillLevel < 0.99 && fillLevel > 0.01) ? maxWaveAmp * Math.sin(fillLevel * Math.PI) : 0
 
-                    Canvas {
+                    FluidWave {
                         id: waveCanvas
                         anchors.fill: parent
                         visible: root.visible && !root.isDesktop && batteryBox.fillLevel > 0.001
-                        renderTarget: Canvas.Image
-                        renderStrategy: Canvas.Immediate
+
                         property real wavePhase: 0.0
                         NumberAnimation on wavePhase {
                             running: root.visible && !root.isDesktop && batteryBox.fillLevel > 0.0 && batteryBox.fillLevel < 1.0
                             loops: Animation.Infinite
-                            from: 0; to: Math.PI * 2; duration: root.isCharging ? 1200 : 3400
+                            from: 0; to: Math.PI * 2; duration: root.isCharging ? 1200 : 2200
                         }
 
-                        onWavePhaseChanged: requestPaint()
-
-                        Connections {
-                            target: batteryBox
-                            enabled: root.visible
-                            function onFillLevelChanged() { waveCanvas.requestPaint() }
-                            function onWaveAmpChanged() { waveCanvas.requestPaint() }
-                            function onRadiusChanged() { waveCanvas.requestPaint() }
-                        }
-
-                        Connections {
-                            target: root
-                            enabled: root.visible
-                            function onBatColorFlatChanged() { waveCanvas.requestPaint() }
-                            function onIsChargingChanged() { waveCanvas.requestPaint() }
-                            function onVisibleChanged() {
-                                if (root.visible) waveCanvas.requestPaint();
-                            }
-                        }
-
-                        Connections {
-                            target: UPower.displayDevice
-                            enabled: root.visible
-                            function onReadyChanged() { waveCanvas.requestPaint() }
-                            function onStateChanged() { waveCanvas.requestPaint() }
-                            function onPercentageChanged() { waveCanvas.requestPaint() }
-                        }
-
-                        onPaint: {
-                            var ctx = getContext("2d");
-                            ctx.clearRect(0, 0, width, height);
-                            if (batteryBox.fillLevel <= 0.001) return;
-
-                            var r = Math.min(batteryBox.radius, Math.min(width, height) / 2);
-                            var currentW = width * batteryBox.fillLevel;
-
-                            ctx.save();
-                            ctx.beginPath();
-                            ctx.moveTo(0, 0);
-                            if (batteryBox.fillLevel < 0.99 && batteryBox.waveAmp > 0) {
-                                var waveAmp = batteryBox.waveAmp;
-                                if (currentW - waveAmp < 0) waveAmp = currentW;
-                                var cp1x = currentW + Math.sin(wavePhase) * waveAmp;
-                                var cp2x = currentW + Math.cos(wavePhase + Math.PI) * waveAmp;
-
-                                ctx.lineTo(currentW, 0);
-                                ctx.bezierCurveTo(cp2x, height * 0.33, cp1x, height * 0.66, currentW, height);
-                                ctx.lineTo(0, height);
-                            } else {
-                                ctx.lineTo(currentW, 0);
-                                ctx.lineTo(currentW, height);
-                                ctx.lineTo(0, height);
-                            }
-                            ctx.closePath();
-                            ctx.clip();
-
-                            ctx.beginPath();
-                            ctx.moveTo(r, 0);
-                            ctx.lineTo(width - r, 0);
-                            ctx.arcTo(width, 0, width, r, r);
-                            ctx.lineTo(width, height - r);
-                            ctx.arcTo(width, height, width - r, height, r);
-                            ctx.lineTo(r, height);
-                            ctx.arcTo(0, height, 0, height - r, r);
-                            ctx.lineTo(0, r);
-                            ctx.arcTo(0, 0, r, 0, r);
-                            ctx.closePath();
-
-                            ctx.fillStyle = root.batColorFlat.toString();
-                            ctx.fill();
-                            ctx.restore();
-                        }
+                        radius: batteryBox.radius
+                        fillLevel: batteryBox.fillLevel
+                        waveAmp: (batteryBox.fillLevel < 0.99 && batteryBox.waveAmp > 0) ? Math.min(batteryBox.waveAmp, Math.min(width * batteryBox.fillLevel, width * (1.0 - batteryBox.fillLevel))) : 0
+                        phase: wavePhase
+                        vertical: 0.0
+                        color1: root.batColorFlat
+                        color2: root.batColorFlat
                     }
 
                     BatteryContent {

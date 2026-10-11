@@ -446,10 +446,88 @@
           "desc": "배터리 표시기의 시각적 모양을 선택합니다",
           "name": {
             "classic": "클래식",
-            "minimal": "미니멀"
+            "minimal": "미니멀",
+            "text": "텍스트"
           },
           "classic": "그라디언트 웨이브 알약 스타일",
-          "minimal": "캡이 있는 iOS/Android 캡슐 스타일"
+          "minimal": "캡이 있는 iOS/Android 캡슐 스타일",
+          "text": "배경 없는 깔끔한 텍스트 및 아이콘"
+        }
+      },
+      "wifi": {
+        "show_icon": {
+          "title": "아이콘 표시",
+          "desc": "네트워크 아이콘 또는 신호 표시기를 표시합니다"
+        },
+        "show_name": {
+          "title": "이름 표시",
+          "desc": "네트워크 SSID 또는 연결 상태 텍스트를 표시합니다"
+        },
+        "style": {
+          "title": "스타일",
+          "desc": "네트워크 모듈의 시각적 모양을 선택합니다",
+          "name": {
+            "button": "버튼",
+            "text": "텍스트"
+          },
+          "button": "배경이 있는 인터랙티브 버튼 캡슐",
+          "text": "배경 없는 깔끔한 텍스트 및 아이콘"
+        }
+      },
+      "bt": {
+        "show_icon": {
+          "title": "아이콘 표시",
+          "desc": "블루투스 상태 아이콘을 표시합니다"
+        },
+        "show_name": {
+          "title": "이름 표시",
+          "desc": "연결된 블루투스 기기 이름을 표시합니다"
+        },
+        "style": {
+          "title": "스타일",
+          "desc": "블루투스 모듈의 시각적 모양을 선택합니다",
+          "name": {
+            "button": "버튼",
+            "text": "텍스트"
+          },
+          "button": "배경이 있는 인터랙티브 버튼 캡슐",
+          "text": "배경 없는 깔끔한 텍스트 및 아이콘"
+        }
+      },
+      "vol": {
+        "show_icon": {
+          "title": "아이콘 표시",
+          "desc": "볼륨 스피커 아이콘을 표시합니다"
+        },
+        "show_percent": {
+          "title": "백분율 표시",
+          "desc": "볼륨 백분율을 숫자로 표시합니다"
+        },
+        "style": {
+          "title": "스타일",
+          "desc": "볼륨 모듈의 시각적 모양을 선택합니다",
+          "name": {
+            "button": "버튼",
+            "text": "텍스트"
+          },
+          "button": "배경이 있는 인터랙티브 버튼 캡슐",
+          "text": "배경 없는 깔끔한 텍스트 및 아이콘"
+        }
+      },
+      "kb": {
+        "show_icon": {
+          "title": "아이콘 표시",
+          "desc": "키보드 배열 아이콘을 표시합니다"
+        },
+        "style": {
+          "title": "스타일",
+          "desc": "키보드 모듈의 시각적 모양을 선택합니다",
+          "name": {
+            "button": "버튼",
+            "text": "텍스트"
+          },
+          "button": "배경이 있는 인터랙티브 버튼 캡슐",
+          "text": "배경 없는 깔끔한 텍스트 및 아이콘"
         }
       }
     },
@@ -926,6 +1004,47 @@
         "pomo_skipped_focus_body": "집중 세션을 건너뛰고 휴식으로 넘어갑니다.",
         "pomo_skipped_break_body": "휴식을 건너뛰고 다시 집중으로 넘어갑니다."
       }
+    },
+    "draw": {
+      "notification": {
+        "app_name": "DrawAction",
+        "saved_title": "Drawing saved",
+        "copied_title": "Drawing copied",
+        "copied_body": "Drawing copied to clipboard",
+        "failed_title": "Export failed",
+        "failed_body": "Could not save drawing"
+      }
+    },
+    "notes": {
+      "title": "메모",
+      "add_note": "메모 추가",
+      "new_note_title": "새 메모",
+      "edit_note": "편집",
+      "preview_note": "마크다운 미리보기",
+      "delete_selected": "선택 삭제 ({count})",
+      "no_notes": "메모가 없습니다. «메모 추가»를 클릭하세요.",
+      "search_placeholder": "메모 검색...",
+      "title_placeholder": "메모 제목...",
+      "content_placeholder": "마크다운으로 작성하세요...",
+      "back": "뒤로",
+      "save": "완료",
+      "cancel": "취소",
+      "delete": "삭제",
+      "select_all": "모두 선택",
+      "deselect_all": "선택 해제",
+      "selected_count": "{count}개 선택됨",
+      "pinned": "고정됨",
+      "recent": "최근",
+      "pin": "고정",
+      "unpin": "고정 해제"
+    },
+    "tabs": {
+      "draw": "그리기",
+      "system": "시스템",
+      "timer": "타이머",
+      "notes": "메모",
+      "tab": "탭",
+      "habits": "Habits"
     }
   },
   "screenshot": {
@@ -1319,7 +1438,15 @@
       "installed_success": "✔ Ghost {ver} ({commit}) 설치가 완료되었습니다.",
       "failed_packages": "다음 패키지를 설치하는 중 오류가 발생했습니다:",
       "restart_prompt": "컴포지터를 다시 시작하거나 'ghostd start'를 실행해 시작하세요.",
-      "ask_reboot": "다시 시작하시겠습니까? [y/n] "
+      "ask_reboot": "다시 시작하시겠습니까? [y/n] ",
+      "twitter": "Twitter:",
+      "reddit": "Reddit:",
+      "telegram": "Telegram:",
+      "donate": "후원:",
+      "donate_sub": "(프로젝트를 응원해 주세요!)",
+      "menu_telemetry": "익명 통계 수집",
+      "support_creator": "제작자 후원하기:",
+      "buy_coffee": "이 프로젝트가 마음에 드셨다면 커피 한 잔 사 주세요!"
     },
     "deps": {
       "syncing": "시스템 패키지를 동기화하고 업데이트하는 중 (pacman -syyu)...",

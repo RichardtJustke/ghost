@@ -66,7 +66,7 @@ Rectangle {
 
     radius: ThemeBackend.borderRadius
     border.width: 0
-    color: isGrouped ? "transparent" : (isSolid ? (distinctPills ? Qt.darker(ThemeBackend.surface0, 1.15) : "transparent") : ThemeBackend.base)
+    color: isGrouped ? "transparent" : (isSolid ? (distinctPills ? Qt.alpha(Qt.darker(ThemeBackend.surface0, 1.15), (barWindow && barWindow.barOpacity !== undefined) ? barWindow.barOpacity : 1.0) : "transparent") : Qt.alpha(ThemeBackend.base, (barWindow && barWindow.barOpacity !== undefined) ? barWindow.barOpacity : 1.0))
     clip: true
 
     width: targetWidth
@@ -78,7 +78,7 @@ Rectangle {
     readonly property bool isFaceVisible: faceLoader.item ? (faceLoader.item.isFaceVisible !== undefined ? faceLoader.item.isFaceVisible : true) : true
     readonly property bool effectiveVisible: moduleActive && isFaceVisible && targetWidth > 0
 
-    opacity: effectiveVisible ? ((barWindow && barWindow.barOpacity !== undefined) ? barWindow.barOpacity : 1.0) : 0.0
+    opacity: effectiveVisible ? 1.0 : 0.0
     visible: opacity > 0 && targetWidth > 0
     enabled: moduleActive
 

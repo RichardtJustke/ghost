@@ -444,10 +444,88 @@
           "desc": "Batareya göstəricisinin vizual görünüşünü seçin",
           "name": {
             "classic": "Klassik",
-            "minimal": "Minimal"
+            "minimal": "Minimal",
+            "text": "Mətn"
           },
           "classic": "Qradiyent dalğalı kapsul",
-          "minimal": "iOS/Android tərzində qapaqlı kapsul"
+          "minimal": "iOS/Android tərzində qapaqlı kapsul",
+          "text": "Arxa plansız sadə mətn və ikon"
+        }
+      },
+      "wifi": {
+        "show_icon": {
+          "title": "İkonu göstər",
+          "desc": "Şəbəkə ikonunu və ya siqnal göstəricisini göstər"
+        },
+        "show_name": {
+          "title": "Adı göstər",
+          "desc": "Şəbəkə SSID və ya qoşulma statusunu göstər"
+        },
+        "style": {
+          "title": "Stil",
+          "desc": "Şəbəkə modulunun vizual görünüşünü seçin",
+          "name": {
+            "button": "Düymə",
+            "text": "Mətn"
+          },
+          "button": "Arxa planlı interaktiv düymə",
+          "text": "Arxa plansız sadə mətn və ikon"
+        }
+      },
+      "bt": {
+        "show_icon": {
+          "title": "İkonu göstər",
+          "desc": "Bluetooth status ikonunu göstər"
+        },
+        "show_name": {
+          "title": "Adı göstər",
+          "desc": "Qoşulmuş Bluetooth cihazının adını göstər"
+        },
+        "style": {
+          "title": "Stil",
+          "desc": "Bluetooth modulunun vizual görünüşünü seçin",
+          "name": {
+            "button": "Düymə",
+            "text": "Mətn"
+          },
+          "button": "Arxa planlı interaktiv düymə",
+          "text": "Arxa plansız sadə mətn və ikon"
+        }
+      },
+      "vol": {
+        "show_icon": {
+          "title": "İkonu göstər",
+          "desc": "Səs dinamiki ikonunu göstər"
+        },
+        "show_percent": {
+          "title": "Faizi göstər",
+          "desc": "Səs səviyyəsinin faizini rəqəmlə göstər"
+        },
+        "style": {
+          "title": "Stil",
+          "desc": "Səs modulunun vizual görünüşünü seçin",
+          "name": {
+            "button": "Düymə",
+            "text": "Mətn"
+          },
+          "button": "Arxa planlı interaktiv düymə",
+          "text": "Arxa plansız sadə mətn və ikon"
+        }
+      },
+      "kb": {
+        "show_icon": {
+          "title": "İkonu göstər",
+          "desc": "Klaviatura düzümü ikonunu göstər"
+        },
+        "style": {
+          "title": "Stil",
+          "desc": "Klaviatura modulunun vizual görünüşünü seçin",
+          "name": {
+            "button": "Düymə",
+            "text": "Mətn"
+          },
+          "button": "Arxa planlı interaktiv düymə",
+          "text": "Arxa plansız sadə mətn və ikon"
         }
       }
     },
@@ -920,6 +998,47 @@
         "pomo_skipped_focus_body": "Diqqət seansı ötürüldü. Fasiləyə keçilir.",
         "pomo_skipped_break_body": "Fasilə ötürüldü. Yenidən diqqət seansına keçilir."
       }
+    },
+    "draw": {
+      "notification": {
+        "app_name": "DrawAction",
+        "saved_title": "Drawing saved",
+        "copied_title": "Drawing copied",
+        "copied_body": "Drawing copied to clipboard",
+        "failed_title": "Export failed",
+        "failed_body": "Could not save drawing"
+      }
+    },
+    "notes": {
+      "title": "Qeydlər",
+      "add_note": "Qeyd əlavə et",
+      "new_note_title": "Yeni qeyd",
+      "edit_note": "Redaktə et",
+      "preview_note": "Markdown baxışı",
+      "delete_selected": "Seçilənləri sil ({count})",
+      "no_notes": "Hələ qeyd yoxdur. «Qeyd əlavə et» düyməsinə basın.",
+      "search_placeholder": "Qeydləri axtarın...",
+      "title_placeholder": "Qeydin başlığı...",
+      "content_placeholder": "Qeydin məzmununu markdown ilə yazın...",
+      "back": "Geri",
+      "save": "Hazırdır",
+      "cancel": "Ləğv et",
+      "delete": "Sil",
+      "select_all": "Hamısını seç",
+      "deselect_all": "Seçimi ləğv et",
+      "selected_count": "{count} seçildi",
+      "pinned": "Bərkidilmiş",
+      "recent": "Son istifadə olunanlar",
+      "pin": "Bərkit",
+      "unpin": "Bərkitməni sil"
+    },
+    "tabs": {
+      "draw": "Rəsm",
+      "system": "Sistem",
+      "timer": "Taymer",
+      "notes": "Qeydlər",
+      "tab": "Vərəq",
+      "habits": "Habits"
     }
   },
   "screenshot": {
@@ -1313,7 +1432,15 @@
       "installed_success": "✔ Ghost {ver} ({commit}) uğurla quraşdırıldı.",
       "failed_packages": "Aşağıdakı paketlərin quraşdırılması zamanı xətalar baş verdi:",
       "restart_prompt": "Başlamaq üçün görüntü birləşdiricisini yenidən başladın və ya 'ghostd start' əmrini icra edin.",
-      "ask_reboot": "Yenidən başlatmaq istəyirsiniz? [y/n] "
+      "ask_reboot": "Yenidən başlatmaq istəyirsiniz? [y/n] ",
+      "twitter": "Twitter:",
+      "reddit": "Reddit:",
+      "telegram": "Telegram:",
+      "donate": "İanə et:",
+      "donate_sub": "(Layihəni dəstəkləyin!)",
+      "menu_telemetry": "Anonim telemetriya",
+      "support_creator": "Müəllifə dəstək olun:",
+      "buy_coffee": "Layihə xoşunuza gəlirsə, mənə bir fincan qəhvə almaqla dəstək ola bilərsiniz!"
     },
     "deps": {
       "syncing": "Sistem paketləri sinxronlaşdırılır və yenilənir (pacman -syyu)...",

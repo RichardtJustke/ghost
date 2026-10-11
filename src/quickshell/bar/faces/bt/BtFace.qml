@@ -16,16 +16,73 @@ Item {
     property var module: null
     property var widget: module
 
-    readonly property bool isCompact: module ? module.isCompact : false
-    readonly property var barWindow: module ? module.barWindow : null
+    readonly property var activeTarget: widget || module
+    readonly property bool isCompact: activeTarget ? activeTarget.isCompact : false
+    readonly property var barWindow: activeTarget ? activeTarget.barWindow : null
+    readonly property bool isPreview: activeTarget ? Boolean(activeTarget.isPreview) : false
+
+    function s(val) {
+        if (barWindow && typeof barWindow.s === "function") return barWindow.s(val);
+        if (activeTarget && typeof activeTarget.s === "function") return activeTarget.s(val);
+        if (typeof Scaler !== "undefined" && typeof Scaler.s === "function") return Math.round(Scaler.s(val));
+        return val;
+    }
+
+    property int configRevision: 0
+
+    Connections {
+        target: (typeof Config !== "undefined") ? Config : null
+        function onSettingsLoaded() { root.configRevision++; }
+        function onRawSettingsChanged() { root.configRevision++; }
+    }
+
+    property string btStyle: {
+        if (widget && widget !== root && widget.btStyle !== undefined) return widget.btStyle;
+        if (module && module.btStyle !== undefined) return module.btStyle;
+        let dummy = configRevision;
+        if (typeof Config !== "undefined" && Config.rawSettings && Config.rawSettings.bar) {
+            let bs = Config.rawSettings.bar;
+            if (bs.btStyle) return bs.btStyle;
+            if (bs.bt && bs.bt.style) return bs.bt.style;
+        }
+        return "button";
+    }
+
+    property bool showIcon: {
+        if (widget && widget !== root && widget.btShowIcon !== undefined) return widget.btShowIcon;
+        if (widget && widget !== root && widget.showIcon !== undefined) return widget.showIcon;
+        if (module && module.btShowIcon !== undefined) return module.btShowIcon;
+        if (module && module.showIcon !== undefined) return module.showIcon;
+        let dummy = configRevision;
+        if (typeof Config !== "undefined" && Config.rawSettings && Config.rawSettings.bar) {
+            let bs = Config.rawSettings.bar;
+            if (bs.btShowIcon !== undefined) return Boolean(bs.btShowIcon);
+            if (bs.bt && bs.bt.showIcon !== undefined) return Boolean(bs.bt.showIcon);
+        }
+        return true;
+    }
+
+    property bool showName: {
+        if (widget && widget !== root && widget.btShowName !== undefined) return widget.btShowName;
+        if (widget && widget !== root && widget.showName !== undefined) return widget.showName;
+        if (module && module.btShowName !== undefined) return module.btShowName;
+        if (module && module.showName !== undefined) return module.showName;
+        let dummy = configRevision;
+        if (typeof Config !== "undefined" && Config.rawSettings && Config.rawSettings.bar) {
+            let bs = Config.rawSettings.bar;
+            if (bs.btShowName !== undefined) return Boolean(bs.btShowName);
+            if (bs.bt && bs.bt.showName !== undefined) return Boolean(bs.bt.showName);
+        }
+        return true;
+    }
 
     property bool isDesktop: false
-    property string btStatus: "Off"
-    property string btIcon: "󰂲"
-    property string btDevice: "Off"
+    property string btStatus: isPreview ? "On" : "Off"
+    property string btIcon: isPreview ? "🎧" : "󰂲"
+    property string btDevice: isPreview ? "Headphones" : "Off"
     property bool budsConnected: false
-    property bool isBtOn: btStatus.toLowerCase() === "enabled" || btStatus.toLowerCase() === "on"
-    property bool showLayout: (!module || module.moduleActive) && (barWindow ? (barWindow.isStartupReady && barWindow.isDataReady) : true)
+    property bool isBtOn: isPreview ? true : (btStatus.toLowerCase() === "enabled" || btStatus.toLowerCase() === "on")
+    property bool showLayout: (!barWindow || isPreview) ? true : ((!module || module.moduleActive) && barWindow.isStartupReady && barWindow.isDataReady)
     property alias btPill: btPill
 
     Component.onCompleted: {
@@ -163,21 +220,75 @@ Item {
         }
     }
 
-    property real targetWidth: ((!module || module.moduleActive) && !isDesktop && sysLayout.implicitWidth > 0) ? (sysLayout.implicitWidth + (barWindow ? barWindow.s(isCompact ? 8 : 10) : (isCompact ? 8 : 10))) : 0
+    property real targetWidth: {
+        if (module && !module.moduleActive) return 0;
+        if (root.isDesktop) return 0;
+        if (root.btStyle === "text") {
+            return (textRow.implicitWidth > 0) ? (textRow.implicitWidth + s(root.isCompact ? 16 : 20)) : 0;
+        }
+        return (sysLayout.implicitWidth > 0) ? (sysLayout.implicitWidth + s(root.isCompact ? 8 : 10)) : 0;
+    }
     property bool isFaceVisible: showLayout && !isDesktop && targetWidth > 0
 
     implicitWidth: targetWidth
     implicitHeight: parent ? parent.height : 0
 
     transform: Translate {
-        x: root.showLayout ? 0 : (barWindow ? barWindow.s(60) : 60)
+        x: root.showLayout ? 0 : s(60)
         Behavior on x { NumberAnimation { duration: 800; easing.type: Easing.OutQuint } }
+    }
+
+    MouseArea {
+        id: textMouseArea
+        anchors.fill: parent
+        hoverEnabled: true
+        cursorShape: Qt.PointingHandCursor
+        enabled: root.btStyle === "text" && !root.isPreview
+        acceptedButtons: Qt.LeftButton | Qt.RightButton
+        onClicked: mouse => {
+            if (mouse.button === Qt.RightButton) {
+                Quickshell.execDetached(["bash", "-c", Caching.ghostDir + "/scripts/qs_manager.sh toggle network bt"]);
+            } else {
+                Quickshell.execDetached(["bash", "-c", Caching.ghostDir + "/scripts/qs_manager.sh " + (root.budsConnected ? "toggle btdevice" : "toggle network bt")]);
+            }
+        }
+    }
+
+    Row {
+        id: textRow
+        visible: root.btStyle === "text"
+        anchors.centerIn: parent
+        spacing: s(root.isCompact ? 5 : 6)
+        opacity: root.showLayout ? 1.0 : 0.0
+        Behavior on opacity { NumberAnimation { duration: 450; easing.type: Easing.OutCubic } }
+
+        Text {
+            visible: root.showIcon
+            text: root.btIcon
+            font.family: ThemeBackend.iconFont
+            font.pixelSize: s(root.isCompact ? 14 : 15)
+            color: textMouseArea.containsMouse ? Qt.lighter(ThemeBackend.mauve, 1.15) : (root.isBtOn ? ThemeBackend.mauve : ThemeBackend.subtext0)
+            anchors.verticalCenter: parent.verticalCenter
+            Behavior on color { ColorAnimation { duration: 150 } }
+        }
+
+        Text {
+            visible: root.showName
+            text: root.btDevice
+            font.family: ThemeBackend.fontFamily
+            font.pixelSize: s(root.isCompact ? 11 : 12)
+            font.bold: true
+            color: textMouseArea.containsMouse ? Qt.lighter(ThemeBackend.text, 1.15) : ThemeBackend.text
+            anchors.verticalCenter: parent.verticalCenter
+            Behavior on color { ColorAnimation { duration: 150 } }
+        }
     }
 
     Row {
         id: sysLayout
+        visible: root.btStyle !== "text"
         anchors.centerIn: parent
-        property int pillHeight: barWindow ? barWindow.s(root.isCompact ? 28 : 30) : (root.isCompact ? 28 : 30)
+        property int pillHeight: s(root.isCompact ? 28 : 30)
 
         ClickButton {
             id: btPill
@@ -185,28 +296,28 @@ Item {
             property bool isActive: root.isBtOn
 
             height: sysLayout.pillHeight
-            maxWidth: barWindow ? barWindow.s(root.isCompact ? 156 : 160) : (root.isCompact ? 156 : 160)
+            maxWidth: s(root.isCompact ? 156 : 160)
             visible: targetWidth > 0
-            cornerRadius: Math.max(0, ThemeBackend.borderRadius - (barWindow ? barWindow.s(2) : 2))
-            horizontalPadding: barWindow ? barWindow.s(root.isCompact ? 10 : 12) : (root.isCompact ? 10 : 12)
-            buttonIcon: root.btIcon
-            iconFontSize: barWindow ? barWindow.s(root.isCompact ? 14 : 15) : (root.isCompact ? 14 : 15)
-            buttonText: root.btDevice
-            textFontSize: barWindow ? barWindow.s(root.isCompact ? 11 : 12) : (root.isCompact ? 11 : 12)
+            cornerRadius: Math.max(0, ThemeBackend.borderRadius - s(2))
+            horizontalPadding: s(root.isCompact ? 10 : 12)
+            buttonIcon: root.showIcon ? root.btIcon : ""
+            iconFontSize: s(root.isCompact ? 14 : 15)
+            buttonText: root.showName ? root.btDevice : ""
+            textFontSize: s(root.isCompact ? 11 : 12)
             accentColor: isActive ? (root.isCompact ? Qt.lighter(ThemeBackend.mauve, 1.08) : ThemeBackend.mauve) : (root.isCompact ? Qt.lighter(ThemeBackend.surface0, 1.18) : ThemeBackend.surface0)
             textColor: isActive ? ThemeBackend.base : (root.isCompact ? Qt.lighter(ThemeBackend.text, 1.05) : ThemeBackend.text)
 
-            property real targetWidth: root.isDesktop ? 0 : implicitWidth
+            property real targetWidth: (root.isDesktop || (!root.showIcon && !root.showName)) ? 0 : implicitWidth
             width: targetWidth
             Behavior on width { NumberAnimation { duration: 480; easing.type: Easing.OutQuint } }
 
             opacity: initAnimTrigger ? 1.0 : 0.0
-            transform: Translate { y: btPill.initAnimTrigger ? 0 : (barWindow ? barWindow.s(15) : 15); Behavior on y { NumberAnimation { duration: 620; easing.type: Easing.OutQuint } } }
+            transform: Translate { y: btPill.initAnimTrigger ? 0 : s(15); Behavior on y { NumberAnimation { duration: 620; easing.type: Easing.OutQuint } } }
             Behavior on opacity { NumberAnimation { duration: 450; easing.type: Easing.OutCubic } }
 
             acceptedButtons: Qt.LeftButton | Qt.RightButton
-            onClicked: Quickshell.execDetached(["bash", "-c", Caching.ghostDir + "/scripts/qs_manager.sh " + (root.budsConnected ? "toggle btdevice" : "toggle network bt")])
-            onRightClicked: Quickshell.execDetached(["bash", "-c", Caching.ghostDir + "/scripts/qs_manager.sh toggle network bt"])
+            onClicked: if (!root.isPreview) Quickshell.execDetached(["bash", "-c", Caching.ghostDir + "/scripts/qs_manager.sh " + (root.budsConnected ? "toggle btdevice" : "toggle network bt")])
+            onRightClicked: if (!root.isPreview) Quickshell.execDetached(["bash", "-c", Caching.ghostDir + "/scripts/qs_manager.sh toggle network bt"])
         }
     }
 }

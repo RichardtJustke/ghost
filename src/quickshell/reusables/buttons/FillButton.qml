@@ -70,12 +70,15 @@ Item {
 
         RowLayout {
             id: contentRow
+            layoutDirection: I18n.layoutDirection
+            x: {
+                if (root.contentAlignment === Qt.AlignHCenter) {
+                    return Math.round((parent.width - width) / 2);
+                }
+                let alignLeft = (root.contentAlignment === Qt.AlignLeft && !I18n.rtl) || (root.contentAlignment === Qt.AlignRight && I18n.rtl);
+                return alignLeft ? root.horizontalPadding : (parent.width - width - root.horizontalPadding);
+            }
             anchors.verticalCenter: parent.verticalCenter
-            anchors.horizontalCenter: root.contentAlignment === Qt.AlignHCenter ? parent.horizontalCenter : undefined
-            anchors.left: root.contentAlignment === Qt.AlignLeft ? parent.left : undefined
-            anchors.leftMargin: root.contentAlignment === Qt.AlignLeft ? root.horizontalPadding : 0
-            anchors.right: root.contentAlignment === Qt.AlignRight ? parent.right : undefined
-            anchors.rightMargin: root.contentAlignment === Qt.AlignRight ? root.horizontalPadding : 0
             spacing: 12
 
             Text {
@@ -110,8 +113,21 @@ Item {
                 Layout.alignment: Qt.AlignVCenter
                 spacing: 2
 
+                Text {
+                    id: rtlMainText
+                    visible: I18n.rtl && root.buttonText !== ""
+                    text: root.buttonText
+                    font.family: ThemeBackend.fontFamily
+                    font.weight: Font.Bold
+                    font.pixelSize: root.textFontSize
+                    color: bRoot.contentTextColor
+                    horizontalAlignment: root.contentAlignment === Qt.AlignHCenter ? Text.AlignHCenter : I18n.textAlignment
+                    Behavior on color { ColorAnimation { duration: 150 } }
+                }
+
                 Row {
                     id: charRow
+                    visible: !I18n.rtl
                     spacing: 0
                     Repeater {
                         model: Array.from(root.buttonText)
@@ -212,6 +228,7 @@ Item {
                     font.family: "JetBrains Mono"
                     font.pixelSize: Math.max(10, root.textFontSize - 6)
                     color: bRoot.contentTextColor
+                    horizontalAlignment: root.contentAlignment === Qt.AlignHCenter ? Text.AlignHCenter : I18n.textAlignment
                     opacity: 0.8
                     Behavior on color { ColorAnimation { duration: 150 } }
 
@@ -279,7 +296,7 @@ Item {
             NumberAnimation { target: root; property: "popScale"; to: 1.0; duration: 400; easing.type: Easing.OutQuint }
         }
 
-        Canvas {
+        FluidWave {
             id: waveCanvas
             anchors.fill: parent
             property real wavePhase: 0.0
@@ -289,57 +306,14 @@ Item {
                 from: 0; to: Math.PI * 2; duration: 800
             }
 
-            onWavePhaseChanged: requestPaint()
-            Connections { target: root; function onFillLevelChanged() { waveCanvas.requestPaint() } }
-
-            onPaint: {
-                var ctx = getContext("2d");
-                ctx.clearRect(0, 0, width, height);
-                if (root.fillLevel <= 0.001) return;
-
-                var r = Math.max(0, Math.min(root.cornerRadius, Math.min(width, height) / 2));
-                var currentW = width * root.fillLevel;
-
-                ctx.save();
-                ctx.beginPath();
-                ctx.moveTo(0, 0);
-
-                if (root.fillLevel < 0.99) {
-                    var maxAmp = Math.min(10, Math.min(currentW, width - currentW));
-                    var waveAmp = maxAmp * Math.sin(root.fillLevel * Math.PI);
-                    var cp1x = Math.max(0, Math.min(width, currentW + Math.sin(wavePhase) * waveAmp));
-                    var cp2x = Math.max(0, Math.min(width, currentW + Math.cos(wavePhase + Math.PI) * waveAmp));
-
-                    ctx.lineTo(currentW, 0);
-                    ctx.bezierCurveTo(cp2x, height * 0.33, cp1x, height * 0.66, currentW, height);
-                    ctx.lineTo(0, height);
-                } else {
-                    ctx.lineTo(width, 0);
-                    ctx.lineTo(width, height);
-                    ctx.lineTo(0, height);
-                }
-                ctx.closePath();
-                ctx.clip();
-
-                ctx.beginPath();
-                ctx.moveTo(r, 0);
-                ctx.lineTo(width - r, 0);
-                ctx.arcTo(width, 0, width, r, r);
-                ctx.lineTo(width, height - r);
-                ctx.arcTo(width, height, width - r, height, r);
-                ctx.lineTo(r, height);
-                ctx.arcTo(0, height, 0, height - r, r);
-                ctx.lineTo(0, r);
-                ctx.arcTo(0, 0, r, 0, r);
-                ctx.closePath();
-
-                var grad = ctx.createLinearGradient(0, 0, currentW, 0);
-                grad.addColorStop(0, Qt.darker(root.accentColor, 1.15).toString());
-                grad.addColorStop(1, root.accentColor.toString());
-                ctx.fillStyle = grad;
-                ctx.fill();
-                ctx.restore();
-            }
+            radius: root.cornerRadius
+            fillLevel: root.fillLevel
+            waveAmp: root.fillLevel < 0.99 ? (Math.min(10, Math.min(width * root.fillLevel, width - width * root.fillLevel)) * Math.sin(root.fillLevel * Math.PI)) : 0
+            phase: wavePhase
+            vertical: 0.0
+            color1: Qt.darker(root.accentColor, 1.15)
+            color2: root.accentColor
+            visible: root.fillLevel > 0.001
         }
 
         Rectangle {

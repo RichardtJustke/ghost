@@ -544,7 +544,7 @@ Item {
         }
     }
 
-    Canvas {
+    ShaderEffect {
         id: topOuterCorner
         x: barWindow && barWindow.barPosition === "right" ? (parent.width - (barWindow ? barWindow.barHeight : 40) - width) : (barWindow ? barWindow.barHeight : 40)
         y: 0
@@ -554,41 +554,11 @@ Item {
         opacity: (visible && (!barWindow || barWindow.isRevealed)) ? 1.0 : 0.0
         z: 0
 
-        Connections {
-            target: ThemeBackend
-            function onBaseChanged() { topOuterCorner.requestPaint(); }
-        }
-        Connections {
-            target: contentWrapper
-            function onIsFillChanged() { topOuterCorner.requestPaint(); }
-        }
-        Connections {
-            target: contentWrapper.barWindow || null
-            function onBarPositionChanged() { topOuterCorner.requestPaint(); }
-            function onBarOpacityChanged() { topOuterCorner.requestPaint(); }
-        }
-        onWidthChanged: requestPaint()
-        onHeightChanged: requestPaint()
+        property vector2d itemSize: Qt.vector2d(width, height)
+        property real cornerIndex: (barWindow && barWindow.barPosition === "right") ? 1.0 : 0.0
+        property color color: Qt.alpha(ThemeBackend.base, (barWindow && barWindow.barOpacity !== undefined) ? barWindow.barOpacity : 1.0)
 
-        onPaint: {
-            var ctx = getContext("2d");
-            ctx.reset();
-            ctx.fillStyle = Qt.alpha(ThemeBackend.base, (barWindow && barWindow.barOpacity !== undefined) ? barWindow.barOpacity : 1.0);
-            ctx.beginPath();
-            if (barWindow && barWindow.barPosition === "right") {
-                ctx.moveTo(width, 0);
-                ctx.lineTo(0, 0);
-                ctx.arcTo(width, 0, width, height, width);
-                ctx.lineTo(width, height);
-            } else {
-                ctx.moveTo(0, 0);
-                ctx.lineTo(width, 0);
-                ctx.arcTo(0, 0, 0, height, width);
-                ctx.lineTo(0, height);
-            }
-            ctx.closePath();
-            ctx.fill();
-        }
+        fragmentShader: "file://" + Caching.ghostDir + "/assets/shaders/ui/corner_cutout.frag.qsb"
 
         Behavior on opacity {
             enabled: barWindow && !barWindow.positionChanging && barWindow.startupCascadeFinished && !contentWrapper.suppressAnimation
@@ -596,7 +566,7 @@ Item {
         }
     }
 
-    Canvas {
+    ShaderEffect {
         id: bottomOuterCorner
         x: barWindow && barWindow.barPosition === "right" ? (parent.width - (barWindow ? barWindow.barHeight : 40) - width) : (barWindow ? barWindow.barHeight : 40)
         y: parent.height - height
@@ -606,41 +576,11 @@ Item {
         opacity: (visible && (!barWindow || barWindow.isRevealed)) ? 1.0 : 0.0
         z: 0
 
-        Connections {
-            target: ThemeBackend
-            function onBaseChanged() { bottomOuterCorner.requestPaint(); }
-        }
-        Connections {
-            target: contentWrapper
-            function onIsFillChanged() { bottomOuterCorner.requestPaint(); }
-        }
-        Connections {
-            target: contentWrapper.barWindow || null
-            function onBarPositionChanged() { bottomOuterCorner.requestPaint(); }
-            function onBarOpacityChanged() { bottomOuterCorner.requestPaint(); }
-        }
-        onWidthChanged: requestPaint()
-        onHeightChanged: requestPaint()
+        property vector2d itemSize: Qt.vector2d(width, height)
+        property real cornerIndex: (barWindow && barWindow.barPosition === "right") ? 3.0 : 2.0
+        property color color: Qt.alpha(ThemeBackend.base, (barWindow && barWindow.barOpacity !== undefined) ? barWindow.barOpacity : 1.0)
 
-        onPaint: {
-            var ctx = getContext("2d");
-            ctx.reset();
-            ctx.fillStyle = Qt.alpha(ThemeBackend.base, (barWindow && barWindow.barOpacity !== undefined) ? barWindow.barOpacity : 1.0);
-            ctx.beginPath();
-            if (barWindow && barWindow.barPosition === "right") {
-                ctx.moveTo(width, height);
-                ctx.lineTo(0, height);
-                ctx.arcTo(width, height, width, 0, width);
-                ctx.lineTo(width, 0);
-            } else {
-                ctx.moveTo(0, height);
-                ctx.lineTo(width, height);
-                ctx.arcTo(0, height, 0, 0, width);
-                ctx.lineTo(0, 0);
-            }
-            ctx.closePath();
-            ctx.fill();
-        }
+        fragmentShader: "file://" + Caching.ghostDir + "/assets/shaders/ui/corner_cutout.frag.qsb"
 
         Behavior on opacity {
             enabled: barWindow && !barWindow.positionChanging && barWindow.startupCascadeFinished && !contentWrapper.suppressAnimation

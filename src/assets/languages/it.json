@@ -445,10 +445,88 @@
           "desc": "Scegli l'aspetto visivo dell'indicatore della batteria",
           "name": {
             "classic": "Classico",
-            "minimal": "Minimale"
+            "minimal": "Minimale",
+            "text": "Testo"
           },
           "classic": "Pillola con onda a gradiente",
-          "minimal": "Capsula in stile iOS/Android con cappuccio"
+          "minimal": "Capsula in stile iOS/Android con cappuccio",
+          "text": "Testo e icona puliti senza sfondo"
+        }
+      },
+      "wifi": {
+        "show_icon": {
+          "title": "Mostra icona",
+          "desc": "Mostra l'icona di rete o l'indicatore del segnale"
+        },
+        "show_name": {
+          "title": "Mostra nome",
+          "desc": "Mostra l'SSID di rete o il testo dello stato di connessione"
+        },
+        "style": {
+          "title": "Stile",
+          "desc": "Scegli l'aspetto visivo del modulo di rete",
+          "name": {
+            "button": "Pulsante",
+            "text": "Testo"
+          },
+          "button": "Pulsante interattivo con sfondo",
+          "text": "Testo e icona puliti senza sfondo"
+        }
+      },
+      "bt": {
+        "show_icon": {
+          "title": "Mostra icona",
+          "desc": "Mostra l'icona di stato del Bluetooth"
+        },
+        "show_name": {
+          "title": "Mostra nome",
+          "desc": "Mostra il nome del dispositivo Bluetooth connesso"
+        },
+        "style": {
+          "title": "Stile",
+          "desc": "Scegli l'aspetto visivo del modulo Bluetooth",
+          "name": {
+            "button": "Pulsante",
+            "text": "Testo"
+          },
+          "button": "Pulsante interattivo con sfondo",
+          "text": "Testo e icona puliti senza sfondo"
+        }
+      },
+      "vol": {
+        "show_icon": {
+          "title": "Mostra icona",
+          "desc": "Mostra l'icona dell'altoparlante del volume"
+        },
+        "show_percent": {
+          "title": "Mostra percentuale",
+          "desc": "Mostra la percentuale numerica del volume"
+        },
+        "style": {
+          "title": "Stile",
+          "desc": "Scegli l'aspetto visivo del modulo volume",
+          "name": {
+            "button": "Pulsante",
+            "text": "Testo"
+          },
+          "button": "Pulsante interattivo con sfondo",
+          "text": "Testo e icona puliti senza sfondo"
+        }
+      },
+      "kb": {
+        "show_icon": {
+          "title": "Mostra icona",
+          "desc": "Mostra l'icona del layout della tastiera"
+        },
+        "style": {
+          "title": "Stile",
+          "desc": "Scegli l'aspetto visivo del modulo tastiera",
+          "name": {
+            "button": "Pulsante",
+            "text": "Testo"
+          },
+          "button": "Pulsante interattivo con sfondo",
+          "text": "Testo e icona puliti senza sfondo"
         }
       }
     },
@@ -925,6 +1003,47 @@
         "pomo_skipped_focus_body": "Sessione di concentrazione saltata. Facciamo una pausa.",
         "pomo_skipped_break_body": "Pausa saltata. Ritorniamo a concentrarci."
       }
+    },
+    "draw": {
+      "notification": {
+        "app_name": "DrawAction",
+        "saved_title": "Disegno salvato",
+        "copied_title": "Disegno copiato",
+        "copied_body": "Disegno copiato negli appunti",
+        "failed_title": "Esportazione non riuscita",
+        "failed_body": "Impossibile salvare il disegno"
+      }
+    },
+    "notes": {
+      "title": "Note",
+      "add_note": "Aggiungi nota",
+      "new_note_title": "Nuova nota",
+      "edit_note": "Modifica",
+      "preview_note": "Anteprima markdown",
+      "delete_selected": "Elimina selezionate ({count})",
+      "no_notes": "Nessuna nota presente. Fai clic su «Aggiungi nota».",
+      "search_placeholder": "Cerca note...",
+      "title_placeholder": "Titolo della nota...",
+      "content_placeholder": "Scrivi la nota in markdown...",
+      "back": "Indietro",
+      "save": "Fatto",
+      "cancel": "Annulla",
+      "delete": "Elimina",
+      "select_all": "Seleziona tutto",
+      "deselect_all": "Deseleziona",
+      "selected_count": "{count} selezionate",
+      "pinned": "Fissati",
+      "recent": "Recenti",
+      "pin": "Fissa",
+      "unpin": "Sblocca"
+    },
+    "tabs": {
+      "draw": "Disegno",
+      "system": "Sistema",
+      "timer": "Timer",
+      "notes": "Note",
+      "tab": "Scheda",
+      "habits": "Habits"
     }
   },
   "screenshot": {
@@ -1318,7 +1437,15 @@
       "installed_success": "✔ Ghost {ver} ({commit}) installato con successo.",
       "failed_packages": "Si sono verificati errori durante l'installazione dei seguenti pacchetti:",
       "restart_prompt": "Riavvia il compositor o esegui 'ghostd start' per iniziare.",
-      "ask_reboot": "Vuoi riavviare ora? [y/n] "
+      "ask_reboot": "Vuoi riavviare ora? [y/n] ",
+      "twitter": "Twitter:",
+      "reddit": "Reddit:",
+      "telegram": "Telegram:",
+      "donate": "Donazioni:",
+      "donate_sub": "(Supporta il progetto!)",
+      "menu_telemetry": "Telemetria anonima",
+      "support_creator": "Supporta il creatore:",
+      "buy_coffee": "Se ti piace questo progetto, offrimi un caffè!"
     },
     "deps": {
       "syncing": "Sincronizzazione e aggiornamento dei pacchetti di sistema (pacman -syyu)...",

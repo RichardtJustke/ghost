@@ -1,5 +1,7 @@
 src/assets/languages/add.py
 changelog.py
+.agents/
+AGENTS.md
 __pycache__/
 *.pyc
 .agents/
