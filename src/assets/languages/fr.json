@@ -529,6 +529,23 @@
           "button": "Pilule bouton interactive avec arrière-plan",
           "text": "Texte épuré et icône sans arrière-plan"
         }
+      },
+      "media": {
+        "show_duration": {
+          "title": "Afficher la durée",
+          "desc": "Afficher le temps écoulé et la durée totale du morceau en cours"
+        },
+        "show_icon": {
+          "title": "Afficher l'icône",
+          "desc": "Afficher la pochette de l'album ou l'icône musicale"
+        },
+        "show_controls": {
+          "title": "Afficher les commandes",
+          "desc": "Afficher les boutons précédent, lecture et suivant"
+        },
+        "preview": {
+          "title": "Titre du morceau"
+        }
       }
     },
     "theme": {
@@ -568,7 +585,8 @@
         "pictures": "Images",
         "music": "Musique",
         "documents": "Documents"
-      }
+      },
+      "done": "Terminé"
     },
     "font_picker": {
       "title": "Sélectionner une police",
@@ -796,6 +814,29 @@
       "smart_autohide": {
         "title": "Masquage automatique intelligent",
         "desc": "Masquer automatiquement le dock uniquement lorsque des fenêtres sont ouvertes, le garder visible sur le bureau"
+      },
+      "focus_running": {
+        "title": "Activer la fenêtre existante",
+        "desc": "Cliquer sur l'icône d'une application active sa fenêtre ouverte au lieu de lancer une nouvelle instance"
+      },
+      "show_running_indicators": {
+        "title": "Indicateurs d'exécution",
+        "desc": "Afficher des indicateurs de point ou de barre sur les icônes d'applications ouvertes"
+      },
+      "show_running_apps": {
+        "title": "Afficher les applications ouvertes",
+        "desc": "Afficher les applications ouvertes non épinglées dans le dock"
+      },
+      "running_scope": {
+        "title": "Portée des fenêtres actives",
+        "desc": "Filtrer les fenêtres en cours d'exécution affichées et contrôlées par le dock",
+        "auto": "Automatique (par défaut du compositeur)",
+        "all": "Tous les espaces de travail et écrans",
+        "output": "Écran actuel uniquement",
+        "workspace": "Espace de travail actif uniquement"
+      },
+      "window_menu": {
+        "untitled": "Untitled"
       }
     },
     "lyrics_picker": {
@@ -938,7 +979,8 @@
     },
     "actions": {
       "unpair": "Dissocier",
-      "scan": "Analyser"
+      "scan": "Analyser",
+      "sign_in": "Se connecter"
     }
   },
   "notifications": {

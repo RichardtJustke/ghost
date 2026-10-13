@@ -529,6 +529,23 @@
           "button": "帶有背景的互動式膠囊按鈕",
           "text": "簡潔文字與圖示，無背景"
         }
+      },
+      "media": {
+        "show_duration": {
+          "title": "顯示時長",
+          "desc": "顯示目前歌曲的已播放時間與總時長"
+        },
+        "show_icon": {
+          "title": "顯示圖示",
+          "desc": "顯示專輯封面或音樂圖示"
+        },
+        "show_controls": {
+          "title": "顯示控制按鈕",
+          "desc": "顯示上一首、播放與下一首按鈕"
+        },
+        "preview": {
+          "title": "歌曲標題"
+        }
       }
     },
     "theme": {
@@ -568,7 +585,8 @@
         "pictures": "圖片",
         "music": "音樂",
         "documents": "文件"
-      }
+      },
+      "done": "完成"
     },
     "font_picker": {
       "title": "選取字型",
@@ -796,6 +814,29 @@
       "smart_autohide": {
         "title": "智慧自動隱藏",
         "desc": "僅在有視窗開啟時自動隱藏 Dock，在桌面上則保持可見"
+      },
+      "focus_running": {
+        "title": "聚焦現有視窗",
+        "desc": "點擊應用程式圖示將啟用其已開啟的視窗，而不是啟動新執行個體"
+      },
+      "show_running_indicators": {
+        "title": "執行指示器",
+        "desc": "在已開啟的應用程式圖示上顯示圓點或長條指示器"
+      },
+      "show_running_apps": {
+        "title": "顯示已開啟的應用程式",
+        "desc": "在 Dock 中顯示未釘選的已開啟應用程式"
+      },
+      "running_scope": {
+        "title": "作用中視窗範圍",
+        "desc": "篩選 Dock 顯示與控制的執行中視窗",
+        "auto": "自動（合成器預設）",
+        "all": "所有工作區與顯示器",
+        "output": "僅目前顯示器",
+        "workspace": "僅作用中工作區"
+      },
+      "window_menu": {
+        "untitled": "Untitled"
       }
     },
     "lyrics_picker": {
@@ -938,7 +979,8 @@
     },
     "actions": {
       "unpair": "取消配對",
-      "scan": "掃描"
+      "scan": "掃描",
+      "sign_in": "登入"
     }
   },
   "notifications": {

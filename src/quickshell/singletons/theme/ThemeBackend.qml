@@ -124,12 +124,10 @@ Item {
             cmd += "mkdir -p \"$(dirname \"$CACHE\")\"; ";
             cmd += "find ";
             if (sys !== "") cmd += "\"" + sys + "\" ";
-            cmd += "\"" + usr + "\" -type f \\( -iname \"*.ttf\" -o -iname \"*.otf\" -o -iname \"*.ttc\" \\) 2>/dev/null | sort | while read -r f; do ";
-            cmd += "FAM=$(fc-query -f \"%{family}\" \"$f\" 2>/dev/null | cut -d, -f1); ";
-            cmd += "if [ -z \"$FAM\" ]; then FAM=$(basename \"$f\" | sed 's/\\.[^.]*$//'); fi; ";
-            cmd += "STL=$(fc-query -f \"%{style}\" \"$f\" 2>/dev/null | cut -d, -f1); ";
-            cmd += "if [ -n \"$STL\" ] && [ \"$STL\" != \"Regular\" ]; then echo \"$FAM $STL|$f\"; else echo \"$FAM|$f\"; fi; ";
-            cmd += "done > \"$CACHE.tmp\" || true; mv \"$CACHE.tmp\" \"$CACHE\"; ";
+            cmd += "\"" + usr + "\" -type f \\( -iname \"*.ttf\" -o -iname \"*.otf\" -o -iname \"*.ttc\" \\) -print0 2>/dev/null | sort -z | ";
+            cmd += "xargs -0 -r fc-scan -f '%{family[0]}\\t%{style[0]}\\t%{file}\\n' 2>/dev/null | ";
+            cmd += "awk -F'\\t' '{ fam=$1; stl=$2; f=$3; if (fam==\"\") { n=split(f,a,\"/\"); fam=a[n]; sub(/\\.[^.]*$/,\"\",fam) } if (stl!=\"\" && stl!=\"Regular\") print fam \" \" stl \"|\" f; else print fam \"|\" f }' ";
+            cmd += "> \"$CACHE.tmp\" || true; mv \"$CACHE.tmp\" \"$CACHE\"; ";
             cmd += "fi; ";
             cmd += "cat \"$CACHE\" || true";
 

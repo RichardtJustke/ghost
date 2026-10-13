@@ -145,6 +145,9 @@ PanelWindow {
             let effectivelyActive = masterWindow.targetActive;
 
             if (cmd === "close") {
+                if (typeof DockAppMenuController !== "undefined") {
+                    DockAppMenuController.hide();
+                }
                 switchWidget("hidden", "");
             } else if (cmd === "toggle" || cmd === "open") {
                 if (targetWidget === effectivelyActive) {

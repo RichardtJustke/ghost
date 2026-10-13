@@ -300,7 +300,7 @@
         "focus": "Fokus",
         "sysmon": "Monitor sistem",
         "timedate": {
-          "name": "Waktu & Tanggal",
+          "name": "Waktu & tanggal",
           "style": {
             "name": {
               "classic": "Klasik",
@@ -379,7 +379,7 @@
       },
       "timedate": {
         "show_date": {
-          "title": "Tampilkan Tanggal",
+          "title": "Tampilkan tanggal",
           "desc": "Tampilkan teks tanggal di samping jam"
         },
         "style": {
@@ -389,7 +389,7 @@
       },
       "vis": {
         "bars": {
-          "title": "Jumlah Bilah",
+          "title": "Jumlah bilah",
           "desc": "Jumlah bilah frekuensi yang akan ditampilkan"
         },
         "alignment": {
@@ -404,13 +404,13 @@
           "right": "Kanan"
         },
         "continuous": {
-          "title": "Gelombang Berkelanjutan",
+          "title": "Gelombang berkelanjutan",
           "desc": "Render gelombang halus dan cair alih-alih bilah terpisah"
         }
       },
       "sysmon": {
         "style": {
-          "title": "Gaya Lingkaran",
+          "title": "Gaya lingkaran",
           "desc": "Tampilan visual cincin progres",
           "wave": "Gelombang",
           "circle": "Lingkaran"
@@ -420,7 +420,7 @@
           "desc": "Tampilkan cincin utilisasi prosesor"
         },
         "ram": {
-          "title": "Penggunaan Memori",
+          "title": "Penggunaan memori",
           "desc": "Tampilkan cincin utilisasi memori (RAM)"
         },
         "temp": {
@@ -428,21 +428,21 @@
           "desc": "Tampilkan cincin suhu sistem"
         },
         "disk": {
-          "title": "Penggunaan Disk",
+          "title": "Penggunaan disk",
           "desc": "Tampilkan cincin utilisasi penyimpanan disk"
         }
       },
       "bat": {
         "show_percent": {
-          "title": "Tampilkan Persentase",
+          "title": "Tampilkan persentase",
           "desc": "Tampilkan angka persentase daya baterai"
         },
         "show_icon": {
-          "title": "Tampilkan Ikon",
+          "title": "Tampilkan ikon",
           "desc": "Tampilkan ikon baterai atau indikator grafis"
         },
         "style": {
-          "title": "Gaya Baterai",
+          "title": "Gaya baterai",
           "desc": "Pilih tampilan visual untuk indikator baterai",
           "name": {
             "classic": "Klasik",
@@ -456,11 +456,11 @@
       },
       "wifi": {
         "show_icon": {
-          "title": "Tampilkan Ikon",
+          "title": "Tampilkan ikon",
           "desc": "Tampilkan ikon jaringan atau indikator sinyal"
         },
         "show_name": {
-          "title": "Tampilkan Nama",
+          "title": "Tampilkan nama",
           "desc": "Tampilkan SSID jaringan atau teks status koneksi"
         },
         "style": {
@@ -476,11 +476,11 @@
       },
       "bt": {
         "show_icon": {
-          "title": "Tampilkan Ikon",
+          "title": "Tampilkan ikon",
           "desc": "Tampilkan ikon status bluetooth"
         },
         "show_name": {
-          "title": "Tampilkan Nama",
+          "title": "Tampilkan nama",
           "desc": "Tampilkan nama perangkat bluetooth yang tersambung"
         },
         "style": {
@@ -496,11 +496,11 @@
       },
       "vol": {
         "show_icon": {
-          "title": "Tampilkan Ikon",
+          "title": "Tampilkan ikon",
           "desc": "Tampilkan ikon speaker volume"
         },
         "show_percent": {
-          "title": "Tampilkan Persentase",
+          "title": "Tampilkan persentase",
           "desc": "Tampilkan angka persentase volume audio"
         },
         "style": {
@@ -516,7 +516,7 @@
       },
       "kb": {
         "show_icon": {
-          "title": "Tampilkan Ikon",
+          "title": "Tampilkan ikon",
           "desc": "Tampilkan ikon tata letak papan ketik"
         },
         "style": {
@@ -528,6 +528,23 @@
           },
           "button": "Tombol kapsul interaktif dengan latar belakang",
           "text": "Teks dan ikon bersih tanpa latar belakang"
+        }
+      },
+      "media": {
+        "show_duration": {
+          "title": "Tampilkan durasi",
+          "desc": "Tampilkan waktu yang telah berlalu dan total durasi lagu saat ini"
+        },
+        "show_icon": {
+          "title": "Tampilkan ikon",
+          "desc": "Tampilkan sampul album atau ikon musik"
+        },
+        "show_controls": {
+          "title": "Tampilkan kontrol",
+          "desc": "Tampilkan tombol sebelumnya, putar, dan berikutnya"
+        },
+        "preview": {
+          "title": "Judul lagu"
         }
       }
     },
@@ -568,7 +585,8 @@
         "pictures": "Gambar",
         "music": "Musik",
         "documents": "Dokumen"
-      }
+      },
+      "done": "Selesai"
     },
     "font_picker": {
       "title": "Pilih huruf",
@@ -796,6 +814,29 @@
       "smart_autohide": {
         "title": "Sembunyikan otomatis cerdas",
         "desc": "Sembunyikan dok secara otomatis hanya saat jendela terbuka, tetap tampilkan di desktop"
+      },
+      "focus_running": {
+        "title": "Fokuskan jendela yang ada",
+        "desc": "Mengklik ikon aplikasi mengaktifkan jendela yang terbuka alih-alih meluncurkan instans baru"
+      },
+      "show_running_indicators": {
+        "title": "Indikator aplikasi berjalan",
+        "desc": "Tampilkan indikator titik atau pil pada ikon aplikasi yang terbuka"
+      },
+      "show_running_apps": {
+        "title": "Tampilkan aplikasi yang terbuka",
+        "desc": "Tampilkan aplikasi terbuka yang tidak disematkan di dok"
+      },
+      "running_scope": {
+        "title": "Cakupan jendela aktif",
+        "desc": "Filter jendela berjalan yang ditampilkan dan dikontrol oleh dok",
+        "auto": "Otomatis (default kompositor)",
+        "all": "Semua ruang kerja & monitor",
+        "output": "Hanya monitor saat ini",
+        "workspace": "Hanya ruang kerja aktif"
+      },
+      "window_menu": {
+        "untitled": "Untitled"
       }
     },
     "lyrics_picker": {
@@ -938,7 +979,8 @@
     },
     "actions": {
       "unpair": "Putuskan pasangan",
-      "scan": "Pindai"
+      "scan": "Pindai",
+      "sign_in": "Masuk"
     }
   },
   "notifications": {

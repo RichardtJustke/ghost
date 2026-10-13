@@ -257,20 +257,24 @@ Variants {
                 }
             }
 
+            function cycleTab(direction) {
+                let step = activeEdge === "top" ? -direction : direction;
+                activeIndex = (activeIndex + step + tabCount) % tabCount;
+                kickTimer();
+            }
+
             Item {
                 id: focusTracker
                 focus: true
                 Keys.onTabPressed: event => {
                     if (!floatingWidget.hasInputFocus && !floatingWidget.childIntercepts("Tab")) {
-                        floatingWidget.activeIndex = (floatingWidget.activeIndex + 1) % floatingWidget.tabCount;
-                        floatingWidget.kickTimer();
+                        floatingWidget.cycleTab(1);
                         event.accepted = true;
                     }
                 }
                 Keys.onBacktabPressed: event => {
                     if (!floatingWidget.hasInputFocus && !floatingWidget.childIntercepts("Backtab")) {
-                        floatingWidget.activeIndex = (floatingWidget.activeIndex + (floatingWidget.tabCount - 1)) % floatingWidget.tabCount;
-                        floatingWidget.kickTimer();
+                        floatingWidget.cycleTab(-1);
                         event.accepted = true;
                     }
                 }
@@ -278,14 +282,12 @@ Variants {
                     if (event.accepted) return;
                     if (event.key === Qt.Key_Tab) {
                         if (!floatingWidget.hasInputFocus && !floatingWidget.childIntercepts("Tab")) {
-                            floatingWidget.activeIndex = (floatingWidget.activeIndex + 1) % floatingWidget.tabCount;
-                            floatingWidget.kickTimer();
+                            floatingWidget.cycleTab(1);
                             event.accepted = true;
                         }
                     } else if (event.key === Qt.Key_Backtab) {
                         if (!floatingWidget.hasInputFocus && !floatingWidget.childIntercepts("Backtab")) {
-                            floatingWidget.activeIndex = (floatingWidget.activeIndex + (floatingWidget.tabCount - 1)) % floatingWidget.tabCount;
-                            floatingWidget.kickTimer();
+                            floatingWidget.cycleTab(-1);
                             event.accepted = true;
                         }
                     }
@@ -420,20 +422,33 @@ Variants {
                 }
             }
 
-            Shortcut { enabled: floatingWidget.isSidebarVisible && !floatingWidget.hasInputFocus && !floatingWidget.childIntercepts("Tab"); sequence: "Tab"; onActivated: { floatingWidget.activeIndex = (floatingWidget.activeIndex + 1) % floatingWidget.tabCount; floatingWidget.kickTimer(); } }
-            Shortcut { enabled: floatingWidget.isSidebarVisible && !floatingWidget.hasInputFocus && !floatingWidget.childIntercepts("Backtab"); sequences: ["Backtab", "Shift+Tab"]; onActivated: { floatingWidget.activeIndex = (floatingWidget.activeIndex + (floatingWidget.tabCount - 1)) % floatingWidget.tabCount; floatingWidget.kickTimer(); } }
+            Shortcut { enabled: floatingWidget.isSidebarVisible && !floatingWidget.hasInputFocus && !floatingWidget.childIntercepts("Tab"); sequence: "Tab"; onActivated: floatingWidget.cycleTab(1) }
+            Shortcut {
+                enabled: floatingWidget.isSidebarVisible && !floatingWidget.hasInputFocus && !floatingWidget.childIntercepts("Backtab")
+                sequence: "Backtab"
+                onActivated: floatingWidget.cycleTab(-1)
+                onActivatedAmbiguously: floatingWidget.cycleTab(-1)
+            }
             Shortcut { enabled: floatingWidget.isSidebarVisible && !floatingWidget.hasInputFocus && !floatingWidget.childIntercepts("Return"); sequence: "Return"; onActivated: { floatingWidget.isExpanded = !floatingWidget.isExpanded; floatingWidget.kickTimer(); } }
             Shortcut { enabled: floatingWidget.isSidebarVisible && !floatingWidget.hasInputFocus && !floatingWidget.childIntercepts("Enter"); sequence: "Enter"; onActivated: { floatingWidget.isExpanded = !floatingWidget.isExpanded; floatingWidget.kickTimer(); } }
 
             Shortcut {
                 enabled: floatingWidget.isSidebarVisible && !floatingWidget.hasInputFocus && (floatingWidget.activeEdge === "bottom" || floatingWidget.activeEdge === "top") && !floatingWidget.childIntercepts("Left")
                 sequence: "Left"
-                onActivated: { floatingWidget.activeIndex = Math.max(0, floatingWidget.activeIndex - 1); floatingWidget.kickTimer(); }
+                onActivated: {
+                    let step = floatingWidget.activeEdge === "top" ? 1 : -1;
+                    floatingWidget.activeIndex = Math.max(0, Math.min(floatingWidget.tabCount - 1, floatingWidget.activeIndex + step));
+                    floatingWidget.kickTimer();
+                }
             }
             Shortcut {
                 enabled: floatingWidget.isSidebarVisible && !floatingWidget.hasInputFocus && (floatingWidget.activeEdge === "bottom" || floatingWidget.activeEdge === "top") && !floatingWidget.childIntercepts("Right")
                 sequence: "Right"
-                onActivated: { floatingWidget.activeIndex = Math.min(floatingWidget.tabCount - 1, floatingWidget.activeIndex + 1); floatingWidget.kickTimer(); }
+                onActivated: {
+                    let step = floatingWidget.activeEdge === "top" ? -1 : 1;
+                    floatingWidget.activeIndex = Math.max(0, Math.min(floatingWidget.tabCount - 1, floatingWidget.activeIndex + step));
+                    floatingWidget.kickTimer();
+                }
             }
             Shortcut {
                 enabled: floatingWidget.isSidebarVisible && !floatingWidget.hasInputFocus && (floatingWidget.activeEdge === "left" || floatingWidget.activeEdge === "right") && !floatingWidget.childIntercepts("Up")

@@ -756,7 +756,8 @@ Item {
                                                         else if (diff < 86400) { let h = Math.floor(diff / 3600); timeText = h + "h"; }
                                                         else { let d = Math.floor(diff / 86400); timeText = d + "d"; }
                                                     }
-                                                    Timer { interval: 10000; running: true; repeat: true; onTriggered: parent.updateTimeText() }
+                                                    Timer { interval: 30000; running: parent.visible && root.visible; repeat: true; onTriggered: parent.updateTimeText() }
+                                                    onVisibleChanged: if (visible) updateTimeText()
                                                     Component.onCompleted: updateTimeText()
                                                     text: timeText
                                                     font.family: ThemeBackend.fontFamily

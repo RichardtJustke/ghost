@@ -288,19 +288,19 @@
               "pacman": "Pacman"
             }
           },
-          "name": "Çalışma Alanları"
+          "name": "Çalışma alanları"
         },
         "media": "Medya",
         "tray": "Sistem Tepsisi",
         "keyboard": "Klavye",
         "network": "Ağ",
         "bluetooth": "Bluetooth",
-        "volume": "Ses Seviyesi",
+        "volume": "Ses seviyesi",
         "battery": "Pil",
         "focus": "Odak",
         "sysmon": "Sistem monitörü",
         "timedate": {
-          "name": "Saat ve Tarih",
+          "name": "Saat ve tarih",
           "style": {
             "name": {
               "classic": "Klasik",
@@ -379,7 +379,7 @@
       },
       "timedate": {
         "show_date": {
-          "title": "Tarihi Göster",
+          "title": "Tarihi göster",
           "desc": "Saatin yanında tarih metnini görüntüleyin"
         },
         "style": {
@@ -389,7 +389,7 @@
       },
       "vis": {
         "bars": {
-          "title": "Çubuk Sayısı",
+          "title": "Çubuk sayısı",
           "desc": "Görüntülenecek frekans çubuğu sayısı"
         },
         "alignment": {
@@ -404,23 +404,23 @@
           "right": "Sağ"
         },
         "continuous": {
-          "title": "Sürekli Dalga",
+          "title": "Sürekli dalga",
           "desc": "Ayrı çubuklar yerine pürüzsüz akıcı bir dalga çizin"
         }
       },
       "sysmon": {
         "style": {
-          "title": "Halka Stili",
+          "title": "Halka stili",
           "desc": "İlerleme halkalarının görsel görünümü",
           "wave": "Dalga",
           "circle": "Daire"
         },
         "cpu": {
-          "title": "CPU Kullanımı",
+          "title": "CPU kullanımı",
           "desc": "İşlemci kullanım halkasını görüntüleyin"
         },
         "ram": {
-          "title": "Bellek Kullanımı",
+          "title": "Bellek kullanımı",
           "desc": "Bellek (RAM) kullanım halkasını görüntüleyin"
         },
         "temp": {
@@ -428,21 +428,21 @@
           "desc": "Sistem sıcaklığı halkasını görüntüleyin"
         },
         "disk": {
-          "title": "Disk Kullanımı",
+          "title": "Disk kullanımı",
           "desc": "Depolama diski kullanım halkasını görüntüleyin"
         }
       },
       "bat": {
         "show_percent": {
-          "title": "Yüzdeyi Göster",
+          "title": "Yüzdeyi göster",
           "desc": "Sayısal pil şarjı yüzdesini görüntüleyin"
         },
         "show_icon": {
-          "title": "Simgeyi Göster",
+          "title": "Simgeyi göster",
           "desc": "Pil simgesini veya grafik göstergesini görüntüleyin"
         },
         "style": {
-          "title": "Pil Stili",
+          "title": "Pil stili",
           "desc": "Pil göstergesinin görsel görünümünü seçin",
           "name": {
             "classic": "Klasik",
@@ -456,11 +456,11 @@
       },
       "wifi": {
         "show_icon": {
-          "title": "Simgeyi Göster",
+          "title": "Simgeyi göster",
           "desc": "Ağ simgesini veya sinyal göstergesini görüntüleyin"
         },
         "show_name": {
-          "title": "Adı Göster",
+          "title": "Adı göster",
           "desc": "Ağ SSID'sini veya bağlantı durumu metnini görüntüleyin"
         },
         "style": {
@@ -476,11 +476,11 @@
       },
       "bt": {
         "show_icon": {
-          "title": "Simgeyi Göster",
+          "title": "Simgeyi göster",
           "desc": "Bluetooth durum simgesini görüntüleyin"
         },
         "show_name": {
-          "title": "Adı Göster",
+          "title": "Adı göster",
           "desc": "Bağlı bluetooth cihazının adını görüntüleyin"
         },
         "style": {
@@ -496,11 +496,11 @@
       },
       "vol": {
         "show_icon": {
-          "title": "Simgeyi Göster",
+          "title": "Simgeyi göster",
           "desc": "Ses hoparlör simgesini görüntüleyin"
         },
         "show_percent": {
-          "title": "Yüzdeyi Göster",
+          "title": "Yüzdeyi göster",
           "desc": "Sayısal ses seviyesi yüzdesini görüntüleyin"
         },
         "style": {
@@ -516,7 +516,7 @@
       },
       "kb": {
         "show_icon": {
-          "title": "Simgeyi Göster",
+          "title": "Simgeyi göster",
           "desc": "Klavye düzeni simgesini görüntüleyin"
         },
         "style": {
@@ -528,6 +528,23 @@
           },
           "button": "Arka planlı etkileşimli düğme hapı",
           "text": "Arka plan olmadan sade metin ve simge"
+        }
+      },
+      "media": {
+        "show_duration": {
+          "title": "Süreyi göster",
+          "desc": "Geçerli şarkının geçen ve toplam süresini görüntüleyin"
+        },
+        "show_icon": {
+          "title": "Simgeyi göster",
+          "desc": "Albüm kapağını veya müzik simgesini görüntüleyin"
+        },
+        "show_controls": {
+          "title": "Kontrolleri göster",
+          "desc": "Önceki, oynat ve sonraki düğmelerini görüntüleyin"
+        },
+        "preview": {
+          "title": "Şarkı adı"
         }
       }
     },
@@ -568,7 +585,8 @@
         "pictures": "Resimler",
         "music": "Müzik",
         "documents": "Belgeler"
-      }
+      },
+      "done": "Tamam"
     },
     "font_picker": {
       "title": "Bir yazı tipi seçin",
@@ -796,6 +814,29 @@
       "smart_autohide": {
         "title": "Akıllı otomatik gizleme",
         "desc": "Dock'ı yalnızca pencereler açıkken otomatik gizleyin, masaüstünde görünür tutun"
+      },
+      "focus_running": {
+        "title": "Mevcut pencereye odaklan",
+        "desc": "Bir uygulama simgesine tıklamak, yeni bir örnek başlatmak yerine açık penceresini etkinleştirir"
+      },
+      "show_running_indicators": {
+        "title": "Çalışma göstergeleri",
+        "desc": "Açık uygulama simgelerinde nokta veya çizgi göstergeleri göster"
+      },
+      "show_running_apps": {
+        "title": "Açık uygulamaları göster",
+        "desc": "Sabitlenmemiş açık uygulamaları dock'ta görüntüle"
+      },
+      "running_scope": {
+        "title": "Etkin pencere kapsamı",
+        "desc": "Dock tarafından görüntülenen ve kontrol edilen çalışan pencereleri filtrele",
+        "auto": "Otomatik (birleştirici varsayılanı)",
+        "all": "Tüm çalışma alanları ve monitörler",
+        "output": "Yalnızca geçerli monitör",
+        "workspace": "Yalnızca etkin çalışma alanı"
+      },
+      "window_menu": {
+        "untitled": "Untitled"
       }
     },
     "lyrics_picker": {
@@ -938,7 +979,8 @@
     },
     "actions": {
       "unpair": "Eşleşmeyi kaldır",
-      "scan": "Tara"
+      "scan": "Tara",
+      "sign_in": "Oturum aç"
     }
   },
   "notifications": {

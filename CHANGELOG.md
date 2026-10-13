@@ -1,3 +1,20 @@
+### 2.5.0
+
+- merge: sync the Quickshell modules and installer with upstream 2.2.9; lock screen and Ghost-only features kept as they were
+- feat(dock): running applications with window switching, redesigned app menu with edge-safe placement, hover scale on unpinned items (Hyprland and Niri)
+- feat(sysdata): live network speed instead of the manual scan
+- feat: multi-GPU detection and a reusable `MarqueeText` component
+- feat(widgets): circle variant with wave gauge shader for the CPU, RAM, disk and temperature faces; variant dropdown in the redactor
+- feat(bar): media module settings for duration, icon and controls; icon buttons follow the bar opacity
+- feat(network): captive portal sign-in action in the wifi info view
+- feat(install): package manager backends (pacman, dnf), Adwaita icons and Qt icon theme setup
+- feat(cli): fall back to `scripts/system` for command lookup
+- feat(i18n): add Bulgarian
+- perf: calendar orbit and pacman face drawn by shaders, fewer clock/notification timers, single `fc-scan` for fonts, progressive theme tiles
+- fix: file picker Done button, top-edge quickactions navigation, desktop and dock menu animations, theme creator keys, tray menu icons, battery presence check, GLES-safe shaders, kitty maximized window
+- refactor: split NetworkPopup, SystemPanel and GuidePopup into smaller components
+- chore: bump version to 2.5.0
+
 ### 2.4.0
 
 - merge: sync the Quickshell modules with upstream 2.2.7 (clipboard, quickactions, bar faces, shaders, translations); lock screen and Ghost-only features kept as they were
