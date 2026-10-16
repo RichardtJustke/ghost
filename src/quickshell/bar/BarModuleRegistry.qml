@@ -257,8 +257,6 @@ QtObject {
             return "classic";
         }
         if (norm === "bat") {
-            if (isSide && ss.batStyle) return ss.batStyle;
-            if (isSide && bs.sideBatStyle) return bs.sideBatStyle;
             if (bs.batStyle) return bs.batStyle;
             return "classic";
         }
