@@ -319,15 +319,15 @@ PanelWindow {
     property bool isCentered: attachEdge === "center"
 
     onAttachEdgeChanged: {
-        LauncherController.hide();
+        if (lazyReady) LauncherController.hide();
     }
 
     onBarStyleChanged: {
-        LauncherController.hide();
+        if (lazyReady) LauncherController.hide();
     }
 
     onBarPositionChanged: {
-        LauncherController.hide();
+        if (lazyReady) LauncherController.hide();
     }
 
     property real cornerRadius: ThemeBackend.borderRadius <= 16 ? ThemeBackend.borderRadius * 2 : Math.min(32, 32 - 16 * Math.exp(-(ThemeBackend.borderRadius - 16) / 12))

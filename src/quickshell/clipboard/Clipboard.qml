@@ -81,7 +81,7 @@ PanelWindow {
     }
 
     onBarPositionChanged: {
-        ClipboardController.hide();
+        if (lazyReady) ClipboardController.hide();
     }
 
     property bool isSideAttached: attachEdge === "left" || attachEdge === "right"
