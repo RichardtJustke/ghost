@@ -40,7 +40,9 @@ PanelWindow {
         LauncherController.hide();
     }
 
-    property bool isVisible: LauncherController.isVisible
+    // Created on first open; held false for one tick so the open handler and intro animation run
+    property bool lazyReady: false
+    property bool isVisible: lazyReady && LauncherController.isVisible
     property int configRevision: 0
     property bool appsLoaded: false
     property real introItems: 0.0
@@ -143,6 +145,7 @@ PanelWindow {
         } else {
             executeEmojiFilter("");
         }
+        Qt.callLater(() => { launcherWindow.lazyReady = true; });
     }
 
     Connections {

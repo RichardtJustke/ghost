@@ -47,8 +47,30 @@ ShellRoot {
     Lock {}
     WidgetRedactor {}
 
-    Launcher {}
-    Clipboard {}    
+    // Launcher and Clipboard are created on first open and kept afterwards
+    LazyLoader {
+        id: launcherLoader
+        active: false
+        Launcher {}
+    }
+    Connections {
+        target: LauncherController
+        function onIsVisibleChanged() {
+            if (LauncherController.isVisible) launcherLoader.active = true;
+        }
+    }
+
+    LazyLoader {
+        id: clipboardLoader
+        active: false
+        Clipboard {}
+    }
+    Connections {
+        target: ClipboardController
+        function onIsVisibleChanged() {
+            if (ClipboardController.isVisible) clipboardLoader.active = true;
+        }
+    }
 
     Polkit {}
     PopoutManager {}

@@ -39,7 +39,11 @@ PanelWindow {
         ClipboardController.hide();
     }
 
-    property bool isVisible: ClipboardController.isVisible
+    // Created on first open; held false for one tick so the open handler and intro animation run
+    property bool lazyReady: false
+    property bool isVisible: lazyReady && ClipboardController.isVisible
+
+    Component.onCompleted: Qt.callLater(() => { clipboardWindow.lazyReady = true; })
     property int configRevision: 0
     property bool isDirty: true
 
