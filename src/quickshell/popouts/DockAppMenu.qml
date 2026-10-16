@@ -82,13 +82,6 @@ PanelWindow {
         ? ThemeBackend.borderRadius
         : s(12)
 
-    property real surfaceOpacity: {
-        let v = 100;
-        if (dockSettings.opacity !== undefined) v = Number(dockSettings.opacity);
-        else if (dockSettings.transparency !== undefined) v = 100 - Number(dockSettings.transparency);
-        return Math.max(0.0, Math.min(1.0, v / 100.0));
-    }
-
     property real menuWidth: s(248)
     property real menuHeight: contentCol.implicitHeight
     property real menuOffset: s(16) + (dockSettings.floating ? s(8) : 0)
@@ -235,7 +228,7 @@ PanelWindow {
                 Rectangle {
                     Layout.fillWidth: true
                     Layout.preferredHeight: dockAppMenuWindow.s(32) + dockAppMenuWindow.s(8)
-                    color: Qt.alpha(ThemeBackend.base, dockAppMenuWindow.surfaceOpacity)
+                    color: Qt.alpha(ThemeBackend.base, ThemeBackend.elementOpacity)
                     radius: dockAppMenuWindow.cornerRadius
                     clip: true
 
@@ -304,7 +297,7 @@ PanelWindow {
                     visible: dockAppMenuWindow.hasWindows
                     Layout.fillWidth: true
                     Layout.preferredHeight: windowsCol.implicitHeight + dockAppMenuWindow.s(8)
-                    color: Qt.alpha(ThemeBackend.base, dockAppMenuWindow.surfaceOpacity)
+                    color: Qt.alpha(ThemeBackend.base, ThemeBackend.elementOpacity)
                     radius: dockAppMenuWindow.cornerRadius
                     clip: true
 
@@ -389,7 +382,7 @@ PanelWindow {
                 Rectangle {
                     Layout.fillWidth: true
                     Layout.preferredHeight: actionsCol.implicitHeight + dockAppMenuWindow.s(8)
-                    color: Qt.alpha(ThemeBackend.base, dockAppMenuWindow.surfaceOpacity)
+                    color: Qt.alpha(ThemeBackend.base, ThemeBackend.elementOpacity)
                     radius: dockAppMenuWindow.cornerRadius
                     clip: true
 

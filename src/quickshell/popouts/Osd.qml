@@ -172,11 +172,7 @@ PanelWindow {
         return barConfig.position || "top";
     }
 
-    property real barOpacity: {
-        if (!barConfig || barConfig.opacity === undefined) return 1.0;
-        let op = Number(barConfig.opacity);
-        return op > 1.0 ? (op / 100.0) : op;
-    }
+    property real barOpacity: ThemeBackend.elementOpacity
 
     property bool isFullscreen: OsdController.isFullscreen
     readonly property bool isBarEffectivelyHidden: barAutohide || isFullscreen
@@ -273,7 +269,7 @@ PanelWindow {
 
     Timer {
         id: briCmdThrottle
-        interval: 400
+        interval: 120
         property int targetPct: -1
         onTriggered: {
             if (targetPct >= 0) {
@@ -373,7 +369,7 @@ PanelWindow {
                 }
                 return osdWindow.isBottomBar ? 3.0 : 1.0;
             }
-            property color color: ThemeBackend.base
+            property color color: Qt.alpha(ThemeBackend.base, ThemeBackend.elementOpacity)
             fragmentShader: "file://" + Caching.ghostDir + "/assets/shaders/ui/corner_cutout.frag.qsb"
         }
 
@@ -400,13 +396,13 @@ PanelWindow {
                 }
                 return osdWindow.isBottomBar ? 2.0 : 0.0;
             }
-            property color color: ThemeBackend.base
+            property color color: Qt.alpha(ThemeBackend.base, ThemeBackend.elementOpacity)
             fragmentShader: "file://" + Caching.ghostDir + "/assets/shaders/ui/corner_cutout.frag.qsb"
         }
         Rectangle {
             id: osdBox
             anchors.fill: parent
-            color: ThemeBackend.base
+            color: Qt.alpha(ThemeBackend.base, ThemeBackend.elementOpacity)
             radius: osdWindow.cornerRadius
             border.width: osdWindow.isAttached ? 0 : 1
             border.color: osdWindow.isAttached ? "transparent" : ThemeBackend.surface0
@@ -418,7 +414,7 @@ PanelWindow {
                 y: 0
                 width: osdContainer.dynamicCornerRadius
                 height: osdContainer.dynamicCornerRadius
-                color: ThemeBackend.base
+                color: Qt.alpha(ThemeBackend.base, ThemeBackend.elementOpacity)
             }
 
             Rectangle {
@@ -427,7 +423,7 @@ PanelWindow {
                 y: 0
                 width: osdContainer.dynamicCornerRadius
                 height: osdContainer.dynamicCornerRadius
-                color: ThemeBackend.base
+                color: Qt.alpha(ThemeBackend.base, ThemeBackend.elementOpacity)
             }
 
             Rectangle {
@@ -436,7 +432,7 @@ PanelWindow {
                 y: parent.height - osdContainer.dynamicCornerRadius
                 width: osdContainer.dynamicCornerRadius
                 height: osdContainer.dynamicCornerRadius
-                color: ThemeBackend.base
+                color: Qt.alpha(ThemeBackend.base, ThemeBackend.elementOpacity)
             }
 
             Rectangle {
@@ -445,7 +441,7 @@ PanelWindow {
                 y: parent.height - osdContainer.dynamicCornerRadius
                 width: osdContainer.dynamicCornerRadius
                 height: osdContainer.dynamicCornerRadius
-                color: ThemeBackend.base
+                color: Qt.alpha(ThemeBackend.base, ThemeBackend.elementOpacity)
             }
 
             Rectangle {
@@ -454,7 +450,7 @@ PanelWindow {
                 y: 0
                 width: osdContainer.dynamicCornerRadius
                 height: osdContainer.dynamicCornerRadius
-                color: ThemeBackend.base
+                color: Qt.alpha(ThemeBackend.base, ThemeBackend.elementOpacity)
             }
 
             Rectangle {
@@ -463,7 +459,7 @@ PanelWindow {
                 y: parent.height - osdContainer.dynamicCornerRadius
                 width: osdContainer.dynamicCornerRadius
                 height: osdContainer.dynamicCornerRadius
-                color: ThemeBackend.base
+                color: Qt.alpha(ThemeBackend.base, ThemeBackend.elementOpacity)
             }
 
             Rectangle {
@@ -472,7 +468,7 @@ PanelWindow {
                 y: 0
                 width: osdContainer.dynamicCornerRadius
                 height: osdContainer.dynamicCornerRadius
-                color: ThemeBackend.base
+                color: Qt.alpha(ThemeBackend.base, ThemeBackend.elementOpacity)
             }
 
             Rectangle {
@@ -481,7 +477,7 @@ PanelWindow {
                 y: parent.height - osdContainer.dynamicCornerRadius
                 width: osdContainer.dynamicCornerRadius
                 height: osdContainer.dynamicCornerRadius
-                color: ThemeBackend.base
+                color: Qt.alpha(ThemeBackend.base, ThemeBackend.elementOpacity)
             }
 
             HoverHandler {
@@ -636,7 +632,7 @@ PanelWindow {
                         if (osdWindow.kind === "brightness") {
                             OsdController.briVal = pct;
                             briCmdThrottle.targetPct = pct;
-                            if (!verticalSlider.isDragging) briCmdThrottle.restart();
+                            if (!briCmdThrottle.running) briCmdThrottle.start();
                         } else if (osdWindow.kind === "volume") {
                             cmdThrottle.targetPct = pct;
                             if (!cmdThrottle.running) cmdThrottle.start();
@@ -840,7 +836,7 @@ PanelWindow {
                         if (osdWindow.kind === "brightness") {
                             OsdController.briVal = pct;
                             briCmdThrottle.targetPct = pct;
-                            if (!horizontalSlider.isDragging) briCmdThrottle.restart();
+                            if (!briCmdThrottle.running) briCmdThrottle.start();
                         } else if (osdWindow.kind === "volume") {
                             cmdThrottle.targetPct = pct;
                             if (!cmdThrottle.running) cmdThrottle.start();

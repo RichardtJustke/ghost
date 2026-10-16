@@ -28,6 +28,7 @@ hl.bind(mainMod .. " + TAB", hl.dsp.exec_cmd("bash ~/.config/hypr/scripts/focus_
 hl.bind("ALT + F4", hl.dsp.window.close())
 -- (do antigo) SUPER+C também fechava a janela — mantido como atalho extra
 hl.bind(mainMod .. " + C", hl.dsp.window.close())
+hl.bind(mainMod .. " + ALT + F", hl.dsp.window.fullscreen({ mode = "maximized", action = "toggle" }))
 hl.bind(mainMod .. " + SHIFT + F", hl.dsp.window.float({ action = "toggle" }))
 
 -- ───────── Brilho / lock (locked = funcionam mesmo com tela travada) ─────────

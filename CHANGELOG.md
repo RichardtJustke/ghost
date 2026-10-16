@@ -1,3 +1,20 @@
+### 2.6.0
+
+- merge: sync the Quickshell modules and installer with upstream 2.2.11; lock screen and Ghost-only features kept as they were
+- feat(mango): Mango compositor support (config, tags/windows tracking, keyboard layout, display settings, idle dpms, installer option)
+- feat(bar): orientation-aware faces replace the separate side variants; adjustable bar thickness, center by edges, rounded edge-attached fill, media width slider and duration/author switch
+- feat(theme): global element opacity setting and dock background toggle
+- feat(music): native channel balance, restyled audio tab, ring wave visualizer and bars/continuous switch for the round face
+- feat(widgets): circle variant for the battery widget, number selector that repeats while held
+- feat(guide): related settings grouped into blobs across the guide tabs
+- feat(notifications): close with right click
+- feat(idle): lock before system sleep without screenshot; screensaver inhibit and sleep lock merged into one helper
+- feat(keybinds): maximize toggle on Mod+Alt+F (Hyprland, Niri)
+- feat(install): SDDM greeter backend detection with safe fallbacks, terra repo for Fedora
+- perf: shader marquee, lazy screenshot overlay, fewer audio/lyrics/datetime updates, spread theme color updates
+- fix: launcher calculator decimal comma, brightness while dragging, paused player kept active, screenshot crop of the frozen frame
+- chore: bump version to 2.6.0
+
 ### 2.5.0
 
 - merge: sync the Quickshell modules and installer with upstream 2.2.9; lock screen and Ghost-only features kept as they were

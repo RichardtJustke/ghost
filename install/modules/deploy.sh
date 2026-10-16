@@ -126,6 +126,45 @@ install_wallpapers() {
     fi
 }
 
+resolve_sddm_backend() {
+    local requested_wayland="${1:-false}"
+    local wayland_cmd="" bin
+
+    if bin="$(find_sddm_binary weston)"; then
+        wayland_cmd="$bin --shell=kiosk"
+    elif bin="$(find_sddm_binary kwin_wayland)"; then
+        wayland_cmd="$bin --no-global-shortcuts --no-lockscreen --locale1"
+    fi
+
+    local has_xorg=false
+    if sddm_has_xorg; then
+        has_xorg=true
+    fi
+
+    if [ "$requested_wayland" = true ]; then
+        if [ -n "$wayland_cmd" ]; then
+            printf 'wayland\n%s\n' "$wayland_cmd"
+            return 0
+        elif [ "$has_xorg" = true ]; then
+            echo -e "  \e[33m[ WARN ]\e[0m $(t "installer.deploy.sddm_no_wayland_compositor")" >&2
+            echo "x11"
+            return 0
+        fi
+    else
+        if [ "$has_xorg" = true ]; then
+            echo "x11"
+            return 0
+        elif [ -n "$wayland_cmd" ]; then
+            echo -e "  \e[33m[ WARN ]\e[0m $(t "installer.deploy.sddm_no_xorg" "compositor=${wayland_cmd%% *}")" >&2
+            printf 'wayland\n%s\n' "$wayland_cmd"
+            return 0
+        fi
+    fi
+
+    echo -e "  \e[31m[ ERROR ]\e[0m $(t "installer.deploy.sddm_no_backend")" >&2
+    return 1
+}
+
 setup_sddm() {
     local project_root="$1"
     local install_state="${2:-$INSTALL_STATE}"
@@ -134,6 +173,19 @@ setup_sddm() {
     if [ "$OPT_SDDM" != true ]; then
         return 0
     fi
+
+    local sddm_display_server=""
+    local sddm_compositor_cmd=""
+    local backend_output=""
+    if ! backend_output=$(resolve_sddm_backend "$SDDM_WAYLAND"); then
+        echo -e "  \e[33m[ WARN ]\e[0m $(t "installer.deploy.sddm_skipped")" >&2
+        return 0
+    fi
+
+    {
+        read -r sddm_display_server
+        read -r sddm_compositor_cmd || true
+    } <<< "$backend_output"
 
     local is_update=false
     if [[ "$install_state" == "current" && "$is_reinstall" != "true" ]]; then
@@ -188,7 +240,7 @@ setup_sddm() {
 
     sudo mkdir -p /etc/sddm.conf.d
 
-    if [ "$SDDM_WAYLAND" = true ]; then
+    if [ "$sddm_display_server" = "wayland" ]; then
         cat <<EOF | sudo tee /etc/sddm.conf.d/10-material-you.conf > /dev/null
 [Theme]
 Current=material-you
@@ -198,6 +250,9 @@ ThemeDir=/usr/share/sddm/themes
 DisplayServer=wayland
 GreeterEnvironment=QT_WAYLAND_DISABLE_WINDOWDECORATION=1
 InputMethod=
+
+[Wayland]
+CompositorCommand=$sddm_compositor_cmd
 EOF
     else
         cat <<EOF | sudo tee /etc/sddm.conf.d/10-material-you.conf > /dev/null
@@ -206,6 +261,7 @@ Current=material-you
 ThemeDir=/usr/share/sddm/themes
 
 [General]
+DisplayServer=x11
 InputMethod=
 EOF
     fi

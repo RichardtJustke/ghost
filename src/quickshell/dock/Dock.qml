@@ -95,7 +95,7 @@ Variants {
                     "onTop": true,
                     "elementSize": 44,
                     "floating": false,
-                    "opacity": 100,
+                    "background": true,
                     "exclusive": false,
                     "autohide": false,
                     "smartAutohide": true,
@@ -196,9 +196,12 @@ Variants {
                 property bool isNiri: false
                 property bool isSway: false
                 property bool isHyprland: false
+                readonly property bool isMango: MangoState.isMango
                 readonly property string myOutput: (dockWindow.screen && dockWindow.screen.name) ? dockWindow.screen.name : ""
                 readonly property int niriActiveIndex: NiriState.activeIndexFor(myOutput)
                 readonly property var niriOccupiedMap: NiriState.occupiedMap
+                readonly property int mangoActiveIndex: MangoState.activeIndexFor(myOutput)
+                readonly property var mangoOccupiedMap: MangoState.occupiedByOutput
                 property int swayActiveIndex: 0
                 property var swayOccupiedMap: ({})
 
@@ -208,6 +211,8 @@ Variants {
                         idx = niriActiveIndex;
                     } else if (isSway) {
                         idx = swayActiveIndex;
+                    } else if (isMango) {
+                        idx = mangoActiveIndex;
                     } else if (isHyprland || typeof Hyprland !== "undefined") {
                         const fw = (typeof Hyprland !== "undefined") ? Hyprland.focusedWorkspace : null;
                         if (!fw) return -1;
@@ -222,6 +227,9 @@ Variants {
                     }
                     if (isSway) {
                         return !!swayOccupiedMap[activeIndex];
+                    }
+                    if (isMango) {
+                        return !!(mangoOccupiedMap && MangoState.isOccupied(myOutput, activeIndex));
                     }
                     if (typeof Hyprland !== "undefined") {
                         let ws = null;
@@ -596,12 +604,8 @@ Variants {
 
                 property bool rawDockFloating: rawDockSettings.floating !== undefined ? rawDockSettings.floating : false
                 property bool dockFloating: rawDockFloating || (sameSideAsBar && !isBarSolid)
-                property real dockOpacitySetting: {
-                    if (rawDockSettings.opacity !== undefined) return Number(rawDockSettings.opacity);
-                    if (rawDockSettings.transparency !== undefined) return Math.max(0, 100 - Number(rawDockSettings.transparency));
-                    return 100;
-                }
-                readonly property real dockOpacity: Math.max(0.0, Math.min(1.0, dockOpacitySetting / 100.0))
+                readonly property bool dockBackground: rawDockSettings.background !== undefined ? Boolean(rawDockSettings.background) : true
+                readonly property real dockOpacity: dockBackground ? ThemeBackend.elementOpacity : 0.0
                 property real floatingMargin: dockFloating ? s(8) : 0
                 Behavior on floatingMargin {
                     enabled: dockWindow.initialized && !dockWindow.positionChanging
@@ -1172,6 +1176,9 @@ Variants {
                     if (dockWindow.isSway) {
                         swayPoller.running = true;
                     }
+                    if (dockWindow.isMango) {
+                        MangoState.subscribe();
+                    }
                     if (typeof WindowTracker !== "undefined") {
                         WindowTracker.subscribe();
                     }
@@ -1183,6 +1190,9 @@ Variants {
                 Component.onDestruction: {
                     if (dockWindow.isNiri) {
                         NiriState.unsubscribe();
+                    }
+                    if (dockWindow.isMango) {
+                        MangoState.unsubscribe();
                     }
                     if (typeof WindowTracker !== "undefined") {
                         WindowTracker.unsubscribe();

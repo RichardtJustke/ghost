@@ -9,7 +9,6 @@ Item {
     property bool vertical: false
     implicitWidth: vertical ? 24 : 200
     implicitHeight: vertical ? 200 : 24
-    activeFocusOnTab: true
 
     property real from: 0.0
     property real to: 100.0
@@ -54,8 +53,6 @@ Item {
     property real animPosition: visualPosition
     readonly property real percentage: root.visualPosition * 100
 
-    property bool _keyboardActive: false
-
     Behavior on animPosition {
         enabled: !root.isDragging
         NumberAnimation {
@@ -64,14 +61,8 @@ Item {
         }
     }
 
-    Timer {
-        id: kbdTimer
-        interval: 1500
-        onTriggered: root._keyboardActive = false
-    }
-
     property bool isHoveredOrHighlighted: (sliderMa.containsMouse || root.action_highlight) && root.enabled
-    property bool handleShouldShow: root.enabled && (root.alwaysShowHandle || root.isDragging || (root.activeFocus && root._keyboardActive))
+    property bool handleShouldShow: root.enabled && (root.alwaysShowHandle || root.isDragging)
 
     property real targetScale: {
         if (!root.handleShouldShow) return 0.0;
@@ -142,24 +133,6 @@ Item {
         handlePopAnim.restart();
     }
 
-    Keys.onPressed: event => {
-        root._keyboardActive = true;
-        kbdTimer.restart();
-        if (event.key === Qt.Key_Left || event.key === Qt.Key_Down) {
-            root.nudge(-1);
-            event.accepted = true;
-        } else if (event.key === Qt.Key_Right || event.key === Qt.Key_Up) {
-            root.nudge(1);
-            event.accepted = true;
-        } else if (event.key === Qt.Key_Home) {
-            root.setValue(root.from, false);
-            event.accepted = true;
-        } else if (event.key === Qt.Key_End) {
-            root.setValue(root.to, false);
-            event.accepted = true;
-        }
-    }
-
     Rectangle {
         id: bgTrack
         anchors.fill: parent
@@ -202,18 +175,6 @@ Item {
         color: "transparent"
         border.color: Qt.rgba(1, 1, 1, 0.06)
         border.width: 1
-    }
-
-    Rectangle {
-        id: focusRing
-        anchors.centerIn: handle
-        width: handle.width + 8
-        height: handle.height + 8
-        radius: Math.min(width, height) / 2
-        color: "transparent"
-        border.width: 2
-        border.color: root.accentColor
-        visible: root.activeFocus && root._keyboardActive
     }
 
     Rectangle {
@@ -294,8 +255,8 @@ Item {
 
     Rectangle {
         id: valueBubble
-        property real previewVal: root._keyboardActive ? root.effectiveValue : root.valueAtPos(sliderMa.mouseX, sliderMa.mouseY)
-        property bool shouldShow: root.showTooltip && !root.isDragging && (root.isHoveredOrHighlighted || root._keyboardActive) && (root.valueFormatter(previewVal) !== root.valueFormatter(root.effectiveValue))
+        property real previewVal: root.valueAtPos(sliderMa.mouseX, sliderMa.mouseY)
+        property bool shouldShow: root.showTooltip && !root.isDragging && root.isHoveredOrHighlighted && (root.valueFormatter(previewVal) !== root.valueFormatter(root.effectiveValue))
 
         visible: opacity > 0.001
         opacity: shouldShow ? 1.0 : 0.0
@@ -320,8 +281,8 @@ Item {
         color: root.accentColor
 
         property real targetCenter: root.vertical
-            ? (root._keyboardActive ? handle.y + handle.height / 2 : Math.max(0, Math.min(root.height, sliderMa.mouseY)))
-            : (root._keyboardActive ? handle.x + handle.width / 2 : Math.max(0, Math.min(root.width, sliderMa.mouseX)))
+            ? Math.max(0, Math.min(root.height, sliderMa.mouseY))
+            : Math.max(0, Math.min(root.width, sliderMa.mouseX))
 
         x: root.vertical
             ? handle.x - width - 8
@@ -379,7 +340,6 @@ Item {
 
         onPressed: mouse => {
             if (!root.enabled) return;
-            root.forceActiveFocus();
             root.isDragging = true;
             root.dragPreview = root.value;
             root._lastStepValue = root.value;

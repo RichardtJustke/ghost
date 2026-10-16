@@ -32,7 +32,7 @@ Rectangle {
     Layout.preferredHeight: slidersCol.implicitHeight + panel.s(20)
     Layout.maximumHeight: slidersCol.implicitHeight + panel.s(20)
     radius: panel.boxRadius
-    color: Qt.darker(ThemeBackend.surface0, 1.04)
+    color: ThemeBackend.faded(Qt.darker(ThemeBackend.surface0, 1.04))
     opacity: panel.introSliders
     transform: Translate { x: (panel.isLeftAnchored ? -panel.rowSlideDistance : panel.rowSlideDistance) * (1.0 - panel.introSliders) }
 
@@ -154,7 +154,7 @@ Rectangle {
 
             Timer {
                 id: briCmdThrottle
-                interval: 400
+                interval: 120
                 property int targetPct: -1
                 onTriggered: {
                     if (targetPct >= 0) {
@@ -204,7 +204,7 @@ Rectangle {
                     panel.sysBrightness = pct;
                     briSlider.value = pct;
                     briCmdThrottle.targetPct = pct;
-                    if (!briSlider.isDragging) briCmdThrottle.restart();
+                    if (!briCmdThrottle.running) briCmdThrottle.start();
                 }
             }
         }

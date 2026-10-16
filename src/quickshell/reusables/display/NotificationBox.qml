@@ -20,7 +20,7 @@ Item {
     property var rootContext: null
     property real cornerRadius: Math.min(ThemeBackend.borderRadius, root.s(20))
     property real cardRadius: Math.min(ThemeBackend.borderRadius, root.s(14))
-    property color baseColor: Qt.darker(ThemeBackend.surface0, 1.04)
+    property color baseColor: ThemeBackend.faded(Qt.darker(ThemeBackend.surface0, 1.04))
     property color borderColor: "transparent"
     property real borderWidth: 0
     property bool hasShadow: false
@@ -521,7 +521,7 @@ Item {
                                     anchors.fill: parent
                                     radius: root.cardRadius
                                     property color baseColor: (typeof unreadCount !== "undefined" && unreadCount > 0) ? Qt.lighter(ThemeBackend.surface1, 1.05) : ThemeBackend.surface1
-                                    color: (groupHeaderMa.pressed && !groupHeaderMa.draggingH && !groupHeaderMa.draggingV) ? Qt.darker(baseColor, 1.1) : (groupHeaderMa.containsMouse && !groupHeaderMa.draggingH && !groupHeaderMa.draggingV ? Qt.lighter(baseColor, 1.05) : baseColor)
+                                    color: ThemeBackend.faded((groupHeaderMa.pressed && !groupHeaderMa.draggingH && !groupHeaderMa.draggingV) ? Qt.darker(baseColor, 1.1) : (groupHeaderMa.containsMouse && !groupHeaderMa.draggingH && !groupHeaderMa.draggingV ? Qt.lighter(baseColor, 1.05) : baseColor))
                                     scale: (groupHeaderMa.pressed && !groupHeaderMa.draggingH && !groupHeaderMa.draggingV) ? 0.98 : 1.0
                                     Behavior on color { enabled: !groupHeaderMa.draggingH && !groupHeaderMa.draggingV; ColorAnimation { duration: 150 } }
                                     Behavior on scale { enabled: !groupHeaderMa.draggingH && !groupHeaderMa.draggingV; NumberAnimation { duration: 150; easing.type: Easing.OutQuint } }

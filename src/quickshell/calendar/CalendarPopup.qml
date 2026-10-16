@@ -456,7 +456,7 @@ Item {
         Rectangle {
             anchors.fill: parent
             radius: ThemeBackend.borderRadius
-            color: window.base
+            color: Qt.alpha(ThemeBackend.base, ThemeBackend.elementOpacity)
             border.color: window.surface0
             border.width: 1
             clip: true

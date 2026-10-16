@@ -370,7 +370,7 @@ PanelWindow {
                     }
                     return trayMenuWindow.alignBottom ? 3.0 : 1.0;
                 }
-                property color color: ThemeBackend.base
+                property color color: Qt.alpha(ThemeBackend.base, ThemeBackend.elementOpacity)
                 fragmentShader: "file://" + Caching.ghostDir + "/assets/shaders/ui/corner_cutout.frag.qsb"
             }
 
@@ -397,14 +397,14 @@ PanelWindow {
                     }
                     return trayMenuWindow.alignBottom ? 2.0 : 0.0;
                 }
-                property color color: ThemeBackend.base
+                property color color: Qt.alpha(ThemeBackend.base, ThemeBackend.elementOpacity)
                 fragmentShader: "file://" + Caching.ghostDir + "/assets/shaders/ui/corner_cutout.frag.qsb"
             }
 
             Rectangle {
                 id: menuBox
                 anchors.fill: parent
-                color: ThemeBackend.base
+                color: Qt.alpha(ThemeBackend.base, ThemeBackend.elementOpacity)
                 radius: trayMenuWindow.cornerRadius
                 border.width: 0
                 border.color: "transparent"
@@ -416,7 +416,7 @@ PanelWindow {
                     y: 0
                     width: menuContainer.dynamicCornerRadius
                     height: menuContainer.dynamicCornerRadius
-                    color: ThemeBackend.base
+                    color: Qt.alpha(ThemeBackend.base, ThemeBackend.elementOpacity)
                 }
 
                 Rectangle {
@@ -425,7 +425,7 @@ PanelWindow {
                     y: 0
                     width: menuContainer.dynamicCornerRadius
                     height: menuContainer.dynamicCornerRadius
-                    color: ThemeBackend.base
+                    color: Qt.alpha(ThemeBackend.base, ThemeBackend.elementOpacity)
                 }
 
                 Rectangle {
@@ -434,7 +434,7 @@ PanelWindow {
                     y: parent.height - menuContainer.dynamicCornerRadius
                     width: menuContainer.dynamicCornerRadius
                     height: menuContainer.dynamicCornerRadius
-                    color: ThemeBackend.base
+                    color: Qt.alpha(ThemeBackend.base, ThemeBackend.elementOpacity)
                 }
 
                 Rectangle {
@@ -443,7 +443,7 @@ PanelWindow {
                     y: parent.height - menuContainer.dynamicCornerRadius
                     width: menuContainer.dynamicCornerRadius
                     height: menuContainer.dynamicCornerRadius
-                    color: ThemeBackend.base
+                    color: Qt.alpha(ThemeBackend.base, ThemeBackend.elementOpacity)
                 }
 
                 Rectangle {
@@ -452,7 +452,7 @@ PanelWindow {
                     y: 0
                     width: menuContainer.dynamicCornerRadius
                     height: menuContainer.dynamicCornerRadius
-                    color: ThemeBackend.base
+                    color: Qt.alpha(ThemeBackend.base, ThemeBackend.elementOpacity)
                 }
 
                 Rectangle {
@@ -461,7 +461,7 @@ PanelWindow {
                     y: parent.height - menuContainer.dynamicCornerRadius
                     width: menuContainer.dynamicCornerRadius
                     height: menuContainer.dynamicCornerRadius
-                    color: ThemeBackend.base
+                    color: Qt.alpha(ThemeBackend.base, ThemeBackend.elementOpacity)
                 }
 
                 Rectangle {
@@ -470,7 +470,7 @@ PanelWindow {
                     y: 0
                     width: menuContainer.dynamicCornerRadius
                     height: menuContainer.dynamicCornerRadius
-                    color: ThemeBackend.base
+                    color: Qt.alpha(ThemeBackend.base, ThemeBackend.elementOpacity)
                 }
 
                 Rectangle {
@@ -479,7 +479,7 @@ PanelWindow {
                     y: parent.height - menuContainer.dynamicCornerRadius
                     width: menuContainer.dynamicCornerRadius
                     height: menuContainer.dynamicCornerRadius
-                    color: ThemeBackend.base
+                    color: Qt.alpha(ThemeBackend.base, ThemeBackend.elementOpacity)
                 }
 
                 HoverHandler {
@@ -700,7 +700,7 @@ PanelWindow {
                     height: submenuPopout.subCornerRadius
                     property vector2d itemSize: Qt.vector2d(width, height)
                     property real cornerIndex: submenuPopout.expandRight ? 2.0 : 3.0
-                    property color color: ThemeBackend.base
+                    property color color: Qt.alpha(ThemeBackend.base, ThemeBackend.elementOpacity)
                     fragmentShader: "file://" + Caching.ghostDir + "/assets/shaders/ui/corner_cutout.frag.qsb"
                 }
 
@@ -712,14 +712,14 @@ PanelWindow {
                     height: submenuPopout.subCornerRadius
                     property vector2d itemSize: Qt.vector2d(width, height)
                     property real cornerIndex: submenuPopout.expandRight ? 0.0 : 1.0
-                    property color color: ThemeBackend.base
+                    property color color: Qt.alpha(ThemeBackend.base, ThemeBackend.elementOpacity)
                     fragmentShader: "file://" + Caching.ghostDir + "/assets/shaders/ui/corner_cutout.frag.qsb"
                 }
 
                 Rectangle {
                     id: subMenuBox
                     anchors.fill: parent
-                    color: ThemeBackend.base
+                    color: Qt.alpha(ThemeBackend.base, ThemeBackend.elementOpacity)
                     radius: trayMenuWindow.cornerRadius
                     border.width: 0
                     border.color: "transparent"
@@ -731,7 +731,7 @@ PanelWindow {
                         y: 0
                         width: submenuPopout.subCornerRadius
                         height: submenuPopout.subCornerRadius
-                        color: ThemeBackend.base
+                        color: Qt.alpha(ThemeBackend.base, ThemeBackend.elementOpacity)
                     }
 
                     Rectangle {
@@ -740,7 +740,7 @@ PanelWindow {
                         y: parent.height - submenuPopout.subCornerRadius
                         width: submenuPopout.subCornerRadius
                         height: submenuPopout.subCornerRadius
-                        color: ThemeBackend.base
+                        color: Qt.alpha(ThemeBackend.base, ThemeBackend.elementOpacity)
                     }
 
                     Rectangle {
@@ -749,7 +749,7 @@ PanelWindow {
                         y: 0
                         width: submenuPopout.subCornerRadius
                         height: submenuPopout.subCornerRadius
-                        color: ThemeBackend.base
+                        color: Qt.alpha(ThemeBackend.base, ThemeBackend.elementOpacity)
                     }
 
                     Rectangle {
@@ -758,7 +758,7 @@ PanelWindow {
                         y: parent.height - submenuPopout.subCornerRadius
                         width: submenuPopout.subCornerRadius
                         height: submenuPopout.subCornerRadius
-                        color: ThemeBackend.base
+                        color: Qt.alpha(ThemeBackend.base, ThemeBackend.elementOpacity)
                     }
 
                     HoverHandler {

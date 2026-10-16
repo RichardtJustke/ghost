@@ -341,8 +341,34 @@ Rectangle {
     onSettingIdChanged: searchRegTimer.restart()
     onHiddenByConfigChanged: searchRegTimer.restart()
 
+    readonly property var blobPlacement: {
+        let child = root;
+        let p = root.parent;
+        let nested = false;
+        while (p) {
+            if (p.isBlobColumn) return { inBlob: true, nested: nested, holder: child, column: p };
+            if (p.isGroupSubWrapper) nested = true;
+            if (p.tabIndex !== undefined || p.isGuidePopup || p.isGuideTab) break;
+            child = p;
+            p = p.parent;
+        }
+        return { inBlob: false, nested: false, holder: null, column: null };
+    }
+    readonly property bool inBlob: blobPlacement.inBlob
+
+    readonly property bool blobDividerVisible: {
+        let pl = blobPlacement;
+        if (!pl.inBlob || pl.nested) return false;
+        let sibs = pl.column.children;
+        for (let i = 0; i < sibs.length; i++) {
+            if (sibs[i] === pl.holder) return false;
+            if (sibs[i].visible && sibs[i].height > 0.01) return true;
+        }
+        return false;
+    }
+
     property real cornerRadius: ThemeBackend.borderRadius
-    property color baseColor: Qt.alpha(ThemeBackend.surface0, 0.4)
+    property color baseColor: root.inBlob ? (root.blobPlacement.nested ? Qt.alpha(ThemeBackend.surface1, 0.25) : "transparent") : Qt.alpha(ThemeBackend.surface0, 0.4)
     property color hoverColor: Qt.alpha(ThemeBackend.surface1, 0.4)
     property color borderColor: "transparent"
     property int borderWidth: 0
@@ -400,6 +426,13 @@ Rectangle {
         if (root.dimmed) base = Qt.alpha(base, base.a * 0.5);
         if (root.highlightFlash > 0.001) {
             let k = root.dimmed ? 0.2 : 0.12;
+            if (root.inBlob) {
+                if (base.a < 0.001) {
+                    let cardAlpha = 0.4;
+                    let overlayAlpha = k * cardAlpha / (1 - k + k * cardAlpha);
+                    return Qt.rgba(ThemeBackend.mauve.r, ThemeBackend.mauve.g, ThemeBackend.mauve.b, root.highlightFlash * overlayAlpha);
+                }
+            }
             return Qt.tint(base, Qt.rgba(ThemeBackend.mauve.r, ThemeBackend.mauve.g, ThemeBackend.mauve.b, root.highlightFlash * k));
         }
         return base;
@@ -562,6 +595,17 @@ Rectangle {
             spacing: root.bottomSpacing
             visible: children.length > 0
         }
+    }
+
+    Rectangle {
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.leftMargin: root.horizontalPadding
+        anchors.rightMargin: root.horizontalPadding
+        height: 1
+        color: root.dividerColor
+        visible: root.blobDividerVisible
     }
 
     MouseArea {

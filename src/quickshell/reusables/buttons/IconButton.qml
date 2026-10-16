@@ -33,6 +33,8 @@ Item {
     property real flashOpacity: 0.0
     property real popScale: 1.0
 
+    readonly property bool pressed: btnMa.pressed
+
     property bool isHoveredOrHighlighted: (btnMa.containsMouse || root.action_highlight) && root.enabled
 
     Item {

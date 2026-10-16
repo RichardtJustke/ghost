@@ -212,6 +212,7 @@ Rectangle {
         id: cardHover
         anchors.fill: parent
         hoverEnabled: true
+        acceptedButtons: Qt.LeftButton | Qt.RightButton
         cursorShape: Qt.PointingHandCursor
         property real startRootX: 0
         property real startRootY: 0
@@ -225,6 +226,7 @@ Rectangle {
         }
 
         onPressed: (mouse) => {
+            if (mouse.button === Qt.RightButton) return;
             let r = getTrackingRoot();
             let pt = mapToItem(r, mouse.x, mouse.y);
             startRootX = pt.x;
@@ -236,7 +238,7 @@ Rectangle {
         }
 
         onPositionChanged: (mouse) => {
-            if (!pressed) return;
+            if (!pressed || pressedButtons !== Qt.LeftButton) return;
             let r = getTrackingRoot();
             let pt = mapToItem(r, mouse.x, mouse.y);
             let dx = pt.x - startRootX;
@@ -264,6 +266,14 @@ Rectangle {
         }
 
         onReleased: (mouse) => {
+            if (mouse.button === Qt.RightButton) {
+                let cfg = Config.getSetting("notifications", {});
+                if (!cfg || cfg.rightClickClose !== false) {
+                    typeRoot.isDismissing = true;
+                    typeRoot.doClose();
+                }
+                return;
+            }
             cardHover.preventStealing = false;
             if (draggingH) {
                 let threshold = typeRoot.width * 0.18;
@@ -396,7 +406,7 @@ Rectangle {
         implicitHeight: cardContent.implicitHeight + s(20)
 
         property color baseColor: typeRoot.readState === false ? Qt.lighter(ThemeBackend.surface1, 1.05) : ThemeBackend.surface1
-        color: (cardHover.pressed && !cardHover.draggingH && !cardHover.draggingV) ? Qt.darker(baseColor, 1.1) : (cardHover.containsMouse && !cardHover.draggingH && !cardHover.draggingV ? Qt.lighter(baseColor, 1.05) : baseColor)
+        color: ThemeBackend.faded((cardHover.pressed && !cardHover.draggingH && !cardHover.draggingV) ? Qt.darker(baseColor, 1.1) : (cardHover.containsMouse && !cardHover.draggingH && !cardHover.draggingV ? Qt.lighter(baseColor, 1.05) : baseColor))
 
         scale: (cardHover.pressed && !cardHover.draggingH && !cardHover.draggingV) ? 0.98 : 1.0
 
@@ -540,7 +550,7 @@ Rectangle {
                     Rectangle {
                         anchors.fill: parent
                         radius: parent.boxRadius
-                        color: typeRoot.urgency === 2 ? Qt.tint(ThemeBackend.surface2, Qt.rgba(urgencyGlow.deepRed.r, urgencyGlow.deepRed.g, urgencyGlow.deepRed.b, 0.12)) : ThemeBackend.surface2
+                        color: ThemeBackend.faded(typeRoot.urgency === 2 ? Qt.tint(ThemeBackend.surface2, Qt.rgba(urgencyGlow.deepRed.r, urgencyGlow.deepRed.g, urgencyGlow.deepRed.b, 0.12)) : ThemeBackend.surface2)
 
                         Behavior on color { ColorAnimation { duration: 200 } }
                     }

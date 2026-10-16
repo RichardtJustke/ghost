@@ -219,6 +219,10 @@ Scope {
         function activate(): void {
             root.lock();
         }
+
+        function activateStatic(): void {
+            root.lock();
+        }
     }
 
     Settings {

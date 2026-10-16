@@ -184,10 +184,16 @@ Item {
         return true;
     }
 
-    property bool mediaShowDuration: {
+    property string mediaInfoMode: {
         let bs = Config.getSetting("bar", {});
-        if (bs && bs.mediaShowDuration !== undefined) return Boolean(bs.mediaShowDuration);
-        return true;
+        if (bs && bs.mediaInfoMode) return bs.mediaInfoMode;
+        return "duration";
+    }
+
+    property int mediaWidth: {
+        let bs = Config.getSetting("bar", {});
+        if (bs && bs.mediaWidth !== undefined) return Math.round(Number(bs.mediaWidth));
+        return 120;
     }
 
     property bool mediaShowIcon: {
@@ -220,17 +226,14 @@ Item {
         return true;
     }
 
-    property real barOpacity: {
-        let bs = Config.getSetting("bar", {});
-        if (bs && bs.opacity !== undefined) return bs.opacity / 100.0;
-        return 1.0;
-    }
+    property real barOpacity: ThemeBackend.elementOpacity
 
     readonly property var previewWidget: ({
-        "s": function(v) { return rootObj ? rootObj.s(v) : v; },
+        "s": function(v) { return rootObj ? rootObj.s(v) : v; }, "cs": function(v) { return rootObj ? rootObj.s(v) : v; },
         "workspaceCount": 5,
         "activeIndex": 1,
         "isCompact": false,
+        "orientation": barModulesRoot.isSideBar ? "vertical" : "horizontal",
         "isOccupied": function(idx) { return idx === 0 || idx === 1 || idx === 2; },
         "focusWorkspace": function(idx) {},
         "barWindow": { "startupCascadeFinished": true, "barOpacity": barModulesRoot.barOpacity },
@@ -241,6 +244,7 @@ Item {
         id: previewTimeWidgetObj
         function s(v) { return rootObj ? rootObj.s(v) : v; }
         property bool isCompact: false
+        property string orientation: barModulesRoot.isSideBar ? "vertical" : "horizontal"
         property bool showDate: barModulesRoot.timeShowDate
         property string timeStr: (typeof DateTime !== "undefined" && DateTime.time) ? DateTime.time : "14:28"
         property string hourStr: (typeof DateTime !== "undefined" && DateTime.hour) ? DateTime.hour : "14"
@@ -250,7 +254,7 @@ Item {
         property string monthStr: (typeof DateTime !== "undefined" && DateTime.monthShort) ? DateTime.monthShort : "Sep"
         property string fullDateStr: (typeof DateTime !== "undefined" && DateTime.fullDate) ? DateTime.fullDate : "Fri, Sep 18"
         property string dateStr: (typeof DateTime !== "undefined" && DateTime.fullDate) ? DateTime.fullDate : "Fri, Sep 18"
-        property var barWindow: ({ "startupCascadeFinished": true, "barOpacity": barModulesRoot.barOpacity, "s": function(v) { return rootObj ? rootObj.s(v) : v; } })
+        property var barWindow: ({ "startupCascadeFinished": true, "barOpacity": barModulesRoot.barOpacity, "s": function(v) { return rootObj ? rootObj.s(v) : v; }, "cs": function(v) { return rootObj ? rootObj.s(v) : v; } })
         property bool moduleActive: barModulesRoot.visible
     }
 
@@ -258,11 +262,12 @@ Item {
         id: previewVisWidgetObj
         function s(v) { return rootObj ? rootObj.s(v) : v; }
         property bool isCompact: false
+        property string orientation: barModulesRoot.isSideBar ? "vertical" : "horizontal"
         property int barCount: barModulesRoot.visBarCount
         property string visAlignment: barModulesRoot.visAlignment
         property bool visContinuous: barModulesRoot.visContinuous
         property bool isPreview: true
-        property var barWindow: ({ "startupCascadeFinished": true, "isStartupReady": true, "barOpacity": barModulesRoot.barOpacity, "s": function(v) { return rootObj ? rootObj.s(v) : v; } })
+        property var barWindow: ({ "startupCascadeFinished": true, "isStartupReady": true, "barOpacity": barModulesRoot.barOpacity, "s": function(v) { return rootObj ? rootObj.s(v) : v; }, "cs": function(v) { return rootObj ? rootObj.s(v) : v; } })
         property bool moduleActive: barModulesRoot.visible
     }
 
@@ -270,10 +275,11 @@ Item {
         id: previewSysWidgetObj
         function s(v) { return rootObj ? rootObj.s(v) : v; }
         property bool isCompact: false
+        property string orientation: barModulesRoot.isSideBar ? "vertical" : "horizontal"
         property string sysmonStyle: barModulesRoot.sysmonStyle
         property var sysmonStats: barModulesRoot.sysmonStats
         property bool isPreview: true
-        property var barWindow: ({ "startupCascadeFinished": true, "isStartupReady": true, "isDataReady": true, "barOpacity": barModulesRoot.barOpacity, "s": function(v) { return rootObj ? rootObj.s(v) : v; } })
+        property var barWindow: ({ "startupCascadeFinished": true, "isStartupReady": true, "isDataReady": true, "barOpacity": barModulesRoot.barOpacity, "s": function(v) { return rootObj ? rootObj.s(v) : v; }, "cs": function(v) { return rootObj ? rootObj.s(v) : v; } })
         property bool moduleActive: barModulesRoot.visible
     }
 
@@ -281,11 +287,12 @@ Item {
         id: previewBatWidgetObj
         function s(v) { return rootObj ? rootObj.s(v) : v; }
         property bool isCompact: false
+        property string orientation: barModulesRoot.isSideBar ? "vertical" : "horizontal"
         property string batStyle: barModulesRoot.batStyle
         property bool batShowPercent: barModulesRoot.batShowPercent
         property bool batShowIcon: barModulesRoot.batShowIcon
         property bool isPreview: true
-        property var barWindow: ({ "startupCascadeFinished": true, "isStartupReady": true, "isDataReady": true, "barOpacity": barModulesRoot.barOpacity, "s": function(v) { return rootObj ? rootObj.s(v) : v; } })
+        property var barWindow: ({ "startupCascadeFinished": true, "isStartupReady": true, "isDataReady": true, "barOpacity": barModulesRoot.barOpacity, "s": function(v) { return rootObj ? rootObj.s(v) : v; }, "cs": function(v) { return rootObj ? rootObj.s(v) : v; } })
         property bool moduleActive: barModulesRoot.visible
     }
 
@@ -293,11 +300,12 @@ Item {
         id: previewWifiWidgetObj
         function s(v) { return rootObj ? rootObj.s(v) : v; }
         property bool isCompact: false
+        property string orientation: barModulesRoot.isSideBar ? "vertical" : "horizontal"
         property string wifiStyle: barModulesRoot.wifiStyle
         property bool wifiShowIcon: barModulesRoot.wifiShowIcon
         property bool wifiShowName: barModulesRoot.wifiShowName
         property bool isPreview: true
-        property var barWindow: ({ "startupCascadeFinished": true, "isStartupReady": true, "isDataReady": true, "barOpacity": barModulesRoot.barOpacity, "s": function(v) { return rootObj ? rootObj.s(v) : v; } })
+        property var barWindow: ({ "startupCascadeFinished": true, "isStartupReady": true, "isDataReady": true, "barOpacity": barModulesRoot.barOpacity, "s": function(v) { return rootObj ? rootObj.s(v) : v; }, "cs": function(v) { return rootObj ? rootObj.s(v) : v; } })
         property bool moduleActive: barModulesRoot.visible
     }
 
@@ -305,11 +313,12 @@ Item {
         id: previewBtWidgetObj
         function s(v) { return rootObj ? rootObj.s(v) : v; }
         property bool isCompact: false
+        property string orientation: barModulesRoot.isSideBar ? "vertical" : "horizontal"
         property string btStyle: barModulesRoot.btStyle
         property bool btShowIcon: barModulesRoot.btShowIcon
         property bool btShowName: barModulesRoot.btShowName
         property bool isPreview: true
-        property var barWindow: ({ "startupCascadeFinished": true, "isStartupReady": true, "isDataReady": true, "barOpacity": barModulesRoot.barOpacity, "s": function(v) { return rootObj ? rootObj.s(v) : v; } })
+        property var barWindow: ({ "startupCascadeFinished": true, "isStartupReady": true, "isDataReady": true, "barOpacity": barModulesRoot.barOpacity, "s": function(v) { return rootObj ? rootObj.s(v) : v; }, "cs": function(v) { return rootObj ? rootObj.s(v) : v; } })
         property bool moduleActive: barModulesRoot.visible
     }
 
@@ -317,11 +326,12 @@ Item {
         id: previewVolWidgetObj
         function s(v) { return rootObj ? rootObj.s(v) : v; }
         property bool isCompact: false
+        property string orientation: barModulesRoot.isSideBar ? "vertical" : "horizontal"
         property string volStyle: barModulesRoot.volStyle
         property bool volShowIcon: barModulesRoot.volShowIcon
         property bool volShowPercent: barModulesRoot.volShowPercent
         property bool isPreview: true
-        property var barWindow: ({ "startupCascadeFinished": true, "isStartupReady": true, "isDataReady": true, "barOpacity": barModulesRoot.barOpacity, "s": function(v) { return rootObj ? rootObj.s(v) : v; } })
+        property var barWindow: ({ "startupCascadeFinished": true, "isStartupReady": true, "isDataReady": true, "barOpacity": barModulesRoot.barOpacity, "s": function(v) { return rootObj ? rootObj.s(v) : v; }, "cs": function(v) { return rootObj ? rootObj.s(v) : v; } })
         property bool moduleActive: barModulesRoot.visible
     }
 
@@ -329,10 +339,11 @@ Item {
         id: previewKbWidgetObj
         function s(v) { return rootObj ? rootObj.s(v) : v; }
         property bool isCompact: false
+        property string orientation: barModulesRoot.isSideBar ? "vertical" : "horizontal"
         property string kbStyle: barModulesRoot.kbStyle
         property bool kbShowIcon: barModulesRoot.kbShowIcon
         property bool isPreview: true
-        property var barWindow: ({ "startupCascadeFinished": true, "isStartupReady": true, "isDataReady": true, "barOpacity": barModulesRoot.barOpacity, "s": function(v) { return rootObj ? rootObj.s(v) : v; } })
+        property var barWindow: ({ "startupCascadeFinished": true, "isStartupReady": true, "isDataReady": true, "barOpacity": barModulesRoot.barOpacity, "s": function(v) { return rootObj ? rootObj.s(v) : v; }, "cs": function(v) { return rootObj ? rootObj.s(v) : v; } })
         property bool moduleActive: barModulesRoot.visible
     }
 
@@ -340,11 +351,13 @@ Item {
         id: previewMediaWidgetObj
         function s(v) { return rootObj ? rootObj.s(v) : v; }
         property bool isCompact: false
-        property bool mediaShowDuration: barModulesRoot.mediaShowDuration
+        property string orientation: barModulesRoot.isSideBar ? "vertical" : "horizontal"
+        property string mediaInfoMode: barModulesRoot.mediaInfoMode
+        property int mediaWidth: barModulesRoot.mediaWidth
         property bool mediaShowIcon: barModulesRoot.mediaShowIcon
         property bool mediaShowControls: barModulesRoot.mediaShowControls
         property bool isPreview: true
-        property var barWindow: ({ "startupCascadeFinished": true, "isStartupReady": true, "isDataReady": true, "barOpacity": barModulesRoot.barOpacity, "s": function(v) { return rootObj ? rootObj.s(v) : v; } })
+        property var barWindow: ({ "startupCascadeFinished": true, "isStartupReady": true, "isDataReady": true, "barOpacity": barModulesRoot.barOpacity, "s": function(v) { return rootObj ? rootObj.s(v) : v; }, "cs": function(v) { return rootObj ? rootObj.s(v) : v; } })
         property bool moduleActive: barModulesRoot.visible
     }
 
@@ -352,7 +365,7 @@ Item {
         if (!moduleId) return "";
         let modId = (variantId !== undefined) ? moduleId : "workspaces";
         let vId = (variantId !== undefined) ? variantId : moduleId;
-        return BarModuleRegistry.variantFaceFile(modId, vId, barModulesRoot.isSideBar);
+        return BarModuleRegistry.variantFaceFile(modId, vId);
     }
 
     function syncSettings() {
@@ -518,11 +531,8 @@ Item {
             barModulesRoot.kbShowIcon = true;
         }
 
-        if (bs && bs.mediaShowDuration !== undefined) {
-            barModulesRoot.mediaShowDuration = Boolean(bs.mediaShowDuration);
-        } else {
-            barModulesRoot.mediaShowDuration = true;
-        }
+        barModulesRoot.mediaInfoMode = (bs && bs.mediaInfoMode) ? bs.mediaInfoMode : "duration";
+        barModulesRoot.mediaWidth = (bs && bs.mediaWidth !== undefined) ? Math.round(Number(bs.mediaWidth)) : 120;
 
         if (bs && bs.mediaShowIcon !== undefined) {
             barModulesRoot.mediaShowIcon = Boolean(bs.mediaShowIcon);
@@ -547,11 +557,6 @@ Item {
         }
         if (!barModulesRoot.volShowIcon && !barModulesRoot.volShowPercent) {
             barModulesRoot.volShowIcon = true;
-        }
-        if (bs && bs.opacity !== undefined) {
-            barModulesRoot.barOpacity = bs.opacity / 100.0;
-        } else {
-            barModulesRoot.barOpacity = 1.0;
         }
     }
 
@@ -757,10 +762,16 @@ Item {
         Config.setSetting("bar", current);
     }
 
-    function setMediaShowDuration(val) {
-        barModulesRoot.mediaShowDuration = val;
+    function setMediaInfoMode(val) {
+        barModulesRoot.mediaInfoMode = val;
         let current = Config.getSetting("bar", {});
-        current.mediaShowDuration = val;
+        current.mediaInfoMode = val;
+        Config.setSetting("bar", current);
+    }
+
+    function setMediaWidth(val) {
+        let current = Config.getSetting("bar", {});
+        current.mediaWidth = val;
         Config.setSetting("bar", current);
     }
 
@@ -1537,7 +1548,7 @@ Item {
                                 height: item ? item.implicitHeight : rootObj.s(32)
                                 scale: Math.min(1.0, Math.min((visPreviewBox.width - rootObj.s(16)) / Math.max(1, width), (visPreviewBox.height - rootObj.s(16)) / Math.max(1, height)))
                                 asynchronous: false
-                                source: barModulesRoot.isSideBar ? Qt.resolvedUrl("../../bar/faces/vis/SideVisFace.qml") : Qt.resolvedUrl("../../bar/faces/vis/VisFace.qml")
+                                source: Qt.resolvedUrl("../../bar/faces/vis/VisFace.qml")
 
                                 onLoaded: {
                                     if (item) {
@@ -1736,7 +1747,7 @@ Item {
                                 height: item ? item.implicitHeight : rootObj.s(32)
                                 scale: Math.min(1.0, Math.min((sysmonPreviewBox.width - rootObj.s(16)) / Math.max(1, width), (sysmonPreviewBox.height - rootObj.s(16)) / Math.max(1, height)))
                                 asynchronous: false
-                                source: barModulesRoot.isSideBar ? Qt.resolvedUrl("../../bar/faces/sysmon/SideSysMonFace.qml") : Qt.resolvedUrl("../../bar/faces/sysmon/SysMonFace.qml")
+                                source: Qt.resolvedUrl("../../bar/faces/sysmon/SysMonFace.qml")
 
                                 onLoaded: {
                                     if (item) {
@@ -1925,9 +1936,7 @@ Item {
                                 height: item ? item.implicitHeight : 0
                                 scale: Math.min(1.0, Math.min((batPreviewBox.width - rootObj.s(16)) / Math.max(1, width), (batPreviewBox.height - rootObj.s(16)) / Math.max(1, height)))
                                 asynchronous: false
-                                source: barModulesRoot.isSideBar
-                                    ? Qt.resolvedUrl("../../bar/faces/bat/SideBatFace.qml")
-                                    : Qt.resolvedUrl("../../bar/faces/bat/BatFace.qml")
+                                source: Qt.resolvedUrl("../../bar/faces/bat/BatFace.qml")
 
                                 onLoaded: {
                                     if (item) {
@@ -2098,6 +2107,7 @@ Item {
                                                     id: cardMockWidget
                                                     function s(v) { return rootObj ? rootObj.s(v) : v; }
                                                     property bool isCompact: false
+                                                    property string orientation: barModulesRoot.isSideBar ? "vertical" : "horizontal"
                                                     property string batStyle: modelData.id
                                                     property bool batShowPercent: barModulesRoot.batShowPercent
                                                     property bool batShowIcon: barModulesRoot.batShowIcon
@@ -2107,7 +2117,7 @@ Item {
                                                         "isStartupReady": true,
                                                         "isDataReady": true,
                                                         "barOpacity": barModulesRoot.barOpacity,
-                                                        "s": function(v) { return rootObj ? rootObj.s(v) : v; }
+                                                        "s": function(v) { return rootObj ? rootObj.s(v) : v; }, "cs": function(v) { return rootObj ? rootObj.s(v) : v; }
                                                     })
                                                     property bool moduleActive: barModulesRoot.visible
                                                 }
@@ -2119,9 +2129,7 @@ Item {
                                                     height: item ? item.implicitHeight : 0
                                                     scale: Math.min(1.0, Math.min((batCardPreviewBox.width - rootObj.s(16)) / Math.max(1, width), (batCardPreviewBox.height - rootObj.s(16)) / Math.max(1, height)))
                                                     asynchronous: false
-                                                    source: barModulesRoot.isSideBar
-                                                        ? Qt.resolvedUrl("../../bar/faces/bat/SideBatFace.qml")
-                                                        : Qt.resolvedUrl("../../bar/faces/bat/BatFace.qml")
+                                                    source: Qt.resolvedUrl("../../bar/faces/bat/BatFace.qml")
 
                                                     onLoaded: {
                                                         if (item) {
@@ -2222,9 +2230,7 @@ Item {
                                 height: item ? item.implicitHeight : 0
                                 scale: Math.min(1.0, Math.min((wifiPreviewBox.width - rootObj.s(16)) / Math.max(1, width), (wifiPreviewBox.height - rootObj.s(16)) / Math.max(1, height)))
                                 asynchronous: false
-                                source: barModulesRoot.isSideBar
-                                    ? Qt.resolvedUrl("../../bar/faces/wifi/SideWifiFace.qml")
-                                    : Qt.resolvedUrl("../../bar/faces/wifi/WifiFace.qml")
+                                source: Qt.resolvedUrl("../../bar/faces/wifi/WifiFace.qml")
 
                                 onLoaded: {
                                     if (item) {
@@ -2392,6 +2398,7 @@ Item {
                                                     id: cardMockWidget
                                                     function s(v) { return rootObj ? rootObj.s(v) : v; }
                                                     property bool isCompact: false
+                                                    property string orientation: barModulesRoot.isSideBar ? "vertical" : "horizontal"
                                                     property string wifiStyle: modelData.id
                                                     property bool wifiShowIcon: barModulesRoot.wifiShowIcon
                                                     property bool wifiShowName: barModulesRoot.wifiShowName
@@ -2401,7 +2408,7 @@ Item {
                                                         "isStartupReady": true,
                                                         "isDataReady": true,
                                                         "barOpacity": barModulesRoot.barOpacity,
-                                                        "s": function(v) { return rootObj ? rootObj.s(v) : v; }
+                                                        "s": function(v) { return rootObj ? rootObj.s(v) : v; }, "cs": function(v) { return rootObj ? rootObj.s(v) : v; }
                                                     })
                                                     property bool moduleActive: barModulesRoot.visible
                                                 }
@@ -2413,9 +2420,7 @@ Item {
                                                     height: item ? item.implicitHeight : 0
                                                     scale: Math.min(1.0, Math.min((wifiCardPreviewBox.width - rootObj.s(16)) / Math.max(1, width), (wifiCardPreviewBox.height - rootObj.s(16)) / Math.max(1, height)))
                                                     asynchronous: false
-                                                    source: barModulesRoot.isSideBar
-                                                        ? Qt.resolvedUrl("../../bar/faces/wifi/SideWifiFace.qml")
-                                                        : Qt.resolvedUrl("../../bar/faces/wifi/WifiFace.qml")
+                                                    source: Qt.resolvedUrl("../../bar/faces/wifi/WifiFace.qml")
 
                                                     onLoaded: {
                                                         if (item) {
@@ -2516,9 +2521,7 @@ Item {
                                 height: item ? item.implicitHeight : 0
                                 scale: Math.min(1.0, Math.min((btPreviewBox.width - rootObj.s(16)) / Math.max(1, width), (btPreviewBox.height - rootObj.s(16)) / Math.max(1, height)))
                                 asynchronous: false
-                                source: barModulesRoot.isSideBar
-                                    ? Qt.resolvedUrl("../../bar/faces/bt/SideBtFace.qml")
-                                    : Qt.resolvedUrl("../../bar/faces/bt/BtFace.qml")
+                                source: Qt.resolvedUrl("../../bar/faces/bt/BtFace.qml")
 
                                 onLoaded: {
                                     if (item) {
@@ -2686,6 +2689,7 @@ Item {
                                                     id: cardMockWidget
                                                     function s(v) { return rootObj ? rootObj.s(v) : v; }
                                                     property bool isCompact: false
+                                                    property string orientation: barModulesRoot.isSideBar ? "vertical" : "horizontal"
                                                     property string btStyle: modelData.id
                                                     property bool btShowIcon: barModulesRoot.btShowIcon
                                                     property bool btShowName: barModulesRoot.btShowName
@@ -2695,7 +2699,7 @@ Item {
                                                         "isStartupReady": true,
                                                         "isDataReady": true,
                                                         "barOpacity": barModulesRoot.barOpacity,
-                                                        "s": function(v) { return rootObj ? rootObj.s(v) : v; }
+                                                        "s": function(v) { return rootObj ? rootObj.s(v) : v; }, "cs": function(v) { return rootObj ? rootObj.s(v) : v; }
                                                     })
                                                     property bool moduleActive: barModulesRoot.visible
                                                 }
@@ -2707,9 +2711,7 @@ Item {
                                                     height: item ? item.implicitHeight : 0
                                                     scale: Math.min(1.0, Math.min((btCardPreviewBox.width - rootObj.s(16)) / Math.max(1, width), (btCardPreviewBox.height - rootObj.s(16)) / Math.max(1, height)))
                                                     asynchronous: false
-                                                    source: barModulesRoot.isSideBar
-                                                        ? Qt.resolvedUrl("../../bar/faces/bt/SideBtFace.qml")
-                                                        : Qt.resolvedUrl("../../bar/faces/bt/BtFace.qml")
+                                                    source: Qt.resolvedUrl("../../bar/faces/bt/BtFace.qml")
 
                                                     onLoaded: {
                                                         if (item) {
@@ -2810,9 +2812,7 @@ Item {
                                 height: item ? item.implicitHeight : 0
                                 scale: Math.min(1.0, Math.min((volPreviewBox.width - rootObj.s(16)) / Math.max(1, width), (volPreviewBox.height - rootObj.s(16)) / Math.max(1, height)))
                                 asynchronous: false
-                                source: barModulesRoot.isSideBar
-                                    ? Qt.resolvedUrl("../../bar/faces/vol/SideVolFace.qml")
-                                    : Qt.resolvedUrl("../../bar/faces/vol/VolFace.qml")
+                                source: Qt.resolvedUrl("../../bar/faces/vol/VolFace.qml")
 
                                 onLoaded: {
                                     if (item) {
@@ -2980,6 +2980,7 @@ Item {
                                                     id: cardMockWidget
                                                     function s(v) { return rootObj ? rootObj.s(v) : v; }
                                                     property bool isCompact: false
+                                                    property string orientation: barModulesRoot.isSideBar ? "vertical" : "horizontal"
                                                     property string volStyle: modelData.id
                                                     property bool volShowIcon: barModulesRoot.volShowIcon
                                                     property bool volShowPercent: barModulesRoot.volShowPercent
@@ -2989,7 +2990,7 @@ Item {
                                                         "isStartupReady": true,
                                                         "isDataReady": true,
                                                         "barOpacity": barModulesRoot.barOpacity,
-                                                        "s": function(v) { return rootObj ? rootObj.s(v) : v; }
+                                                        "s": function(v) { return rootObj ? rootObj.s(v) : v; }, "cs": function(v) { return rootObj ? rootObj.s(v) : v; }
                                                     })
                                                     property bool moduleActive: barModulesRoot.visible
                                                 }
@@ -3001,9 +3002,7 @@ Item {
                                                     height: item ? item.implicitHeight : 0
                                                     scale: Math.min(1.0, Math.min((volCardPreviewBox.width - rootObj.s(16)) / Math.max(1, width), (volCardPreviewBox.height - rootObj.s(16)) / Math.max(1, height)))
                                                     asynchronous: false
-                                                    source: barModulesRoot.isSideBar
-                                                        ? Qt.resolvedUrl("../../bar/faces/vol/SideVolFace.qml")
-                                                        : Qt.resolvedUrl("../../bar/faces/vol/VolFace.qml")
+                                                    source: Qt.resolvedUrl("../../bar/faces/vol/VolFace.qml")
 
                                                     onLoaded: {
                                                         if (item) {
@@ -3104,9 +3103,7 @@ Item {
                                 height: item ? item.implicitHeight : 0
                                 scale: Math.min(1.0, Math.min((kbPreviewBox.width - rootObj.s(16)) / Math.max(1, width), (kbPreviewBox.height - rootObj.s(16)) / Math.max(1, height)))
                                 asynchronous: false
-                                source: barModulesRoot.isSideBar
-                                    ? Qt.resolvedUrl("../../bar/faces/kb/SideKbFace.qml")
-                                    : Qt.resolvedUrl("../../bar/faces/kb/KbFace.qml")
+                                source: Qt.resolvedUrl("../../bar/faces/kb/KbFace.qml")
 
                                 onLoaded: {
                                     if (item) {
@@ -3253,6 +3250,7 @@ Item {
                                                     id: cardMockWidget
                                                     function s(v) { return rootObj ? rootObj.s(v) : v; }
                                                     property bool isCompact: false
+                                                    property string orientation: barModulesRoot.isSideBar ? "vertical" : "horizontal"
                                                     property string kbStyle: modelData.id
                                                     property bool kbShowIcon: barModulesRoot.kbShowIcon
                                                     property bool isPreview: true
@@ -3261,7 +3259,7 @@ Item {
                                                         "isStartupReady": true,
                                                         "isDataReady": true,
                                                         "barOpacity": barModulesRoot.barOpacity,
-                                                        "s": function(v) { return rootObj ? rootObj.s(v) : v; }
+                                                        "s": function(v) { return rootObj ? rootObj.s(v) : v; }, "cs": function(v) { return rootObj ? rootObj.s(v) : v; }
                                                     })
                                                     property bool moduleActive: barModulesRoot.visible
                                                 }
@@ -3273,9 +3271,7 @@ Item {
                                                     height: item ? item.implicitHeight : 0
                                                     scale: Math.min(1.0, Math.min((kbCardPreviewBox.width - rootObj.s(16)) / Math.max(1, width), (kbCardPreviewBox.height - rootObj.s(16)) / Math.max(1, height)))
                                                     asynchronous: false
-                                                    source: barModulesRoot.isSideBar
-                                                        ? Qt.resolvedUrl("../../bar/faces/kb/SideKbFace.qml")
-                                                        : Qt.resolvedUrl("../../bar/faces/kb/KbFace.qml")
+                                                    source: Qt.resolvedUrl("../../bar/faces/kb/KbFace.qml")
 
                                                     onLoaded: {
                                                         if (item) {
@@ -3376,9 +3372,7 @@ Item {
                                 height: item ? item.implicitHeight : 0
                                 scale: Math.min(1.0, Math.min((mediaPreviewBox.width - rootObj.s(16)) / Math.max(1, width), (mediaPreviewBox.height - rootObj.s(16)) / Math.max(1, height)))
                                 asynchronous: false
-                                source: barModulesRoot.isSideBar
-                                    ? Qt.resolvedUrl("../../bar/faces/media/SideMediaFace.qml")
-                                    : Qt.resolvedUrl("../../bar/faces/media/MediaFace.qml")
+                                source: Qt.resolvedUrl("../../bar/faces/media/MediaFace.qml")
 
                                 onLoaded: {
                                     if (item) {
@@ -3393,25 +3387,71 @@ Item {
 
                     SettingsRow {
                         rootObj: barModulesRoot.rootObj
-                        settingId: "bar_media_show_duration"
-                        searchKeywords: "media song track duration time position length"
+                        settingId: "bar_media_info_mode"
+                        searchKeywords: "media song track duration time position length author artist"
                         baseColor: Qt.alpha(ThemeBackend.surface1, 0.35)
                         icon: "󰥔"
-                        title: I18n.t("guide.bar.media.show_duration.title", "Show duration")
-                        description: I18n.t("guide.bar.media.show_duration.desc", "Display the elapsed and total time of the current song")
+                        title: I18n.t("guide.bar.media.info_mode.title", "Secondary info")
+                        description: I18n.t("guide.bar.media.info_mode.desc", "Choose whether to show the song duration or its author")
                         visible: !barModulesRoot.isSideBar
                         searchable: !barModulesRoot.isSideBar
                         hiddenByConfig: barModulesRoot.isSideBar
 
-                        Toggle {
+                        Switch {
                             Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
-                            checked: barModulesRoot.mediaShowDuration
+                            implicitWidth: rootObj.s(200)
+                            implicitHeight: rootObj.s(32)
+                            cornerRadius: ThemeBackend.borderRadius
+                            fontPixelSize: rootObj.s(11)
+                            options: [
+                                I18n.t("guide.bar.media.info_mode.duration", "Duration"),
+                                I18n.t("guide.bar.media.info_mode.author", "Author")
+                            ]
+                            currentIndex: barModulesRoot.mediaInfoMode === "author" ? 1 : 0
                             accentColor: ThemeBackend.mauve
-                            baseColor: ThemeBackend.surface1
-                            handleColor: ThemeBackend.crust
-                            handleOffColor: ThemeBackend.text
-                            onToggled: function(c) {
-                                barModulesRoot.setMediaShowDuration(c);
+                            baseColor: ThemeBackend.surface0
+                            textColor: ThemeBackend.text
+                            activeTextColor: ThemeBackend.crust
+                            onToggled: function(idx) {
+                                barModulesRoot.setMediaInfoMode(idx === 1 ? "author" : "duration");
+                            }
+                        }
+                    }
+
+                    SettingsRow {
+                        rootObj: barModulesRoot.rootObj
+                        settingId: "bar_media_width"
+                        searchKeywords: "media song track size width length resize"
+                        baseColor: Qt.alpha(ThemeBackend.surface1, 0.35)
+                        icon: "󰩨"
+                        title: I18n.t("guide.bar.media.width.title", "Width")
+                        description: I18n.t("guide.bar.media.width.desc", "Width of the song title area")
+                        visible: !barModulesRoot.isSideBar
+                        searchable: !barModulesRoot.isSideBar
+                        hiddenByConfig: barModulesRoot.isSideBar
+
+                        Draggable {
+                            id: mediaSizeSlider
+                            Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
+                            Layout.rightMargin: rootObj.s(8)
+                            implicitWidth: rootObj.s(220)
+                            implicitHeight: rootObj.s(18)
+                            from: 80
+                            to: 300
+                            stepSize: 1
+                            defaultValue: 120
+                            showValueBubble: true
+                            valueFormatter: function(v) { return Math.round(v) + "px" }
+                            value: barModulesRoot.mediaWidth
+                            backgroundColor: ThemeBackend.surface0
+                            accentColor: ThemeBackend.mauve
+                            handleColor: ThemeBackend.text
+                            handleBorderColor: ThemeBackend.mantle
+                            onMoved: function(val) {
+                                barModulesRoot.mediaWidth = Math.round(val);
+                            }
+                            onDragFinished: {
+                                barModulesRoot.setMediaWidth(barModulesRoot.mediaWidth);
                             }
                         }
                     }

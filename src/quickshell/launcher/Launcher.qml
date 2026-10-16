@@ -271,12 +271,7 @@ PanelWindow {
         return Config.rawSettings.bar.position || "top";
     }
 
-    property real barOpacity: {
-        let dummy = configRevision;
-        if (!rawBarSettings || rawBarSettings.opacity === undefined) return 1.0;
-        let op = Number(rawBarSettings.opacity);
-        return op > 1.0 ? (op / 100.0) : op;
-    }
+    property real barOpacity: ThemeBackend.elementOpacity
 
     property bool barAutohide: (rawBarSettings && rawBarSettings.autohide !== undefined) ? Boolean(rawBarSettings.autohide) : false
 
@@ -576,12 +571,42 @@ PanelWindow {
         }
     }
 
+    function normalizeDecimalCommas(expr) {
+        let out = "";
+        let parens = [];
+        for (let i = 0; i < expr.length; i++) {
+            let ch = expr[i];
+            if (ch === "(") {
+                parens.push({ isPow: /pow\s*$/i.test(expr.substring(0, i)), commas: 0 });
+            } else if (ch === ")") {
+                parens.pop();
+            } else if (ch === ",") {
+                let top = parens.length > 0 ? parens[parens.length - 1] : null;
+                if (top && top.isPow) {
+                    if (++top.commas > 1) return null;
+                    out += ch;
+                    continue;
+                }
+                if (/\d/.test(expr[i - 1] || "") && /\d/.test(expr[i + 1] || "")) {
+                    out += ".";
+                    continue;
+                }
+                return null;
+            }
+            out += ch;
+        }
+        return out;
+    }
+
     function evaluateMath(expr) {
         if (!expr) return null;
         let trimmed = expr.trim();
         if (trimmed.length === 0 || trimmed.startsWith(">")) return null;
 
-        let parsed = trimmed
+        let normalized = normalizeDecimalCommas(trimmed);
+        if (normalized === null) return null;
+
+        let parsed = normalized
             .replace(/×/g, "*")
             .replace(/÷/g, "/")
             .replace(/\bpi\b/gi, "Math.PI")
@@ -1223,7 +1248,7 @@ PanelWindow {
             height: container.dynamicCornerRadius
             preferredRendererType: Shape.CurveRenderer
             ShapePath {
-                fillColor: ThemeBackend.base
+                fillColor: Qt.alpha(ThemeBackend.base, ThemeBackend.elementOpacity)
                 strokeColor: "transparent"
                 startX: 0
                 startY: 0
@@ -1247,7 +1272,7 @@ PanelWindow {
             height: container.dynamicCornerRadius
             preferredRendererType: Shape.CurveRenderer
             ShapePath {
-                fillColor: ThemeBackend.base
+                fillColor: Qt.alpha(ThemeBackend.base, ThemeBackend.elementOpacity)
                 strokeColor: "transparent"
                 startX: container.dynamicCornerRadius
                 startY: 0
@@ -1271,7 +1296,7 @@ PanelWindow {
             height: container.dynamicCornerRadius
             preferredRendererType: Shape.CurveRenderer
             ShapePath {
-                fillColor: ThemeBackend.base
+                fillColor: Qt.alpha(ThemeBackend.base, ThemeBackend.elementOpacity)
                 strokeColor: "transparent"
                 startX: 0
                 startY: container.dynamicCornerRadius
@@ -1295,7 +1320,7 @@ PanelWindow {
             height: container.dynamicCornerRadius
             preferredRendererType: Shape.CurveRenderer
             ShapePath {
-                fillColor: ThemeBackend.base
+                fillColor: Qt.alpha(ThemeBackend.base, ThemeBackend.elementOpacity)
                 strokeColor: "transparent"
                 startX: container.dynamicCornerRadius
                 startY: container.dynamicCornerRadius
@@ -1319,7 +1344,7 @@ PanelWindow {
             height: container.dynamicCornerRadius
             preferredRendererType: Shape.CurveRenderer
             ShapePath {
-                fillColor: ThemeBackend.base
+                fillColor: Qt.alpha(ThemeBackend.base, ThemeBackend.elementOpacity)
                 strokeColor: "transparent"
                 startX: 0
                 startY: 0
@@ -1343,7 +1368,7 @@ PanelWindow {
             height: container.dynamicCornerRadius
             preferredRendererType: Shape.CurveRenderer
             ShapePath {
-                fillColor: ThemeBackend.base
+                fillColor: Qt.alpha(ThemeBackend.base, ThemeBackend.elementOpacity)
                 strokeColor: "transparent"
                 startX: 0
                 startY: container.dynamicCornerRadius
@@ -1367,7 +1392,7 @@ PanelWindow {
             height: container.dynamicCornerRadius
             preferredRendererType: Shape.CurveRenderer
             ShapePath {
-                fillColor: ThemeBackend.base
+                fillColor: Qt.alpha(ThemeBackend.base, ThemeBackend.elementOpacity)
                 strokeColor: "transparent"
                 startX: container.dynamicCornerRadius
                 startY: 0
@@ -1391,7 +1416,7 @@ PanelWindow {
             height: container.dynamicCornerRadius
             preferredRendererType: Shape.CurveRenderer
             ShapePath {
-                fillColor: ThemeBackend.base
+                fillColor: Qt.alpha(ThemeBackend.base, ThemeBackend.elementOpacity)
                 strokeColor: "transparent"
                 startX: container.dynamicCornerRadius
                 startY: container.dynamicCornerRadius
@@ -1411,7 +1436,7 @@ PanelWindow {
             id: bgCard
             anchors.fill: parent
             radius: container.dynamicCornerRadius
-            color: ThemeBackend.base
+            color: Qt.alpha(ThemeBackend.base, ThemeBackend.elementOpacity)
             border.width: 0
             border.color: launcherWindow.isCentered ? Qt.alpha(ThemeBackend.surface2, 0.6) : "transparent"
             clip: true
@@ -1422,7 +1447,7 @@ PanelWindow {
                 y: 0
                 width: container.dynamicCornerRadius
                 height: container.dynamicCornerRadius
-                color: ThemeBackend.base
+                color: Qt.alpha(ThemeBackend.base, ThemeBackend.elementOpacity)
             }
 
             Rectangle {
@@ -1431,7 +1456,7 @@ PanelWindow {
                 y: 0
                 width: container.dynamicCornerRadius
                 height: container.dynamicCornerRadius
-                color: ThemeBackend.base
+                color: Qt.alpha(ThemeBackend.base, ThemeBackend.elementOpacity)
             }
 
             Rectangle {
@@ -1440,7 +1465,7 @@ PanelWindow {
                 y: parent.height - container.dynamicCornerRadius
                 width: container.dynamicCornerRadius
                 height: container.dynamicCornerRadius
-                color: ThemeBackend.base
+                color: Qt.alpha(ThemeBackend.base, ThemeBackend.elementOpacity)
             }
 
             Rectangle {
@@ -1449,7 +1474,7 @@ PanelWindow {
                 y: parent.height - container.dynamicCornerRadius
                 width: container.dynamicCornerRadius
                 height: container.dynamicCornerRadius
-                color: ThemeBackend.base
+                color: Qt.alpha(ThemeBackend.base, ThemeBackend.elementOpacity)
             }
 
             Rectangle {
@@ -1458,7 +1483,7 @@ PanelWindow {
                 y: 0
                 width: container.dynamicCornerRadius
                 height: container.dynamicCornerRadius
-                color: ThemeBackend.base
+                color: Qt.alpha(ThemeBackend.base, ThemeBackend.elementOpacity)
             }
 
             Rectangle {
@@ -1467,7 +1492,7 @@ PanelWindow {
                 y: parent.height - container.dynamicCornerRadius
                 width: container.dynamicCornerRadius
                 height: container.dynamicCornerRadius
-                color: ThemeBackend.base
+                color: Qt.alpha(ThemeBackend.base, ThemeBackend.elementOpacity)
             }
 
             Rectangle {
@@ -1476,7 +1501,7 @@ PanelWindow {
                 y: 0
                 width: container.dynamicCornerRadius
                 height: container.dynamicCornerRadius
-                color: ThemeBackend.base
+                color: Qt.alpha(ThemeBackend.base, ThemeBackend.elementOpacity)
             }
 
             Rectangle {
@@ -1485,7 +1510,7 @@ PanelWindow {
                 y: parent.height - container.dynamicCornerRadius
                 width: container.dynamicCornerRadius
                 height: container.dynamicCornerRadius
-                color: ThemeBackend.base
+                color: Qt.alpha(ThemeBackend.base, ThemeBackend.elementOpacity)
             }
 
             Item {

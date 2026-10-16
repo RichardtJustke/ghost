@@ -7,6 +7,8 @@ Item {
     id: pillsFaceRoot
     property var widget: null
 
+    readonly property bool isVertical: widget ? widget.orientation === "vertical" : false
+
     implicitWidth: wsLayout.implicitWidth
     implicitHeight: wsLayout.implicitHeight
 
@@ -22,11 +24,11 @@ Item {
         onCurIdxChanged: {
             if (curIdx >= 0 && prevIdx >= 0) {
                 if (curIdx > prevIdx) {
-                    leftAnim.duration = 400;
-                    rightAnim.duration = 300;
+                    startAnim.duration = 400;
+                    endAnim.duration = 300;
                 } else if (curIdx < prevIdx) {
-                    leftAnim.duration = 300;
-                    rightAnim.duration = 400;
+                    startAnim.duration = 300;
+                    endAnim.duration = 400;
                 }
             }
             if (curIdx >= 0) {
@@ -34,46 +36,52 @@ Item {
             }
         }
 
-        function getX(index, activeIndex) {
+        function getPos(index, activeIndex) {
             if (index < 0 || !widget) return 0;
-            let xPos = 0;
+            let pos = 0;
             let spacing = widget.s(widget.isCompact ? 7 : 8);
-            let activeW = widget.s(widget.isCompact ? 34 : 36);
-            let inactiveW = widget.s(widget.isCompact ? 16 : 18);
+            let activeLen = widget.s(widget.isCompact ? 34 : 36);
+            let inactiveLen = widget.s(widget.isCompact ? 16 : 18);
             for (let i = 0; i < index; i++) {
                 if (typeof widget.isShown === "function" && !widget.isShown(i))
                     continue;
-                xPos += (i === activeIndex ? activeW : inactiveW) + spacing;
+                pos += (i === activeIndex ? activeLen : inactiveLen) + spacing;
             }
-            return xPos;
+            return pos;
         }
 
-        property real targetLeft: {
+        property real targetStart: {
             if (widget) {
                 widget.hideEmptyWorkspaces;
                 widget.activeIndex;
                 widget.niriOccupiedMap;
                 widget.swayOccupiedMap;
+                widget.mangoOccupiedMap;
             }
-            return (curIdx >= 0 && widget) ? getX(curIdx, curIdx) : 0;
+            return (curIdx >= 0 && widget) ? getPos(curIdx, curIdx) : 0;
         }
-        property real targetRight: (curIdx >= 0 && widget) ? targetLeft + widget.s(widget.isCompact ? 34 : 36) : 0
-        property real actualLeft: targetLeft
-        property real actualRight: targetRight
+        property real targetEnd: (curIdx >= 0 && widget) ? targetStart + widget.s(widget.isCompact ? 34 : 36) : 0
+        property real actualStart: targetStart
+        property real actualEnd: targetEnd
 
-        Behavior on actualLeft { NumberAnimation { id: leftAnim; duration: 380; easing.type: Easing.OutQuint } }
-        Behavior on actualRight { NumberAnimation { id: rightAnim; duration: 380; easing.type: Easing.OutQuint } }
+        Behavior on actualStart { NumberAnimation { id: startAnim; duration: 380; easing.type: Easing.OutQuint } }
+        Behavior on actualEnd { NumberAnimation { id: endAnim; duration: 380; easing.type: Easing.OutQuint } }
 
-        x: wsLayout.x + actualLeft
-        y: wsLayout.y + (wsLayout.height - height) / 2
-        width: actualRight - actualLeft
-        height: widget ? widget.s(widget.isCompact ? 16 : 18) : 18
+        readonly property real thickness: widget ? widget.s(widget.isCompact ? 16 : 18) : 18
+
+        x: pillsFaceRoot.isVertical ? wsLayout.x + (wsLayout.width - width) / 2 : wsLayout.x + actualStart
+        y: pillsFaceRoot.isVertical ? wsLayout.y + actualStart : wsLayout.y + (wsLayout.height - height) / 2
+        width: pillsFaceRoot.isVertical ? thickness : actualEnd - actualStart
+        height: pillsFaceRoot.isVertical ? actualEnd - actualStart : thickness
         opacity: (widget && widget.workspaceCount > 0 && widget.activeIndex >= 0) ? 1.0 : 0.0
         Behavior on opacity { NumberAnimation { duration: 180 } }
     }
 
-    Row {
+    AxisFlow {
         id: wsLayout
+        vertical: pillsFaceRoot.isVertical
+        horizontalItemAlignment: Grid.AlignHCenter
+        verticalItemAlignment: Grid.AlignVCenter
         z: 2
         anchors.centerIn: parent
         spacing: widget ? widget.s(widget.isCompact ? 7 : 8) : 8
@@ -91,13 +99,21 @@ Item {
                 property bool shown: widget && typeof widget.isShown === "function" ? widget.isShown(index) : true
 
                 visible: shown
-                width: shown
+                readonly property real length: shown
                     ? (isActive ? (widget ? widget.s(widget.isCompact ? 34 : 36) : 36) : (widget ? widget.s(widget.isCompact ? 16 : 18) : 18))
                     : 0
-                height: widget ? widget.s(widget.isCompact ? 16 : 18) : 18
-                anchors.verticalCenter: parent.verticalCenter
+                readonly property real thickness: widget ? widget.s(widget.isCompact ? 16 : 18) : 18
+                width: pillsFaceRoot.isVertical ? thickness : length
+                height: pillsFaceRoot.isVertical ? length : thickness
 
-                Behavior on width { NumberAnimation { duration: 400; easing.type: Easing.OutQuint } }
+                Behavior on width {
+                    enabled: !pillsFaceRoot.isVertical
+                    NumberAnimation { duration: 400; easing.type: Easing.OutQuint }
+                }
+                Behavior on height {
+                    enabled: pillsFaceRoot.isVertical
+                    NumberAnimation { duration: 400; easing.type: Easing.OutQuint }
+                }
 
                 Rectangle {
                     id: wsVisualShape
@@ -114,7 +130,9 @@ Item {
 
                 opacity: initAnimTrigger ? 1.0 : 0.0
                 transform: Translate {
-                    y: wsPill.initAnimTrigger ? 0 : (widget ? widget.s(15) : 15)
+                    x: (!pillsFaceRoot.isVertical || wsPill.initAnimTrigger) ? 0 : (widget ? widget.s(15) : 15)
+                    y: (pillsFaceRoot.isVertical || wsPill.initAnimTrigger) ? 0 : (widget ? widget.s(15) : 15)
+                    Behavior on x { NumberAnimation { duration: 650; easing.type: Easing.OutQuint } }
                     Behavior on y { NumberAnimation { duration: 650; easing.type: Easing.OutQuint } }
                 }
 

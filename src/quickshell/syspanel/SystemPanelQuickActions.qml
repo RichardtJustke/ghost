@@ -29,7 +29,7 @@ Item {
         signal leftClicked()
         signal rightClicked()
 
-        color: isActive ? activeColor : (qaMa.containsMouse ? ThemeBackend.surface1 : Qt.darker(ThemeBackend.surface0, 1.04))
+        color: isActive ? activeColor : ThemeBackend.faded(qaMa.containsMouse ? ThemeBackend.surface1 : Qt.darker(ThemeBackend.surface0, 1.04))
         Behavior on color {
             enabled: view.panel.visible
             ColorAnimation { duration: 150 }
