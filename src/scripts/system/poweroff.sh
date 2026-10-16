@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+touch /tmp/ghostd.stop 2>/dev/null
 rm -f /tmp/ghostd.lock /tmp/ghostd.pid 2>/dev/null
 
 if command -v systemctl &>/dev/null && [ -d /run/systemd/system ]; then

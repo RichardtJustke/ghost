@@ -225,6 +225,7 @@ if [ $# -eq 0 ]; then
 fi
 
 if [[ "$1" == "kill" ]]; then
+    touch "/tmp/ghostd.stop" 2>/dev/null
     pid=""
     if [ -f "/tmp/ghostd.pid" ]; then
         pid="$(cat "/tmp/ghostd.pid" 2>/dev/null)"

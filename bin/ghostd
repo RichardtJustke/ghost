@@ -143,6 +143,7 @@ if [ -z "$COMMAND" ]; then
 fi
 
 if [ "$COMMAND" == "stop" ]; then
+    touch "/tmp/ghostd.stop" 2>/dev/null
     pid=""
     if [ -f "/tmp/ghostd.pid" ]; then
         pid="$(cat "/tmp/ghostd.pid" 2>/dev/null)"
@@ -293,8 +294,43 @@ if [ "$COMMAND" == "start" ]; then
     bash "$GHOST_DIR/quickshell/guide/wellbeing/launch_daemon.sh" 9>&- &
     LAUNCH_PID=$!
 
-    quickshell -p "$MAIN_QML" 9>&- &
-    QS_PID=$!
+    rm -f "/tmp/ghostd.stop" 2>/dev/null
 
-    wait $QS_PID
+    wayland_alive() {
+        [ -n "$WAYLAND_DISPLAY" ] || return 1
+        local sock="$WAYLAND_DISPLAY"
+        [[ "$sock" == /* ]] || sock="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/$sock"
+        [ -S "$sock" ]
+    }
+
+    MAX_RESTARTS=5
+    RESTART_WINDOW=120
+    restart_times=()
+
+    while true; do
+        quickshell -p "$MAIN_QML" 9>&- &
+        QS_PID=$!
+        wait $QS_PID
+        status=$?
+
+        # Give a pending stop signal time to reach the trap before deciding to relaunch
+        sleep 1
+        [ -f "/tmp/ghostd.stop" ] && break
+        wayland_alive || break
+
+        now=$(date +%s)
+        recent=()
+        for ts in "${restart_times[@]}"; do
+            (( now - ts < RESTART_WINDOW )) && recent+=("$ts")
+        done
+        restart_times=("${recent[@]}" "$now")
+        if [ "${#restart_times[@]}" -gt "$MAX_RESTARTS" ]; then
+            echo "quickshell exited $MAX_RESTARTS times in ${RESTART_WINDOW}s, giving up" >&2
+            command -v notify-send &>/dev/null && notify-send -u critical "Ghost" "Quickshell keeps crashing (exit $status). Run 'ghostd -v start' to see the error." 2>/dev/null
+            break
+        fi
+
+        [ "$VERBOSE" = true ] && echo "quickshell exited with status $status, restarting"
+        sleep 1
+    done
 fi
