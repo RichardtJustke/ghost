@@ -337,14 +337,30 @@ PanelWindow {
     Component.onCompleted: {
         applyConfigSettings();
         reportWidgetState();
-        Qt.callLater(function() {
-            if (masterWindow.currentActive === "hidden") {
-                let t = masterWindow.getLayout("guide");
-                if (t) masterWindow.ensureWidgetItem("guide", t);
-                let w = masterWindow.getLayout("wallpaper");
-                if (w) masterWindow.ensureWidgetItem("wallpaper", w);
+    }
+
+    // Guide (~125 MB) and wallpaper picker (~70 MB) are built on first open
+    // and released after staying closed for a while
+    readonly property var releasableWidgets: ["guide", "wallpaper"]
+
+    Timer {
+        id: idleReleaseTimer
+        interval: 120000
+        running: masterWindow.currentActive === "hidden" && !masterWindow.isVisible
+        onTriggered: {
+            if (masterWindow.currentActive !== "hidden" || masterWindow.isVisible) return;
+            let released = false;
+            for (let i = 0; i < masterWindow.releasableWidgets.length; i++) {
+                let name = masterWindow.releasableWidgets[i];
+                let it = widgetCache[name];
+                if (!it) continue;
+                if (!released) widgetStack.clear(StackView.Immediate);
+                delete widgetCache[name];
+                it.destroy();
+                released = true;
             }
-        });
+            if (released) Qt.callLater(gc);
+        }
     }
 
     Component.onDestruction: {
