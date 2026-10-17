@@ -48,10 +48,18 @@ Item {
         }
     }
 
-    // For now the popup only handles Galaxy Buds.
+    // Galaxy Buds get the per-earbud helper; every other headphone uses BlueZ data only.
     function isBuds(d) {
         let name = (d ? (d.name || d.deviceName || "") : "").toLowerCase();
         return name.indexOf("buds") !== -1;
+    }
+
+    // Earbuds get the earbud art, anything else (PEI-P10, AirPods Max...) the over-ear one.
+    function artFor(d) {
+        let name = (d ? (d.name || d.deviceName || "") : "").toLowerCase();
+        if (name.indexOf("max") !== -1) return "headphone";
+        if (name.indexOf("buds") !== -1 || name.indexOf("pods") !== -1 || name.indexOf("tws") !== -1) return "bud";
+        return "headphone";
     }
 
     property string selectedMac: ""
@@ -69,7 +77,7 @@ Item {
         let vals = adapter.devices.values || [];
         for (let i = 0; i < vals.length; i++) {
             let d = vals[i];
-            if (d && (d.paired || d.bonded || d.connected) && isBuds(d)) list.push(d);
+            if (d && (d.paired || d.bonded || d.connected) && isAudio(d)) list.push(d);
         }
         return list;
     }
@@ -123,6 +131,8 @@ Item {
     readonly property bool isConnecting: device ? (device.state === BluetoothDeviceState.Connecting || (window.pendingMac === window.mac && !device.connected)) : false
     readonly property bool isDisconnecting: device ? device.state === BluetoothDeviceState.Disconnecting : false
     readonly property int battery: batteryOf(device)
+
+    readonly property var connectedDevices: devices.filter(d => d.connected)
 
     readonly property PwNode sinkNode: {
         if (!isConnected || mac === "") return null;
@@ -255,7 +265,7 @@ Item {
     property var budsUnsupported: ({})
     property int budsFailures: 0
     readonly property bool hasBuds: budsState.left !== undefined && budsState.right !== undefined
-    readonly property bool wantBuds: window.visible && window.isConnected && window.isAudio(window.device) && !budsUnsupported[window.mac]
+    readonly property bool wantBuds: window.visible && window.isConnected && window.isBuds(window.device) && !budsUnsupported[window.mac]
 
     function noiseIndex(mode) {
         if (mode === "ambient") return 1;
@@ -525,6 +535,61 @@ Item {
                     }
                 }
 
+                // Switcher between connected headphones
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: window.s(8)
+                    visible: window.connectedDevices.length > 1
+                    opacity: introHeader
+
+                    Repeater {
+                        model: window.connectedDevices
+                        delegate: Rectangle {
+                            required property var modelData
+                            readonly property bool selected: (modelData.address || "").toUpperCase() === window.mac
+                            readonly property int pct: window.batteryOf(modelData)
+                            Layout.fillWidth: true
+                            Layout.preferredWidth: 1
+                            Layout.preferredHeight: window.s(34)
+                            radius: ThemeBackend.borderRadius
+                            color: selected ? ThemeBackend.mauve : (chipMa.containsMouse ? ThemeBackend.surface0 : ThemeBackend.mantle)
+                            Behavior on color { ColorAnimation { duration: 180 } }
+
+                            RowLayout {
+                                anchors.fill: parent
+                                anchors.leftMargin: window.s(10)
+                                anchors.rightMargin: window.s(10)
+                                spacing: window.s(6)
+                                Text {
+                                    font.family: ThemeBackend.iconFont; font.pixelSize: window.s(14)
+                                    color: selected ? ThemeBackend.crust : ThemeBackend.subtext0
+                                    text: window.deviceIcon(modelData)
+                                }
+                                Text {
+                                    Layout.fillWidth: true; elide: Text.ElideRight
+                                    font.family: ThemeBackend.fontFamily; font.weight: Font.Bold; font.pixelSize: window.s(11.5)
+                                    color: selected ? ThemeBackend.crust : ThemeBackend.text
+                                    text: modelData.name || modelData.deviceName || modelData.address
+                                }
+                                Text {
+                                    visible: pct >= 0
+                                    font.family: ThemeBackend.fontFamily; font.pixelSize: window.s(11)
+                                    color: selected ? ThemeBackend.crust : ThemeBackend.subtext0
+                                    text: pct + "%"
+                                }
+                            }
+
+                            MouseArea {
+                                id: chipMa
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: window.selectedMac = (modelData.address || "").toUpperCase()
+                            }
+                        }
+                    }
+                }
+
                 // Per-earbud battery (Galaxy Buds helper)
                 ColumnLayout {
                     Layout.fillWidth: true
@@ -627,6 +692,7 @@ Item {
                         Layout.preferredHeight: window.s(124)
                         percent: window.isConnected ? window.battery : (window.isConnecting ? 25 : -1)
                         ringColor: window.isConnecting ? ThemeBackend.yellow : window.batteryColor(window.battery)
+                        art: window.artFor(window.device)
                         artOpacity: window.isConnected ? 1.0 : (window.isConnecting ? 0.55 : 0.35)
                     }
 

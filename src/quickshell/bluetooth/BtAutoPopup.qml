@@ -3,15 +3,16 @@ import Quickshell
 import Quickshell.Bluetooth
 import "../"
 
-// Opens the Bluetooth device popup when Galaxy Buds connect.
+// Opens the Bluetooth device popup when headphones connect.
 // Only reacts to connection changes, so devices already connected at startup don't pop.
 Item {
     id: root
     visible: false
 
-    function isBuds(d) {
+    function isHeadphone(d) {
+        let icon = (d && d.icon ? d.icon : "").toLowerCase();
         let name = (d ? (d.name || d.deviceName || "") : "").toLowerCase();
-        return name.indexOf("buds") !== -1;
+        return icon.indexOf("headset") !== -1 || icon.indexOf("headphone") !== -1 || name.indexOf("buds") !== -1 || name.indexOf("pods") !== -1;
     }
 
     Timer {
@@ -30,7 +31,7 @@ Item {
                 target: modelData
                 ignoreUnknownSignals: true
                 function onConnectedChanged() {
-                    if (modelData.connected && root.isBuds(modelData)) {
+                    if (modelData.connected && root.isHeadphone(modelData)) {
                         openDelay.mac = (modelData.address || "").toUpperCase();
                         openDelay.restart();
                     } else if (!modelData.connected && openDelay.mac === (modelData.address || "").toUpperCase()) {

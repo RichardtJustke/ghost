@@ -1,7 +1,7 @@
 import QtQuick
 import "../"
 
-// Battery ring with an earbud drawn inside. percent < 0 means "unknown" (empty ring).
+// Battery ring with an earbud (or over-ear headphone) drawn inside. percent < 0 means "unknown" (empty ring).
 Item {
     id: root
 
@@ -10,6 +10,8 @@ Item {
     property color trackColor: ThemeBackend.surface0
     property real ringWidth: Math.max(4, width * 0.055)
     property bool mirrored: false
+    // "bud" for earbuds, "headphone" for over-ear headphones (AirPods Max style).
+    property string art: "bud"
     property real artOpacity: 1.0
 
     property color bodyColor: Qt.lighter(ThemeBackend.text, 1.08)
@@ -25,6 +27,7 @@ Item {
     onTrackColorChanged: ring.requestPaint()
     onBodyColorChanged: bud.requestPaint()
     onMirroredChanged: bud.requestPaint()
+    onArtChanged: bud.requestPaint()
 
     Canvas {
         id: ring
@@ -77,11 +80,40 @@ Item {
                 ctx.fill();
             }
 
-            oval(32, 32, 20, 17, root.bodyColor);
-            oval(36, 30, 11, 9, root.shadeColor);
-            oval(14, 26, 8, 7, root.tipColor);
-            oval(13, 26, 3.2, 3.2, root.meshColor);
-            oval(40, 38, 1.8, 1.8, root.meshColor);
+            function box(x, y, w, h, r, color) {
+                ctx.fillStyle = color;
+                ctx.beginPath();
+                ctx.roundedRect(x, y, w, h, r, r);
+                ctx.fill();
+            }
+
+            if (root.art === "headphone") {
+                // Steel frame with the mesh canopy hanging just under it.
+                ctx.lineCap = "round";
+                ctx.strokeStyle = root.shadeColor;
+                ctx.lineWidth = 2.4;
+                ctx.beginPath();
+                ctx.arc(30, 31, 20, Math.PI, Math.PI * 2);
+                ctx.stroke();
+                ctx.strokeStyle = root.meshColor;
+                ctx.lineWidth = 4.2;
+                ctx.beginPath();
+                ctx.arc(30, 31, 16, Math.PI * 1.08, Math.PI * 1.92);
+                ctx.stroke();
+
+                // Ear cups, cushions facing inward, and the crown on the right cup.
+                box(4, 27, 14, 24, 6, root.bodyColor);
+                box(42, 27, 14, 24, 6, root.bodyColor);
+                box(16, 30, 4, 18, 2, root.tipColor);
+                box(40, 30, 4, 18, 2, root.tipColor);
+                box(48, 23, 4, 5, 1.2, root.shadeColor);
+            } else {
+                oval(32, 32, 20, 17, root.bodyColor);
+                oval(36, 30, 11, 9, root.shadeColor);
+                oval(14, 26, 8, 7, root.tipColor);
+                oval(13, 26, 3.2, 3.2, root.meshColor);
+                oval(40, 38, 1.8, 1.8, root.meshColor);
+            }
             ctx.restore();
         }
     }

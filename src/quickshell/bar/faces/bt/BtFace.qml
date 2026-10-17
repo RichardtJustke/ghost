@@ -83,7 +83,8 @@ Item {
     property string btStatus: isPreview ? "On" : "Off"
     property string btIcon: isPreview ? "🎧" : "󰂲"
     property string btDevice: isPreview ? "Headphones" : "Off"
-    property bool budsConnected: false
+    property bool headphoneConnected: false
+    property int connectedCount: isPreview ? 1 : 0
     property bool isBtOn: isPreview ? true : (btStatus.toLowerCase() === "enabled" || btStatus.toLowerCase() === "on")
     property bool showLayout: (!barWindow || isPreview) ? true : ((!module || module.moduleActive) && barWindow.isStartupReady && barWindow.isDataReady)
     readonly property var btPill: pillLoader.item
@@ -137,7 +138,8 @@ Item {
             btStatus = "Off";
             btIcon = "󰂲";
             btDevice = "Off";
-            budsConnected = false;
+            headphoneConnected = false;
+            connectedCount = 0;
             isConnected = false;
             return;
         }
@@ -145,22 +147,27 @@ Item {
         btStatus = "On";
 
         let connectedDev = null;
+        let connectedNames = [];
         let devList = getBtDevicesList();
 
-        let buds = false;
+        let headphone = false;
         for (let i = 0; i < devList.length; i++) {
             let d = devList[i];
-            if (d && d.connected && (d.name || d.deviceName || "").toLowerCase().indexOf("buds") !== -1) buds = true;
+            if (!d || !d.connected) continue;
+            let n = (d.name || d.deviceName || "").toLowerCase();
+            let ic = (d.icon || "").toLowerCase();
+            if (n.indexOf("buds") !== -1 || n.indexOf("pods") !== -1 || ic.indexOf("headset") !== -1 || ic.indexOf("headphone") !== -1) headphone = true;
         }
-        budsConnected = buds;
+        headphoneConnected = headphone;
 
         for (let i = 0; i < devList.length; i++) {
             let d = devList[i];
             if (d && d.connected) {
-                connectedDev = d;
-                break;
+                if (!connectedDev) connectedDev = d;
+                connectedNames.push(d.name || d.deviceName || d.address || "");
             }
         }
+        connectedCount = connectedNames.length;
 
         if (connectedDev) {
             let name = connectedDev.name || connectedDev.deviceName || connectedDev.address || "";
@@ -177,7 +184,7 @@ Item {
             else if (typeLower.indexOf("controller") !== -1 || nameLower.indexOf("controller") !== -1) icon = "🎮";
 
             btIcon = icon;
-            btDevice = name;
+            btDevice = connectedNames.join(" + ");
             isConnected = true;
         } else {
             btIcon = "󰂯";
@@ -273,7 +280,7 @@ Item {
             if (mouse.button === Qt.RightButton) {
                 Quickshell.execDetached(["bash", "-c", Caching.ghostDir + "/scripts/qs_manager.sh toggle network bt"]);
             } else {
-                Quickshell.execDetached(["bash", "-c", Caching.ghostDir + "/scripts/qs_manager.sh " + (root.budsConnected ? "toggle btdevice" : "toggle network bt")]);
+                Quickshell.execDetached(["bash", "-c", Caching.ghostDir + "/scripts/qs_manager.sh " + (root.headphoneConnected ? "toggle btdevice" : "toggle network bt")]);
             }
         }
     }
@@ -334,7 +341,7 @@ Item {
             property bool isActive: root.isBtOn
 
             height: s(root.isCompact ? 28 : 30)
-            maxWidth: s(root.isCompact ? 156 : 160)
+            maxWidth: s(root.connectedCount > 1 ? (root.isCompact ? 276 : 280) : (root.isCompact ? 156 : 160))
             visible: targetWidth > 0
             cornerRadius: Math.max(0, ThemeBackend.borderRadius - s(2))
             horizontalPadding: s(root.isCompact ? 10 : 12)
@@ -354,7 +361,7 @@ Item {
             Behavior on opacity { NumberAnimation { duration: 450; easing.type: Easing.OutCubic } }
 
             acceptedButtons: Qt.LeftButton | Qt.RightButton
-            onClicked: if (!root.isPreview) Quickshell.execDetached(["bash", "-c", Caching.ghostDir + "/scripts/qs_manager.sh " + (root.budsConnected ? "toggle btdevice" : "toggle network bt")])
+            onClicked: if (!root.isPreview) Quickshell.execDetached(["bash", "-c", Caching.ghostDir + "/scripts/qs_manager.sh " + (root.headphoneConnected ? "toggle btdevice" : "toggle network bt")])
             onRightClicked: if (!root.isPreview) Quickshell.execDetached(["bash", "-c", Caching.ghostDir + "/scripts/qs_manager.sh toggle network bt"])
         }
     }
@@ -373,7 +380,7 @@ Item {
             textFontSize: s(root.isCompact ? 9 : 10)
             accentColor: root.isBtOn ? (root.isCompact ? Qt.lighter(ThemeBackend.mauve, 1.08) : ThemeBackend.mauve) : (root.isCompact ? Qt.lighter(ThemeBackend.surface0, 1.18) : ThemeBackend.surface0)
             textColor: root.isBtOn ? ThemeBackend.base : (root.isCompact ? Qt.lighter(ThemeBackend.text, 1.05) : ThemeBackend.text)
-            onClicked: if (!root.isPreview) Quickshell.execDetached(["bash", "-c", Caching.ghostDir + "/scripts/qs_manager.sh " + (root.budsConnected ? "toggle btdevice" : "toggle network bt")])
+            onClicked: if (!root.isPreview) Quickshell.execDetached(["bash", "-c", Caching.ghostDir + "/scripts/qs_manager.sh " + (root.headphoneConnected ? "toggle btdevice" : "toggle network bt")])
             onRightClicked: if (!root.isPreview) Quickshell.execDetached(["bash", "-c", Caching.ghostDir + "/scripts/qs_manager.sh toggle network bt"])
         }
     }
