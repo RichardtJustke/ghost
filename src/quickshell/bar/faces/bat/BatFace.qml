@@ -95,11 +95,9 @@ Item {
 
     Timer {
         id: waveSettleTimer
-        interval: root.isCharging ? 30000 : 1800
+        interval: root.isCharging ? 6000 : 1800
         repeat: false
-        onTriggered: {
-            if (!root.isActivelyCharging) waveAnimation.stop();
-        }
+        onTriggered: waveAnimation.stop()
     }
 
     NumberAnimation {
@@ -110,7 +108,9 @@ Item {
         to: Math.PI * 2
         duration: root.isCharging ? 1200 : 2200
         loops: Animation.Infinite
-        running: root.visible && (!root.isDesktop) && root.batStyle !== "text" && (typeof batPill !== "undefined" && batPill ? (batPill.fillRatio > 0.0 && batPill.fillRatio < 1.0) : false) && root.isActivelyCharging
+        // Started on demand (plug/unplug, level change) and stopped by
+        // waveSettleTimer: an endless wave keeps every bar repainting.
+        running: false
     }
 
     onIsChargingChanged: {
@@ -128,6 +128,7 @@ Item {
             waveSettleTimer.stop();
         } else if (isActivelyCharging && !isDesktop && root.batStyle !== "text" && typeof batPill !== "undefined" && batPill && batPill.fillRatio > 0.0 && batPill.fillRatio < 1.0) {
             waveAnimation.start();
+            waveSettleTimer.restart();
         }
     }
 
@@ -281,7 +282,7 @@ Item {
                 onFillRatioChanged: {
                     if (root.visible && (!root.isDesktop) && fillRatio > 0.0 && fillRatio < 1.0) {
                         if (!waveAnimation.running) waveAnimation.start();
-                        if (!root.isActivelyCharging) waveSettleTimer.restart();
+                        waveSettleTimer.restart();
                     }
                 }
 
@@ -502,7 +503,7 @@ Item {
                 onFillRatioChanged: {
                     if (root.visible && (!root.isDesktop) && fillRatio > 0.0 && fillRatio < 1.0) {
                         if (!waveAnimation.running) waveAnimation.start();
-                        if (!root.isActivelyCharging) waveSettleTimer.restart();
+                        waveSettleTimer.restart();
                     }
                 }
 
