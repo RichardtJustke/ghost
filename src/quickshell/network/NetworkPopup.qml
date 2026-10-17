@@ -749,6 +749,7 @@ Item {
                     return;
                 }
                 d.trusted = true;
+                if (Bluetooth.defaultAdapter && !Bluetooth.defaultAdapter.pairable) Bluetooth.defaultAdapter.pairable = true;
                 if (!d.paired && !d.bonded) {
                     window.pendingPairThenConnect = mac;
                     d.pair();
@@ -831,6 +832,11 @@ Item {
         }
         window.coreVisualIndices = newVis;
         window.activeCoreCount = activeCount;
+    }
+
+    // Connecting stops discovery; resume it when going back to the list so another device can be added.
+    onShowInfoViewChanged: {
+        if (!showInfoView && activeMode === "bt" && visible) startBtScan();
     }
 
     onCurrentConnChanged: {
