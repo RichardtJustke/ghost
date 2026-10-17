@@ -14,7 +14,7 @@ Item {
     focus: true
 
     function s(val) { 
-        return Scaler.s(val); 
+        return Scaler.p(val); 
     }
 
     property real introContent: 0.0

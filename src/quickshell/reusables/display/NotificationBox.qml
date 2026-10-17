@@ -13,7 +13,9 @@ Item {
     implicitWidth: 320
     implicitHeight: 300
 
+    // Follow the host's scale (popup or lock screen) so the box matches its siblings
     function s(val) {
+        if (rootContext && typeof rootContext.s === "function") return rootContext.s(val);
         return typeof Scaler !== "undefined" ? Scaler.s(val) : val;
     }
 

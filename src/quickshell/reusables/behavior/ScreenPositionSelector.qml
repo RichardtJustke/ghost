@@ -91,7 +91,7 @@ Item {
     signal dragFinished()
 
     function s(val) {
-        return (typeof Scaler !== "undefined") ? Scaler.s(val) : val;
+        return (typeof Scaler !== "undefined") ? Scaler.p(val) : val;
     }
 
     implicitWidth: 300

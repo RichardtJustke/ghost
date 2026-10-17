@@ -16,7 +16,7 @@ Item {
     focus: true
 
     function s(val) {
-        return Scaler.s(val);
+        return Scaler.p(val);
     }
 
     readonly property string scriptDir: Caching.ghostDir + "/scripts/wallpaper"

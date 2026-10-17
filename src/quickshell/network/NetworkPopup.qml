@@ -480,7 +480,7 @@ Item {
         }
     }
 
-    function s(val) { return Scaler.s(val); }
+    function s(val) { return Scaler.p(val); }
 
     function deepEqual(a, b) {
         if (a === b) return true;

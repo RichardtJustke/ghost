@@ -45,7 +45,7 @@ Popup {
             return rootObj.s(val);
         }
         if (typeof Scaler !== "undefined" && typeof Scaler.s === "function") {
-            return Scaler.s(val);
+            return Scaler.p(val);
         }
         return val;
     }

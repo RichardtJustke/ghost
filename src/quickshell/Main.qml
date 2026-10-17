@@ -404,6 +404,21 @@ PanelWindow {
 
     property real globalUiScale: 1.0
 
+    // One scale for the popup window and everything inside it, so the window
+    // size and its content always agree and fit the current monitor.
+    readonly property real popupScale: {
+        let d = Scaler.rev;
+        let scr = masterWindow.screen;
+        if (!scr) return Math.min(1.0, masterWindow.globalUiScale);
+        return Scaler.popupScaleFor(scr.name, scr.width, scr.height, masterWindow.globalUiScale);
+    }
+
+    Binding {
+        target: Scaler
+        property: "popupScale"
+        value: masterWindow.popupScale
+    }
+
     Notifs.NotificationPopups {
         id: osdPopups
     }
@@ -442,11 +457,11 @@ PanelWindow {
         let scrW = masterWindow.screen ? masterWindow.screen.width : masterWindow.width;
         let scrH = masterWindow.screen ? masterWindow.screen.height : masterWindow.height;
 
-        let result = Registry.getLayout(name, 0, 0, scrW, scrH, masterWindow.globalUiScale, bp);
+        let result = Registry.getLayout(name, 0, 0, scrW, scrH, masterWindow.popupScale, bp);
         if (!result) return null;
 
-        let scale = masterWindow.globalUiScale || 1.0;
-        let isFixed = (name === "guide" || name === "wallpaper" || name === "notifications" || name === "system" || name === "hidden");
+        let scale = masterWindow.popupScale || 1.0;
+        let isFixed = (name === "guide" || name === "wallpaper" || name === "notifications" || name === "hidden");
 
         if (effHidden && !isFixed) {
             let offsetAdjustment = Math.round(46 * scale);

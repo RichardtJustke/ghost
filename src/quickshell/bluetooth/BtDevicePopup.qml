@@ -13,7 +13,7 @@ Item {
     focus: true
 
     function s(val) {
-        return Scaler.s(val);
+        return Scaler.p(val);
     }
 
     // Set by Main.qml from the widget arg: a device MAC, or "auto:<MAC>" when BtAutoPopup opened us on connect.

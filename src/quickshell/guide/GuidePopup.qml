@@ -595,7 +595,7 @@ Item {
     }
 
     function s(val) {
-        return Scaler.s(val);
+        return Scaler.p(val);
     }
 
     function getTabProgress(idx) {

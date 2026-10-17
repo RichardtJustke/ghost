@@ -8,7 +8,7 @@ FilePicker {
     id: soundPickerRoot
 
    function s(val) {
-	return Scaler.s(val);
+	return Scaler.p(val);
    }	
 
     width: s(1040)

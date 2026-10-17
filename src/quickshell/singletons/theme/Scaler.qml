@@ -45,6 +45,27 @@ Item {
         return 1.0;
     }
 
+    // Scale for everything hosted by the master popup window (Main.qml).
+    // Main keeps it in sync with the screen the popup opens on: it follows that
+    // monitor's shellScale and shrinks further when the popups would not fit.
+    property real popupScale: 1.0
+
+    // Largest fixed-size popup (settings) in base px, used to fit small screens.
+    readonly property real popupRefWidth: 1200
+    readonly property real popupRefHeight: 750
+
+    function popupScaleFor(name, screenW, screenH, extra) {
+        let pref = scaleFor(name) * ((typeof extra === "number" && extra > 0) ? extra : 1.0);
+        if (!(screenW > 0) || !(screenH > 0)) return pref;
+        // Leave room for the bar (~52px) and a small margin around the popup
+        let fit = Math.min((screenW * 0.94) / root.popupRefWidth, (screenH - 64) / root.popupRefHeight);
+        return Math.max(0.5, Math.min(pref, fit));
+    }
+
+    function p(val) {
+        return Math.round(val * root.popupScale);
+    }
+
     // Scaler is a singleton, so it has no window/screen of its own: root.screenName
     // is not reliable per-caller. Any per-monitor window (bar, dock, widgets, ...)
     // MUST pass its own screen name so each monitor's shell scale stays independent.
