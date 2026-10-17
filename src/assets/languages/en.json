@@ -1027,7 +1027,8 @@
       "fr": "Fr",
       "sa": "Sa",
       "su": "Su"
-    }
+    },
+    "now": "Now"
   },
   "clipboard": {
     "search": "Search",
@@ -1311,7 +1312,19 @@
     "actions": {
       "system_name": "System",
       "hibernate_error_title": "Hibernation unavailable",
-      "hibernate_error_body": "Hibernation is unavailable on this system. Please check your swap configuration."
+      "hibernate_error_body": "Hibernation is unavailable on this system. Please check your swap configuration.",
+      "hold_hint": "Hold to confirm"
+    },
+    "toggles": {
+      "wifi": "Wi-Fi",
+      "bluetooth": "Bluetooth",
+      "night_light": "Night light",
+      "caffeine": "Caffeine",
+      "airplane": "Airplane mode",
+      "on": "On",
+      "off": "Off",
+      "disconnected": "Not connected",
+      "devices": "{count} devices"
     }
   },
   "volumepopup": {

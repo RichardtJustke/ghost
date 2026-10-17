@@ -17,8 +17,8 @@ Item {
         return Scaler.s(val);
     }
 
-    property real targetMasterHeight: window.s(510)
-    property real targetMasterWidth: window.s(1360)
+    property real targetMasterHeight: window.s(340)
+    property real targetMasterWidth: window.s(940)
     implicitWidth: targetMasterWidth
     implicitHeight: targetMasterHeight
     width: targetMasterWidth
@@ -217,31 +217,13 @@ Item {
         }
     }
 
-    property real globalOrbitOffset: 0
-    NumberAnimation on globalOrbitOffset {
-        from: 0; to: -360; duration: 60000; loops: Animation.Infinite; running: window.visible
-    }
-
-    property real globalOscPhase: 0
-    NumberAnimation on globalOscPhase {
-        from: 0; to: Math.PI * 2; duration: 9000; loops: Animation.Infinite; running: window.visible
-    }
-
     property var currentTime: new Date()
     property real currentEpoch: currentTime.getTime() / 1000
-
-    property real secondPulse: 1.0
-    NumberAnimation on secondPulse {
-        id: pulseReset
-        to: 1.0; duration: 600; easing.type: Easing.OutQuint; running: false
-    }
 
     Timer {
         interval: 1000; running: window.visible; repeat: true
         onTriggered: {
             window.currentTime = new Date();
-            window.secondPulse = 1.02;
-            pulseReset.start();
 
             if (window.currentTime.getHours() === 0 && window.currentTime.getMinutes() === 0 && window.currentTime.getSeconds() === 0) {
                 updateCalendarGrid();
@@ -359,7 +341,6 @@ Item {
         return bestIdx !== -1 ? bestIdx : 0;
     }
 
-    property real centerOffset: 0
     property int monthOffset: 0
     property int targetMonthOffset: 0
     property string targetMonthName: ""
@@ -448,386 +429,71 @@ Item {
         }
     }
 
-    Item {
+    // Hourly strip: 6 slots, starting at the current hour for today
+    readonly property var hourlySlots: {
+        if (!window.weatherData || !window.weatherData.forecast || !window.weatherData.forecast[window.weatherView]) return [];
+        let hourly = window.weatherData.forecast[window.weatherView].hourly;
+        if (!hourly) return [];
+        let arr = hourly.slice(0, 8);
+        let start = 0;
+        if (window.weatherView === 0 && window.activeHourIndex > 0) {
+            start = Math.max(0, Math.min(window.activeHourIndex, arr.length - 6));
+        }
+        return arr.slice(start, start + 6).map(function(h, i) {
+            return { time: h.time, icon: h.icon, hex: h.hex, temp: h.temp, active: window.weatherView === 0 && (start + i) === window.activeHourIndex };
+        });
+    }
+
+    readonly property var currentForecast: window.weatherData && window.weatherData.forecast && window.weatherData.forecast[window.weatherView] ? window.weatherData.forecast[window.weatherView] : null
+    readonly property color cardColor: Qt.alpha(window.surface0, 0.35)
+    readonly property real cardRadius: Math.min(ThemeBackend.borderRadius, window.s(16))
+
+    Rectangle {
         anchors.fill: parent
+        radius: ThemeBackend.borderRadius
+        color: Qt.alpha(ThemeBackend.base, ThemeBackend.elementOpacity)
+        border.color: window.surface0
+        border.width: 1
+        clip: true
         scale: 0.95 + (0.05 * introMain)
         opacity: introMain
 
-        Rectangle {
+        RowLayout {
             anchors.fill: parent
-            radius: ThemeBackend.borderRadius
-            color: Qt.alpha(ThemeBackend.base, ThemeBackend.elementOpacity)
-            border.color: window.surface0
-            border.width: 1
-            clip: true
+            anchors.margins: window.s(14)
+            spacing: window.s(12)
 
-            Rectangle {
-                width: parent.width * 0.5; height: width; radius: width / 2
-                x: parent.width * 0.75 - width / 2
-                y: parent.height * 0.3 - height / 2
-                opacity: 0.012 * window.introAmbient
-                color: window.activeWeatherHex
-                Behavior on color { ColorAnimation { duration: 1000 } }
-
-                transform: Translate {
-                    SequentialAnimation on x {
-                        loops: Animation.Infinite
-                        running: window.visible
-                        NumberAnimation { from: window.s(350); to: -window.s(350); duration: 30000; easing.type: Easing.InOutSine }
-                        NumberAnimation { from: -window.s(350); to: window.s(350); duration: 30000; easing.type: Easing.InOutSine }
-                    }
-                    SequentialAnimation on y {
-                        loops: Animation.Infinite
-                        running: window.visible
-                        NumberAnimation { from: 0; to: window.s(200); duration: 15000; easing.type: Easing.OutSine }
-                        NumberAnimation { from: window.s(200); to: -window.s(200); duration: 30000; easing.type: Easing.InOutSine }
-                        NumberAnimation { from: -window.s(200); to: 0; duration: 15000; easing.type: Easing.InSine }
-                    }
-                }
-            }
-
-            Rectangle {
-                width: parent.width * 0.6; height: width; radius: width / 2
-                x: parent.width * 0.25 - width / 2
-                y: parent.height * 0.7 - height / 2
-                opacity: 0.01 * window.introAmbient
-                color: window.timeColor
-                Behavior on color { ColorAnimation { duration: 1000 } }
-
-                transform: Translate {
-                    SequentialAnimation on x {
-                        loops: Animation.Infinite
-                        running: window.visible
-                        NumberAnimation { from: 0; to: -window.s(300); duration: 18750; easing.type: Easing.OutSine }
-                        NumberAnimation { from: -window.s(300); to: window.s(300); duration: 37500; easing.type: Easing.InOutSine }
-                        NumberAnimation { from: window.s(300); to: 0; duration: 18750; easing.type: Easing.InSine }
-                    }
-                    SequentialAnimation on y {
-                        loops: Animation.Infinite
-                        running: window.visible
-                        NumberAnimation { from: -window.s(250); to: window.s(250); duration: 37500; easing.type: Easing.InOutSine }
-                        NumberAnimation { from: window.s(250); to: -window.s(250); duration: 37500; easing.type: Easing.InOutSine }
-                    }
-                }
-            }
-
-            Rectangle {
-                width: parent.width * 0.45; height: width; radius: width / 2
-                x: parent.width * 0.5 - width / 2
-                y: parent.height * 0.5 - height / 2
-                opacity: 0.007 * window.introAmbient
-                color: window.timeAccent
-                Behavior on color { ColorAnimation { duration: 1000 } }
-
-                transform: Translate {
-                    SequentialAnimation on x {
-                        loops: Animation.Infinite
-                        running: window.visible
-                        NumberAnimation { from: window.s(400); to: -window.s(400); duration: 25000; easing.type: Easing.InOutSine }
-                        NumberAnimation { from: -window.s(400); to: window.s(400); duration: 25000; easing.type: Easing.InOutSine }
-                    }
-                    SequentialAnimation on y {
-                        loops: Animation.Infinite
-                        running: window.visible
-                        NumberAnimation { from: 0; to: -window.s(350); duration: 12500; easing.type: Easing.OutSine }
-                        NumberAnimation { from: -window.s(350); to: window.s(350); duration: 25000; easing.type: Easing.InOutSine }
-                        NumberAnimation { from: window.s(350); to: 0; duration: 12500; easing.type: Easing.InSine }
-                    }
-                }
-            }
-
-            Item {
-                anchors.centerIn: parent
-                anchors.verticalCenterOffset: window.centerOffset
-                z: 0
-                opacity: window.introAmbient * window.weatherContentOpacity
-
-                Text {
-                    id: parallaxIcon
-                    anchors.centerIn: parent
-                    text: {
-                        if (!window.weatherData) return "";
-                        if (window.weatherView === 0 && window.weatherData.current_icon) return window.weatherData.current_icon;
-                        if (window.weatherData.forecast && window.weatherData.forecast[window.weatherView]) return window.weatherData.forecast[window.weatherView].icon;
-                        return "";
-                    }
-                    font.family: ThemeBackend.fontFamily
-                    font.pixelSize: window.s(520)
-                    color: window.activeWeatherHex
-                    Behavior on color { ColorAnimation { duration: 1500 } }
-
-                    opacity: 0.015
-                    SequentialAnimation on opacity {
-                        loops: Animation.Infinite
-                        running: window.visible
-                        NumberAnimation { from: 0.015; to: 0.018; duration: 5625; easing.type: Easing.OutSine }
-                        NumberAnimation { from: 0.018; to: 0.012; duration: 11250; easing.type: Easing.InOutSine }
-                        NumberAnimation { from: 0.012; to: 0.015; duration: 5625; easing.type: Easing.InSine }
-                    }
-
-                    transform: [
-                        Translate {
-                            SequentialAnimation on y {
-                                loops: Animation.Infinite
-                                running: window.visible
-                                NumberAnimation { to: -window.s(8); duration: 6000; easing.type: Easing.InOutSine }
-                                NumberAnimation { to: 0; duration: 6000; easing.type: Easing.InOutSine }
-                            }
-                        },
-                        Translate { x: window.weatherContentOffset * 2 }
-                    ]
-                }
-            }
-
-            Item {
-                id: centralHub
-                anchors.centerIn: parent
-                anchors.verticalCenterOffset: window.centerOffset
-                width: window.s(1)
-                height: window.s(1)
-                z: 5
-
-                opacity: introClock
-                scale: 0.85 + (0.15 * introClock)
-
-                transform: [
-                    Translate { y: window.s(25) * (1.0 - introClock) },
-                    Translate {
-                        SequentialAnimation on y {
-                            loops: Animation.Infinite
-                            running: window.visible
-                            NumberAnimation { to: -window.s(6); duration: 4500; easing.type: Easing.InOutSine }
-                            NumberAnimation { to: 0; duration: 4500; easing.type: Easing.InOutSine }
-                        }
-                    },
-                    Rotation {
-                        axis { x: 1; y: 0; z: 0 }
-                        SequentialAnimation on angle {
-                            loops: Animation.Infinite; running: window.visible
-                            NumberAnimation { to: 1.5; duration: 4800; easing.type: Easing.InOutSine }
-                            NumberAnimation { to: -1.5; duration: 4800; easing.type: Easing.InOutSine }
-                        }
-                    },
-                    Rotation {
-                        axis { x: 0; y: 1; z: 0 }
-                        SequentialAnimation on angle {
-                            loops: Animation.Infinite; running: window.visible
-                            NumberAnimation { to: 1.2; duration: 5500; easing.type: Easing.InOutSine }
-                            NumberAnimation { to: -1.2; duration: 5500; easing.type: Easing.InOutSine }
-                        }
-                    },
-                    Rotation {
-                        axis { x: 0; y: 0; z: 1 }
-                        SequentialAnimation on angle {
-                            loops: Animation.Infinite; running: window.visible
-                            NumberAnimation { to: 0.8; duration: 6200; easing.type: Easing.InOutSine }
-                            NumberAnimation { to: -0.8; duration: 6200; easing.type: Easing.InOutSine }
-                        }
-                    }
-                ]
-
-                ShaderEffect {
-                    id: orbitCanvas
-                    z: -10
-                    anchors.centerIn: parent
-                    width: window.s(680)
-                    height: window.s(320)
-                    opacity: 0.35
-
-                    property vector2d itemSize: Qt.vector2d(width, height)
-                    property vector2d radii: Qt.vector2d(window.s(268), window.s(124))
-                    property vector2d dash: Qt.vector2d(window.s(4), window.s(12))
-                    property real lineWidth: Math.max(1, window.s(2))
-                    property color color: Qt.alpha(window.textAccent, 0.45)
-
-                    fragmentShader: "file://" + Caching.ghostDir + "/assets/shaders/ui/dashed_ellipse.frag.qsb"
-
-                    SequentialAnimation on scale {
-                        loops: Animation.Infinite
-                        running: window.visible
-                        NumberAnimation { to: 1.012; duration: 4000; easing.type: Easing.InOutSine }
-                        NumberAnimation { to: 1.0; duration: 4000; easing.type: Easing.InOutSine }
-                    }
-
-                    Behavior on opacity { NumberAnimation { duration: 1500 } }
-                }
-
-                ColumnLayout {
-                    anchors.centerIn: parent
-                    spacing: 0
-                    z: 0
-                    scale: 0.98 + (0.02 * window.secondPulse)
-
-                    Text {
-                        Layout.alignment: Qt.AlignHCenter
-                        text: DateTime.time
-                        font.family: ThemeBackend.fontFamily
-                        font.weight: Font.Black
-                        font.pixelSize: {
-                            let baseSize = window.s(84);
-                            let len = (DateTime.time || "").length;
-                            if (len <= 5) return baseSize;
-                            let scaleFactor = Math.min(1.0, Math.pow(5 / len, 0.7));
-                            return Math.round(Math.max(window.s(36), baseSize * scaleFactor));
-                        }
-                        color: window.text
-                        style: Text.Outline
-                        styleColor: Qt.alpha(window.crust, 0.4)
-                    }
-
-                    Text {
-                        Layout.alignment: Qt.AlignHCenter
-                        text: DateTime.fullDate
-                        font.family: ThemeBackend.fontFamily
-                        font.weight: Font.Bold
-                        font.pixelSize: window.s(16)
-                        color: window.subtext0
-                        opacity: 0.9
-                    }
-                }
-
-                Item {
-                    anchors.fill: parent
-                    opacity: window.weatherContentOpacity
-                    scale: window.transitionScale
-                    transform: Translate { x: window.weatherContentOffset * 1.5 }
-
-                    Repeater {
-                        id: hourRepeater
-                        model: window.weatherData && window.weatherData.forecast[window.weatherView] && window.weatherData.forecast[window.weatherView].hourly ? window.weatherData.forecast[window.weatherView].hourly.slice(0, 8) : []
-
-                        delegate: Item {
-                            property int mCount: hourRepeater.count
-                            property bool isToday: window.weatherView === 0
-                            property bool isHighlighted: isToday && index === window.activeHourIndex
-
-                            property real rx: window.s(268) * orbitCanvas.scale
-                            property real ry: window.s(124) * orbitCanvas.scale
-
-                            property int relIdx: isToday ? (index - window.activeHourIndex) : index
-                            property real targetAngleDeg: isToday ? (65 + (relIdx * 30)) : (index * (360 / Math.max(1, mCount)))
-                            property real orbitOffset: isToday ? 0 : window.globalOrbitOffset
-                            property real osc: isToday ? (Math.sin(window.globalOscPhase + index) * 2.5) : 0
-                            property real rad: (targetAngleDeg + orbitOffset + osc + window.transitionSpin) * (Math.PI / 180)
-
-                            property real depthFactor: (Math.sin(rad) + 1.0) / 2.0
-
-                            x: Math.cos(rad) * rx - width / 2
-                            y: Math.sin(rad) * ry - height / 2
-                            z: isHighlighted ? (Math.sin(rad) * window.s(100) + 10) : (Math.sin(rad) * window.s(100))
-
-                            property real baseScale: isHighlighted ? (0.80 + 0.55 * depthFactor) : (0.68 + 0.42 * depthFactor)
-                            property real hoverScale: hrMa.containsMouse && !isHighlighted ? 1.04 : 1.0
-                            Behavior on hoverScale { NumberAnimation { duration: 150 } }
-
-                            scale: baseScale * hoverScale
-
-                            opacity: isHighlighted ? (0.75 + 0.25 * depthFactor) : (0.55 + 0.45 * depthFactor)
-
-                            width: window.s(52)
-                            height: window.s(86)
-
-                            Rectangle {
-                                anchors.fill: parent
-                                radius: Math.min(window.s(26), ThemeBackend.borderRadius * 1.75)
-                                color: isHighlighted ? window.textAccent : (hrMa.containsMouse ? Qt.lighter(window.surface0, 1.12) : window.surface0)
-                                border.color: isHighlighted ? Qt.lighter(window.textAccent, 1.1) : (hrMa.containsMouse ? Qt.alpha(window.surface2, 0.9) : Qt.alpha(window.surface1, 0.6))
-                                border.width: 1
-
-                                Behavior on color { ColorAnimation { duration: 180 } }
-                                Behavior on border.color { ColorAnimation { duration: 180 } }
-
-                                ColumnLayout {
-                                    anchors.centerIn: parent
-                                    spacing: window.s(3)
-
-                                    Text {
-                                        Layout.alignment: Qt.AlignHCenter
-                                        text: modelData ? modelData.time : ""
-                                        font.family: ThemeBackend.fontFamily
-                                        font.weight: Font.Bold
-                                        font.pixelSize: window.s(11.5)
-                                        color: isHighlighted ? window.base : (hrMa.containsMouse ? window.text : window.overlay1)
-                                        Behavior on color { ColorAnimation { duration: 180 } }
-                                    }
-
-                                    Text {
-                                        Layout.alignment: Qt.AlignHCenter
-                                        text: modelData ? (modelData.icon || (window.weatherData && window.weatherData.forecast[window.weatherView] ? window.weatherData.forecast[window.weatherView].icon : "")) : ""
-                                        font.family: ThemeBackend.fontFamily
-                                        font.pixelSize: window.s(16.5)
-                                        color: isHighlighted ? window.base : (modelData ? (modelData.hex || window.text) : window.text)
-                                    }
-
-                                    Text {
-                                        Layout.alignment: Qt.AlignHCenter
-                                        text: modelData ? (modelData.temp + "°") : ""
-                                        font.family: ThemeBackend.fontFamily
-                                        font.weight: Font.Black
-                                        font.pixelSize: window.s(12.5)
-                                        color: isHighlighted ? window.base : window.text
-                                    }
-                                }
-                            }
-                            MouseArea { id: hrMa; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor }
-                        }
-                    }
-                }
-            }
-
+            // Month
             Rectangle {
                 id: calendarRect
-                anchors.left: parent.left
-                anchors.verticalCenter: parent.verticalCenter
-                anchors.leftMargin: window.s(40)
-                width: window.s(310)
-                height: window.s(350)
-                color: Qt.alpha(window.surface0, 0.2)
-                radius: ThemeBackend.borderRadius
-                border.color: Qt.alpha(window.surface1, 0.4)
-                border.width: 1
-                z: 10
+                Layout.preferredWidth: window.s(268)
+                Layout.fillHeight: true
+                color: window.cardColor
+                radius: window.cardRadius
 
                 opacity: introCalendar
-                transform: Translate { x: -window.s(40) * (1.0 - introCalendar) }
+                transform: Translate { x: -window.s(24) * (1.0 - introCalendar) }
 
                 HoverHandler { id: calHover }
 
                 ColumnLayout {
                     anchors.fill: parent
-                    anchors.topMargin: window.s(12)
-                    anchors.bottomMargin: window.s(12)
-                    anchors.leftMargin: window.s(16)
-                    anchors.rightMargin: window.s(16)
-                    spacing: 0
+                    anchors.margins: window.s(10)
+                    spacing: window.s(4)
 
                     RowLayout {
                         Layout.fillWidth: true
-                        Layout.bottomMargin: window.s(14)
+                        Layout.bottomMargin: window.s(4)
                         layoutDirection: I18n.layoutDirection
+                        spacing: window.s(4)
 
                         IconButton {
-                            Layout.preferredWidth: window.s(28)
-                            Layout.preferredHeight: window.s(28)
-                            size: window.s(28)
+                            Layout.preferredWidth: window.s(26)
+                            Layout.preferredHeight: window.s(26)
+                            size: window.s(26)
                             cornerRadius: window.s(8)
-                            buttonIcon: "󰃭"
-                            iconFontSize: window.s(14)
-                            accentColor: window.surface0
-                            textColor: window.text
-                            opacity: window.targetMonthOffset !== 0 ? 1.0 : 0.0
-                            visible: opacity > 0
-                            Behavior on opacity { NumberAnimation { duration: 200 } }
-                            onClicked: { if (window.targetMonthOffset !== 0) window.setMonthOffset(0) }
-                        }
-
-                        IconButton {
-                            Layout.preferredWidth: window.s(28)
-                            Layout.preferredHeight: window.s(28)
-                            size: window.s(28)
-                            cornerRadius: window.s(8)
-                            buttonIcon: I18n.rtl ? "" : ""
-                            iconFontSize: window.s(14)
+                            buttonIcon: I18n.rtl ? "" : ""
+                            iconFontSize: window.s(13)
                             accentColor: window.surface0
                             textColor: window.text
                             onClicked: window.setMonthOffset(window.targetMonthOffset - 1)
@@ -838,7 +504,7 @@ Item {
                             text: window.targetMonthName.toUpperCase()
                             font.family: ThemeBackend.fontFamily
                             font.weight: Font.Black
-                            font.pixelSize: window.s(14)
+                            font.pixelSize: window.s(12)
                             fontSizeMode: Text.Fit
                             minimumPixelSize: window.s(8)
                             color: window.text
@@ -846,15 +512,21 @@ Item {
 
                             opacity: window.calendarContentOpacity
                             transform: Translate { x: window.calendarContentOffset }
+
+                            MouseArea {
+                                anchors.fill: parent
+                                cursorShape: window.targetMonthOffset !== 0 ? Qt.PointingHandCursor : Qt.ArrowCursor
+                                onClicked: { if (window.targetMonthOffset !== 0) window.setMonthOffset(0) }
+                            }
                         }
 
                         IconButton {
-                            Layout.preferredWidth: window.s(28)
-                            Layout.preferredHeight: window.s(28)
-                            size: window.s(28)
+                            Layout.preferredWidth: window.s(26)
+                            Layout.preferredHeight: window.s(26)
+                            size: window.s(26)
                             cornerRadius: window.s(8)
-                            buttonIcon: I18n.rtl ? "" : ""
-                            iconFontSize: window.s(14)
+                            buttonIcon: I18n.rtl ? "" : ""
+                            iconFontSize: window.s(13)
                             accentColor: window.surface0
                             textColor: window.text
                             onClicked: window.setMonthOffset(window.targetMonthOffset + 1)
@@ -863,17 +535,17 @@ Item {
 
                     RowLayout {
                         Layout.fillWidth: true
-                        Layout.bottomMargin: window.s(4)
                         layoutDirection: I18n.layoutDirection
 
                         Repeater {
                             model: [I18n.t("calendar.days.mo"), I18n.t("calendar.days.tu"), I18n.t("calendar.days.we"), I18n.t("calendar.days.th"), I18n.t("calendar.days.fr"), I18n.t("calendar.days.sa"), I18n.t("calendar.days.su")]
                             Text {
                                 Layout.fillWidth: true
+                                Layout.preferredWidth: 1
                                 text: modelData
                                 font.family: ThemeBackend.fontFamily
                                 font.weight: Font.Black
-                                font.pixelSize: window.s(11.5)
+                                font.pixelSize: window.s(9.5)
                                 color: window.overlay0
                                 horizontalAlignment: Text.AlignHCenter
                             }
@@ -884,8 +556,10 @@ Item {
                         Layout.fillWidth: true
                         Layout.fillHeight: true
                         columns: 7
-                        rowSpacing: window.s(2)
-                        columnSpacing: window.s(3)
+                        rowSpacing: window.s(1)
+                        columnSpacing: window.s(2)
+                        uniformCellWidths: true
+                        uniformCellHeights: true
                         layoutDirection: I18n.layoutDirection
 
                         opacity: window.calendarContentOpacity
@@ -893,51 +567,149 @@ Item {
 
                         Repeater {
                             model: calendarModel
-                            ClickButton {
+                            Rectangle {
                                 Layout.fillWidth: true
                                 Layout.fillHeight: true
-                                enabled: false
-                                buttonText: dayNum
-                                textFontSize: window.s(11.5)
-                                cornerRadius: window.s(5)
-                                horizontalPadding: 0
-                                accentColor: isToday ? window.textAccent : "transparent"
-                                textColor: isToday ? window.base : (isCurrentMonth ? window.text : window.surface0)
+                                radius: window.s(6)
+                                color: isToday ? window.textAccent : "transparent"
+
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: dayNum
+                                    font.family: ThemeBackend.fontFamily
+                                    font.weight: isToday ? Font.Black : Font.Bold
+                                    font.pixelSize: window.s(10.5)
+                                    color: isToday ? window.base : (isCurrentMonth ? window.text : window.surface2)
+                                }
                             }
                         }
                     }
                 }
             }
 
-            Item {
-                id: weatherContainer
-                anchors.right: parent.right
-                anchors.verticalCenter: parent.verticalCenter
-                anchors.rightMargin: window.s(40)
-                width: window.s(320)
-                height: window.s(430)
-                z: 10
+            // Clock + hourly forecast
+            Rectangle {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                color: window.cardColor
+                radius: window.cardRadius
 
-                opacity: introWeather
-                transform: Translate { x: window.s(40) * (1.0 - introWeather) }
+                opacity: introClock
+                transform: Translate { y: window.s(16) * (1.0 - introClock) }
 
                 ColumnLayout {
                     anchors.fill: parent
-                    spacing: window.s(12)
+                    anchors.margins: window.s(12)
+                    spacing: window.s(2)
+
+                    Item { Layout.fillHeight: true }
+
+                    Text {
+                        Layout.alignment: Qt.AlignHCenter
+                        Layout.maximumWidth: parent.width
+                        text: DateTime.time
+                        font.family: ThemeBackend.fontFamily
+                        font.weight: Font.Black
+                        font.pixelSize: window.s(56)
+                        fontSizeMode: Text.HorizontalFit
+                        minimumPixelSize: window.s(28)
+                        color: window.text
+                    }
+
+                    Text {
+                        Layout.alignment: Qt.AlignHCenter
+                        text: DateTime.fullDate
+                        font.family: ThemeBackend.fontFamily
+                        font.weight: Font.Bold
+                        font.pixelSize: window.s(12)
+                        color: window.subtext0
+                    }
+
+                    Item { Layout.fillHeight: true }
 
                     RowLayout {
                         Layout.fillWidth: true
-                        Layout.alignment: Qt.AlignRight | Qt.AlignTop
-                        spacing: window.s(14)
+                        spacing: window.s(6)
+                        layoutDirection: I18n.layoutDirection
+                        opacity: window.weatherContentOpacity
+                        transform: Translate { x: window.weatherContentOffset }
+
+                        Repeater {
+                            model: window.hourlySlots
+
+                            Rectangle {
+                                Layout.fillWidth: true
+                                Layout.preferredWidth: 1
+                                Layout.preferredHeight: window.s(70)
+                                radius: Math.min(window.s(12), ThemeBackend.borderRadius)
+                                color: modelData.active ? window.textAccent : (hrMa.containsMouse ? Qt.lighter(window.surface0, 1.12) : window.surface0)
+                                Behavior on color { ColorAnimation { duration: 180 } }
+
+                                ColumnLayout {
+                                    anchors.centerIn: parent
+                                    spacing: window.s(2)
+
+                                    Text {
+                                        Layout.alignment: Qt.AlignHCenter
+                                        text: modelData.active ? I18n.t("calendar.now") : (modelData.time || "")
+                                        font.family: ThemeBackend.fontFamily
+                                        font.weight: Font.Bold
+                                        font.pixelSize: window.s(9.5)
+                                        color: modelData.active ? window.base : window.overlay1
+                                    }
+
+                                    Text {
+                                        Layout.alignment: Qt.AlignHCenter
+                                        text: modelData.icon || (window.currentForecast ? window.currentForecast.icon : "")
+                                        font.family: ThemeBackend.fontFamily
+                                        font.pixelSize: window.s(15)
+                                        color: modelData.active ? window.base : (modelData.hex || window.text)
+                                    }
+
+                                    Text {
+                                        Layout.alignment: Qt.AlignHCenter
+                                        text: modelData.temp !== undefined ? modelData.temp + "°" : ""
+                                        font.family: ThemeBackend.fontFamily
+                                        font.weight: Font.Black
+                                        font.pixelSize: window.s(11)
+                                        color: modelData.active ? window.base : window.text
+                                    }
+                                }
+
+                                MouseArea { id: hrMa; anchors.fill: parent; hoverEnabled: true }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Weather
+            Rectangle {
+                Layout.preferredWidth: window.s(240)
+                Layout.fillHeight: true
+                color: window.cardColor
+                radius: window.cardRadius
+
+                opacity: introWeather
+                transform: Translate { x: window.s(24) * (1.0 - introWeather) }
+
+                ColumnLayout {
+                    anchors.fill: parent
+                    anchors.margins: window.s(12)
+                    spacing: window.s(4)
+
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: window.s(4)
                         layoutDirection: I18n.layoutDirection
 
                         IconButton {
-                            Layout.preferredWidth: window.s(28)
-                            Layout.preferredHeight: window.s(28)
-                            size: window.s(28)
+                            Layout.preferredWidth: window.s(26)
+                            Layout.preferredHeight: window.s(26)
+                            size: window.s(26)
                             cornerRadius: window.s(8)
-                            buttonIcon: I18n.rtl ? "" : ""
-                            iconFontSize: window.s(12)
+                            buttonIcon: I18n.rtl ? "" : ""
+                            iconFontSize: window.s(11)
                             accentColor: window.surface0
                             textColor: isHoveredOrHighlighted ? window.textAccent : window.overlay1
                             onClicked: window.setWeatherView(window.targetWeatherView - 1)
@@ -946,98 +718,76 @@ Item {
                         Text {
                             Layout.fillWidth: true
                             horizontalAlignment: Text.AlignHCenter
-                            text: window.weatherData && window.weatherData.forecast[window.weatherView] ? window.weatherData.forecast[window.weatherView].day_full.toUpperCase() : I18n.t("calendar.loading")
+                            text: window.currentForecast ? window.currentForecast.day_full.toUpperCase() : I18n.t("calendar.loading")
                             font.family: ThemeBackend.fontFamily
                             font.weight: Font.Black
-                            font.pixelSize: window.s(15)
+                            font.pixelSize: window.s(12)
                             fontSizeMode: Text.Fit
                             minimumPixelSize: window.s(8)
                             color: window.text
                         }
 
                         IconButton {
-                            Layout.preferredWidth: window.s(28)
-                            Layout.preferredHeight: window.s(28)
-                            size: window.s(28)
+                            Layout.preferredWidth: window.s(26)
+                            Layout.preferredHeight: window.s(26)
+                            size: window.s(26)
                             cornerRadius: window.s(8)
-                            buttonIcon: I18n.rtl ? "" : ""
-                            iconFontSize: window.s(12)
+                            buttonIcon: I18n.rtl ? "" : ""
+                            iconFontSize: window.s(11)
                             accentColor: window.surface0
                             textColor: isHoveredOrHighlighted ? window.textAccent : window.overlay1
                             onClicked: window.setWeatherView(window.targetWeatherView + 1)
                         }
                     }
 
-                    ColumnLayout {
-                        Layout.alignment: Qt.AlignRight
-                        spacing: 0
+                    Text {
+                        Layout.topMargin: window.s(4)
+                        text: (window.weatherData && window.weatherData.offline ? "--" : window.displayedTemp.toFixed(1)) + (Weather.unitSym || "°")
+                        font.family: ThemeBackend.fontFamily
+                        font.weight: Font.Black
+                        font.pixelSize: window.s(40)
+                        color: window.tempGlowColor
+                        Behavior on color { ColorAnimation { duration: 300 } }
+                    }
 
-                        Text {
-                            Layout.alignment: Qt.AlignRight
-                            text: (window.weatherData && window.weatherData.offline ? "--" : window.displayedTemp.toFixed(1)) + (Weather.unitSym || "°")
-                            font.family: ThemeBackend.fontFamily
-                            font.weight: Font.Black
-                            font.pixelSize: window.s(68)
-                            color: window.tempGlowColor
-                            style: Text.Outline
-                            styleColor: window.isTempAnimating ? Qt.alpha(window.tempGlowColor, 0.5) : Qt.alpha(window.crust, 0.4)
-
-                            Behavior on color { ColorAnimation { duration: 300 } }
-                            Behavior on styleColor { ColorAnimation { duration: 300 } }
+                    Text {
+                        Layout.fillWidth: true
+                        text: {
+                            let city = (typeof Location !== "undefined" && Location.city && Location.city !== "") ? Location.city : (window.weatherData && window.weatherData.city ? window.weatherData.city : "");
+                            let desc = window.currentForecast ? (window.currentForecast.desc || "") : "";
+                            return [city, desc].filter(function(x) { return x !== ""; }).join(" · ");
                         }
-
-                        Text {
-                            Layout.alignment: Qt.AlignRight
-                            Layout.maximumWidth: window.s(320)
-                            horizontalAlignment: Text.AlignRight
-                            text: (typeof Location !== "undefined" && Location.city && Location.city !== "") ? Location.city : (window.weatherData && window.weatherData.city ? window.weatherData.city : "")
-                            font.family: ThemeBackend.fontFamily
-                            font.weight: Font.Bold
-                            font.pixelSize: window.s(14)
-                            color: window.text
-                            elide: Text.ElideRight
-                            visible: text !== ""
-                        }
-
-                        Text {
-                            Layout.alignment: Qt.AlignRight
-                            Layout.maximumWidth: window.s(320)
-                            Layout.topMargin: window.s(4)
-                            horizontalAlignment: Text.AlignRight
-                            text: window.weatherData && window.weatherData.forecast[window.weatherView] ? window.weatherData.forecast[window.weatherView].desc : ""
-                            font.family: ThemeBackend.fontFamily
-                            font.weight: Font.Medium
-                            font.pixelSize: window.s(13)
-                            wrapMode: Text.WordWrap
-                            color: window.textAccent
-                            Behavior on color { ColorAnimation { duration: 1000 } }
-
-                            opacity: window.weatherContentOpacity
-                            Behavior on opacity { NumberAnimation { duration: 200 } }
-                        }
+                        font.family: ThemeBackend.fontFamily
+                        font.weight: Font.Bold
+                        font.pixelSize: window.s(11)
+                        color: window.textAccent
+                        elide: Text.ElideRight
+                        opacity: window.weatherContentOpacity
                     }
 
                     Item { Layout.fillHeight: true }
 
                     GridLayout {
-                        Layout.alignment: Qt.AlignRight | Qt.AlignBottom
+                        Layout.fillWidth: true
                         columns: 2
-                        rowSpacing: window.s(8)
-                        columnSpacing: window.s(8)
+                        rowSpacing: window.s(6)
+                        columnSpacing: window.s(6)
+                        uniformCellWidths: true
                         layoutDirection: I18n.layoutDirection
 
                         Repeater {
                             model: 4
 
                             ClickButton {
-                                Layout.preferredWidth: window.s(118)
-                                Layout.preferredHeight: window.s(42)
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: window.s(38)
                                 cornerRadius: window.s(9)
                                 horizontalPadding: window.s(8)
+                                contentAlignment: Qt.AlignLeft
 
                                 property var forecast: window.weatherData && window.weatherData.forecast[window.targetWeatherView] ? window.weatherData.forecast[window.targetWeatherView] : null
 
-                                buttonIcon: index === 0 ? "" : index === 1 ? "" : index === 2 ? "" : ""
+                                buttonIcon: index === 0 ? "" : index === 1 ? "" : index === 2 ? "" : ""
                                 buttonText: window.weatherData && window.weatherData.offline ? "--" : forecast ? (
                                     index === 0 ? forecast.wind + (Weather.unit === "imperial" ? "mph" : "m/s") :
                                     index === 1 ? forecast.humidity + "%" :
@@ -1046,11 +796,11 @@ Item {
                                 ) : ""
                                 subText: index === 0 ? I18n.t("calendar.weather.wind") : index === 1 ? I18n.t("calendar.weather.humid") : index === 2 ? I18n.t("calendar.weather.rain") : I18n.t("calendar.weather.feels")
 
-                                iconFontSize: window.s(14)
-                                textFontSize: window.s(11.5)
+                                iconFontSize: window.s(13)
+                                textFontSize: window.s(10.5)
 
                                 accentColor: window.surface0
-                                textColor: isHoveredOrHighlighted ? window.textAccent : window.overlay0
+                                textColor: isHoveredOrHighlighted ? window.textAccent : window.subtext0
                             }
                         }
                     }

@@ -112,7 +112,7 @@ function getLayout(name, mx, my, mw, mh, userScale, barPosition) {
             } 
         },
         "calendar": { 
-            w: 1360, h: 510, comp: "calendar/CalendarPopup.qml", 
+            w: 940, h: 340, comp: "calendar/CalendarPopup.qml", 
             pos: { 
                 "top": { anchor: "top-center", mt: 52 }, 
                 "bottom": { anchor: "bottom-center", mb: 52 }, 
@@ -148,12 +148,12 @@ function getLayout(name, mx, my, mw, mh, userScale, barPosition) {
             } 
         },
         "system": { 
-            w: 500, h: "fill", comp: "syspanel/SystemPanel.qml", 
+            w: 420, h: 640, comp: "syspanel/SystemPanel.qml", 
             pos: { 
-                "top": { anchor: "right" }, 
-                "bottom": { anchor: "right" }, 
-                "left": { anchor: "right" }, 
-                "right": { anchor: "left" } 
+                "top": { anchor: "top-right", mt: 52, mr: 4 }, 
+                "bottom": { anchor: "bottom-right", mb: 52, mr: 4 }, 
+                "left": { anchor: "bottom-left", ml: 52, mb: 4 }, 
+                "right": { anchor: "bottom-right", mr: 52, mb: 4 } 
             } 
         },
         "hidden": { 

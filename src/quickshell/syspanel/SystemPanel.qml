@@ -19,7 +19,7 @@ Item {
     enabled: visible
 
     function s(val) {
-        return Scaler.s(val);
+        return Scaler.p(val);
     }
 
     readonly property string barPosition: {
@@ -29,14 +29,16 @@ Item {
         return "top";
     }
 
-    readonly property bool isLeftAnchored: barPosition === "right"
-    readonly property real slideDistance: sidebarPanel.width > 0 ? sidebarPanel.width : root.s(420)
+    readonly property bool isLeftAnchored: barPosition === "left"
+    readonly property real slideDistance: root.s(48)
     readonly property real rowSlideDistance: root.s(36)
 
     readonly property bool isDesktop: UPower.displayDevice.ready ? !UPower.displayDevice.isLaptopBattery : SystemInfo.isDesktop
 
     readonly property real boxRadius: Math.min(ThemeBackend.borderRadius, root.s(20))
     readonly property real cardRadius: Math.min(ThemeBackend.borderRadius, root.s(14))
+    readonly property real panelRadius: Math.min(ThemeBackend.borderRadius, root.s(22))
+    readonly property color cardColor: ThemeBackend.faded(Qt.darker(ThemeBackend.surface0, 1.04))
 
     readonly property color briColor: Qt.lighter(ThemeBackend.mauve, 1.1)
     readonly property color volColor: Qt.lighter(ThemeBackend.sapphire, 1.5)
@@ -332,339 +334,279 @@ Item {
         event.accepted = true;
     }
 
-    component BatteryContent : Item {
-        id: bRoot
-        property color contentTextColor: ThemeBackend.text
-        property color iconColor: root.batColorFlat
-
-        RowLayout {
-            anchors.fill: parent
-            anchors.leftMargin: root.s(20)
-            anchors.rightMargin: root.s(20)
-            spacing: root.s(16)
-
-            Text {
-                font.family: ThemeBackend.iconFont
-                font.pixelSize: root.s(32)
-                color: bRoot.iconColor
-                text: root.isCharging ? "󰂄" : (root.batCapacity > 20 ? "󰁹" : "󰂃")
-                Behavior on color {
-                    enabled: root.visible
-                    ColorAnimation { duration: 400 }
-                }
-                Layout.alignment: Qt.AlignVCenter
-            }
-
-            ColumnLayout {
-                spacing: root.s(2)
-                Layout.fillWidth: true
-                Layout.alignment: Qt.AlignVCenter
-
-                Text {
-                    font.family: ThemeBackend.fontFamily
-                    font.weight: Font.Black
-                    font.pixelSize: root.s(20)
-                    color: bRoot.contentTextColor
-                    text: Math.round(root.animCapacity) + "%"
-                    Behavior on color {
-                        enabled: root.visible
-                        ColorAnimation { duration: 400 }
-                    }
-                }
-
-                Text {
-                    property string timeString: {
-                        if (root.batStatus === "Fully Charged") return I18n.t("syspanel.battery.fully_charged");
-                        if (root.batStatus === "Charging") {
-                            if (root.batHours === 0 && root.batMins === 0) return I18n.t("syspanel.battery.charging");
-                            return I18n.t("syspanel.battery.charging_time", { hours: root.batHours, mins: root.batMins });
-                        }
-                        if (root.batHours === 0 && root.batMins === 0) return I18n.t("syspanel.battery.discharging");
-                        return I18n.t("syspanel.battery.left_time", { hours: root.batHours, mins: root.batMins });
-                    }
-
-                    font.family: ThemeBackend.fontFamily
-                    font.weight: Font.Bold
-                    font.pixelSize: root.s(10)
-                    color: bRoot.contentTextColor === ThemeBackend.crust ? Qt.alpha(ThemeBackend.crust, 0.85) : (root.isCharging ? ThemeBackend.green : ThemeBackend.subtext0)
-                    text: timeString
-                    Behavior on color {
-                        enabled: root.visible
-                        ColorAnimation { duration: 300 }
-                    }
-                }
-            }
-
-            Item { Layout.fillWidth: true }
+    readonly property string batTimeString: {
+        if (root.batStatus === "Fully Charged") return I18n.t("syspanel.battery.fully_charged");
+        if (root.batStatus === "Charging") {
+            if (root.batHours === 0 && root.batMins === 0) return I18n.t("syspanel.battery.charging");
+            return I18n.t("syspanel.battery.charging_time", { hours: root.batHours, mins: root.batMins });
         }
+        if (root.batHours === 0 && root.batMins === 0) return I18n.t("syspanel.battery.discharging");
+        return I18n.t("syspanel.battery.left_time", { hours: root.batHours, mins: root.batMins });
+    }
+
+    function openWidget(name, arg) {
+        closeSequence.start();
+        let cmd = ["bash", Caching.ghostDir + "/scripts/qs_manager.sh", "toggle", name];
+        if (arg) cmd.push(arg);
+        Quickshell.execDetached(cmd);
     }
 
     Rectangle {
         id: sidebarPanel
         anchors.fill: parent
         color: Qt.alpha(ThemeBackend.base, ThemeBackend.elementOpacity)
-        radius: Math.min(ThemeBackend.borderRadius, root.s(28))
-        topLeftRadius: root.isLeftAnchored ? 0 : radius
-        bottomLeftRadius: root.isLeftAnchored ? 0 : radius
-        topRightRadius: root.isLeftAnchored ? radius : 0
-        bottomRightRadius: root.isLeftAnchored ? radius : 0
-        border.width: 0
+        radius: root.panelRadius
+        border.width: 1
+        border.color: Qt.alpha(ThemeBackend.surface1, 0.55)
         clip: true
         opacity: root.introContent
         transform: Translate { x: (root.isLeftAnchored ? -root.slideDistance : root.slideDistance) * (1.0 - root.introContent) }
 
-        Item {
+        ColumnLayout {
             anchors.fill: parent
+            anchors.margins: root.s(10)
+            spacing: root.s(8)
 
-            ColumnLayout {
-                anchors.fill: parent
-                anchors.margins: root.s(8)
-                spacing: root.s(5)
+            Rectangle {
+                id: userBox
+                Layout.fillWidth: true
+                Layout.preferredHeight: root.s(60)
+                Layout.maximumHeight: root.s(60)
+                radius: root.boxRadius
+                color: root.cardColor
+                opacity: root.introTop
+                transform: Translate { x: (root.isLeftAnchored ? -root.rowSlideDistance : root.rowSlideDistance) * (1.0 - root.introTop) }
 
-                Rectangle {
-                    id: userBox
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: root.s(54)
-                    Layout.maximumHeight: root.s(54)
-                    radius: root.boxRadius
-                    color: ThemeBackend.faded(Qt.darker(ThemeBackend.surface0, 1.04))
-                    opacity: root.introTop
-                    transform: Translate { x: (root.isLeftAnchored ? -root.rowSlideDistance : root.rowSlideDistance) * (1.0 - root.introTop) }
+                RowLayout {
+                    anchors.fill: parent
+                    anchors.leftMargin: root.s(10)
+                    anchors.rightMargin: root.s(10)
+                    spacing: root.s(10)
+
+                    ImageBox {
+                        Layout.alignment: Qt.AlignVCenter
+                        Layout.preferredWidth: root.s(40)
+                        Layout.preferredHeight: root.s(40)
+                        size: root.s(40)
+                        cornerRadius: root.s(20)
+                        imageRadius: root.s(20)
+                        source: SystemInfo.avatarPath !== "" ? "file://" + SystemInfo.avatarPath : ""
+                        backgroundColor: SystemInfo.avatarPath === "" ? ThemeBackend.surface1 : "transparent"
+
+                        Text {
+                            anchors.centerIn: parent
+                            text: ""
+                            font.family: ThemeBackend.iconFont
+                            font.pixelSize: root.s(18)
+                            color: ThemeBackend.text
+                            visible: SystemInfo.avatarPath === ""
+                        }
+                    }
+
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        Layout.alignment: Qt.AlignVCenter
+                        spacing: root.s(1)
+
+                        Text {
+                            Layout.fillWidth: true
+                            text: SystemInfo.username !== "" ? SystemInfo.username : I18n.t("syspanel.user.default_name")
+                            font.family: ThemeBackend.fontFamily
+                            font.weight: Font.Black
+                            font.pixelSize: root.s(15)
+                            color: ThemeBackend.text
+                            elide: Text.ElideRight
+                        }
+
+                        Text {
+                            Layout.fillWidth: true
+                            text: (SystemInfo.osName !== "" ? SystemInfo.osName : I18n.t("syspanel.user.default_os"))
+                                + (SystemInfo.uptime !== "" ? " · " + SystemInfo.uptime : "")
+                            font.family: ThemeBackend.fontFamily
+                            font.weight: Font.Medium
+                            font.pixelSize: root.s(10)
+                            color: ThemeBackend.subtext0
+                            elide: Text.ElideRight
+                        }
+                    }
+
+                    IconButton {
+                        Layout.alignment: Qt.AlignVCenter
+                        size: root.s(36)
+                        cornerRadius: root.s(12)
+                        buttonIcon: "󰒓"
+                        iconFontSize: root.s(16)
+                        accentColor: ThemeBackend.surface1
+                        textColor: isHoveredOrHighlighted ? ThemeBackend.text : ThemeBackend.subtext0
+                        onClicked: root.openWidget("guide", "")
+                    }
+
+                    IconButton {
+                        id: logoutBtn
+                        Layout.alignment: Qt.AlignVCenter
+                        size: root.s(36)
+                        cornerRadius: root.s(12)
+                        buttonIcon: "󰍃"
+                        iconFontSize: root.s(16)
+                        accentColor: ThemeBackend.surface1
+                        textColor: isHoveredOrHighlighted ? ThemeBackend.red : ThemeBackend.subtext0
+
+                        Timer {
+                            id: logoutOpenTimer
+                            interval: 150
+                            onTriggered: {
+                                closeSequence.start();
+                                Quickshell.execDetached(["bash", Caching.ghostDir + "/scripts/system/exit.sh"]);
+                                Quickshell.execDetached(["sh", "-c", "echo 'close' > " + Caching.runDir + "/widget_state"]);
+                            }
+                        }
+
+                        onClicked: logoutOpenTimer.start()
+                    }
+                }
+            }
+
+            SystemPanelSliders {
+                id: slidersBox
+                panel: root
+            }
+
+            SystemPanelQuickActions {
+                id: quickActionsBox
+                panel: root
+            }
+
+            Rectangle {
+                id: batteryBox
+                Layout.fillWidth: true
+                Layout.preferredHeight: batteryCol.implicitHeight + root.s(24)
+                Layout.maximumHeight: Layout.preferredHeight
+                radius: root.boxRadius
+                color: root.cardColor
+                opacity: root.introCore
+                transform: Translate { x: (root.isLeftAnchored ? -root.rowSlideDistance : root.rowSlideDistance) * (1.0 - root.introCore) }
+
+                ColumnLayout {
+                    id: batteryCol
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.top: parent.top
+                    anchors.margins: root.s(12)
+                    spacing: root.s(10)
 
                     RowLayout {
-                        anchors.fill: parent
-                        anchors.margins: root.s(10)
+                        Layout.fillWidth: true
                         spacing: root.s(10)
-
-                        ImageBox {
-                            Layout.alignment: Qt.AlignTop
-                            Layout.preferredWidth: root.s(34)
-                            Layout.preferredHeight: root.s(34)
-                            size: root.s(34)
-                            cornerRadius: root.s(8)
-                            imageRadius: root.s(8)
-                            source: SystemInfo.avatarPath !== "" ? "file://" + SystemInfo.avatarPath : ""
-                            backgroundColor: SystemInfo.avatarPath === "" ? ThemeBackend.surface1 : "transparent"
-
-                            Text {
-                                anchors.centerIn: parent
-                                text: ""
-                                font.family: ThemeBackend.iconFont
-                                font.pixelSize: root.s(18)
-                                color: ThemeBackend.text
-                                visible: SystemInfo.avatarPath === ""
-                            }
-                        }
-
-                        ColumnLayout {
-                            Layout.alignment: Qt.AlignTop
-                            spacing: 0
-
-                            Text {
-                                text: SystemInfo.username !== "" ? SystemInfo.username : I18n.t("syspanel.user.default_name")
-                                font.family: ThemeBackend.fontFamily
-                                font.weight: Font.Black
-                                font.pixelSize: root.s(15)
-                                color: ThemeBackend.text
-                            }
-
-                            Text {
-                                text: SystemInfo.osName !== "" ? SystemInfo.osName : I18n.t("syspanel.user.default_os")
-                                font.family: ThemeBackend.fontFamily
-                                font.weight: Font.Medium
-                                font.pixelSize: root.s(10)
-                                color: ThemeBackend.subtext0
-                            }
-                        }
-
-                        Item { Layout.fillWidth: true }
-
-                        ClickButton {
-                            id: logoutBtn
-                            Layout.alignment: Qt.AlignTop | Qt.AlignRight
-                            Layout.preferredWidth: root.s(92)
-                            Layout.preferredHeight: root.s(34)
-                            horizontalPadding: root.s(10)
-                            cornerRadius: root.s(12)
-                            buttonText: I18n.t("syspanel.user.logout")
-                            textFontSize: root.s(11)
-                            buttonIcon: "󰍃"
-                            iconFontSize: root.s(14)
-                            accentColor: ThemeBackend.surface2
-                            textColor: ThemeBackend.text
-
-                            Timer {
-                                id: logoutOpenTimer
-                                interval: 150
-                                onTriggered: {
-                                    closeSequence.start();
-                                    Quickshell.execDetached(["bash", Caching.ghostDir + "/scripts/system/exit.sh"]);
-                                    Quickshell.execDetached(["sh", "-c", "echo 'close' > " + Caching.runDir + "/widget_state"]);
-                                }
-                            }
-
-                            onTriggered: {
-                                logoutOpenTimer.start();
-                            }
-                        }
-                    }
-                }
-
-                SystemPanelSliders {
-                    id: slidersBox
-                    panel: root
-                }
-
-                SystemPanelQuickActions {
-                    id: quickActionsBox
-                    panel: root
-                }
-
-                NotificationBox {
-                    id: notifsBox
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
-                    Layout.minimumHeight: root.s(68)
-                    cornerRadius: root.boxRadius
-                    cardRadius: root.cardRadius
-                    baseColor: ThemeBackend.faded(Qt.darker(ThemeBackend.surface0, 1.04))
-                    rootContext: root
-                    opacity: root.introNotifs
-                    transform: Translate { x: (root.isLeftAnchored ? -root.rowSlideDistance : root.rowSlideDistance) * (1.0 - root.introNotifs) }
-                }
-
-                SystemPanelPowerActions {
-                    panel: root
-                }
-
-                Rectangle {
-                    id: batteryBox
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: root.isDesktop ? root.s(52) : root.s(72)
-                    Layout.maximumHeight: Layout.preferredHeight
-                    radius: root.isDesktop ? root.s(15) : root.boxRadius
-                    color: root.isDesktop ? "transparent" : ThemeBackend.faded(Qt.darker(ThemeBackend.surface0, 1.04))
-                    clip: true
-                    opacity: root.introCore
-                    transform: Translate { x: (root.isLeftAnchored ? -root.rowSlideDistance : root.rowSlideDistance) * (1.0 - root.introCore) }
-
-                    property real fillLevel: root.animCapacity / 100
-                    property real maxWaveAmp: root.isCharging ? root.s(10) : root.s(6.5)
-                    property real waveAmp: (fillLevel < 0.99 && fillLevel > 0.01) ? maxWaveAmp * Math.sin(fillLevel * Math.PI) : 0
-
-                    FluidWave {
-                        id: waveCanvas
-                        anchors.fill: parent
-                        visible: root.visible && !root.isDesktop && batteryBox.fillLevel > 0.001
-
-                        property real wavePhase: 0.0
-                        NumberAnimation on wavePhase {
-                            running: root.visible && !root.isDesktop && batteryBox.fillLevel > 0.0 && batteryBox.fillLevel < 1.0
-                            loops: Animation.Infinite
-                            from: 0; to: Math.PI * 2; duration: root.isCharging ? 1200 : 2200
-                        }
-
-                        radius: batteryBox.radius
-                        fillLevel: batteryBox.fillLevel
-                        waveAmp: (batteryBox.fillLevel < 0.99 && batteryBox.waveAmp > 0) ? Math.min(batteryBox.waveAmp, Math.min(width * batteryBox.fillLevel, width * (1.0 - batteryBox.fillLevel))) : 0
-                        phase: wavePhase
-                        vertical: 0.0
-                        color1: root.batColorFlat
-                        color2: root.batColorFlat
-                    }
-
-                    BatteryContent {
-                        anchors.fill: parent
-                        contentTextColor: ThemeBackend.text
-                        iconColor: root.batColorFlat
-                        visible: !root.isDesktop
-                    }
-
-                    Item {
-                        anchors.left: parent.left
-                        anchors.top: parent.top
-                        anchors.bottom: parent.bottom
                         visible: !root.isDesktop
 
-                        property real phaseOffset: Math.sin(waveCanvas.wavePhase) - Math.cos(waveCanvas.wavePhase)
-                        property real centerOffset: batteryBox.fillLevel > 0.01 && batteryBox.fillLevel < 0.99 ? 0.375 * batteryBox.waveAmp * phaseOffset : 0
+                        Text {
+                            font.family: ThemeBackend.iconFont
+                            font.pixelSize: root.s(22)
+                            color: root.batColorFlat
+                            text: root.isCharging ? "󰂄" : (root.batCapacity > 20 ? "󰁹" : "󰂃")
+                            Behavior on color {
+                                enabled: root.visible
+                                ColorAnimation { duration: 400 }
+                            }
+                        }
 
-                        width: Math.max(0, Math.min(parent.width, (parent.width * batteryBox.fillLevel) + centerOffset))
-                        clip: true
+                        Text {
+                            font.family: ThemeBackend.fontFamily
+                            font.weight: Font.Black
+                            font.pixelSize: root.s(20)
+                            color: ThemeBackend.text
+                            text: Math.round(root.animCapacity) + "%"
+                        }
 
-                        BatteryContent {
-                            width: batteryBox.width
-                            height: batteryBox.height
-                            contentTextColor: ThemeBackend.crust
-                            iconColor: ThemeBackend.crust
+                        Text {
+                            Layout.fillWidth: true
+                            font.family: ThemeBackend.fontFamily
+                            font.weight: Font.Bold
+                            font.pixelSize: root.s(10)
+                            color: root.isCharging ? ThemeBackend.green : ThemeBackend.subtext0
+                            text: root.batTimeString
+                            elide: Text.ElideRight
                         }
                     }
 
-                    Item {
-                        id: profileSwitchWrapper
-                        anchors.fill: root.isDesktop ? parent : undefined
-                        anchors.right: root.isDesktop ? undefined : parent.right
-                        anchors.verticalCenter: root.isDesktop ? undefined : parent.verticalCenter
-                        anchors.rightMargin: root.isDesktop ? 0 : root.s(12)
-                        implicitWidth: root.isDesktop ? parent.width : profileSwitch.implicitWidth
-                        implicitHeight: profileSwitch.implicitHeight
+                    Rectangle {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: root.s(6)
+                        radius: height / 2
+                        color: ThemeBackend.surface1
+                        visible: !root.isDesktop
 
                         Rectangle {
-                            id: profileSwitchShadow
-                            visible: !root.isDesktop
-                            anchors.fill: parent
-                            anchors.topMargin: root.s(1.5)
-                            anchors.bottomMargin: -root.s(1.5)
-                            radius: profileSwitch.cornerRadius
-                            color: Qt.rgba(0, 0, 0, 0.25)
-                        }
-
-                        Switch {
-                            id: profileSwitch
-                            anchors.fill: parent
-                            implicitWidth: root.isDesktop ? parent.width : (PowerProfiles.hasPerformanceProfile ? root.s(240) : root.s(162))
-                            implicitHeight: root.isDesktop ? root.s(48) : root.s(52)
-                            cornerRadius: root.s(15)
-                            fontPixelSize: root.isDesktop ? root.s(14) : root.s(22)
-                            options: {
-                                if (root.isDesktop) {
-                                    return PowerProfiles.hasPerformanceProfile
-                                        ? ["󰌪 " + I18n.t("syspanel.profiles.power_saver"), "󰗑 " + I18n.t("syspanel.profiles.balanced"), "󰓅 " + I18n.t("syspanel.profiles.performance")]
-                                        : ["󰌪 " + I18n.t("syspanel.profiles.power_saver"), "󰗑 " + I18n.t("syspanel.profiles.balanced")];
-                                } else {
-                                    return PowerProfiles.hasPerformanceProfile
-                                        ? ["󰌪", "󰗑", "󰓅"]
-                                        : ["󰌪", "󰗑"];
-                                }
-                            }
-                            accentColor: root.profileColor
-                            baseColor: ThemeBackend.surface1
-                            textColor: ThemeBackend.text
-                            activeTextColor: ThemeBackend.crust
-                            currentIndex: {
-                                if (PowerProfiles.hasPerformanceProfile) {
-                                    if (root.powerProfile === "power-saver") return 0;
-                                    if (root.powerProfile === "balanced") return 1;
-                                    return 2;
-                                } else {
-                                    if (root.powerProfile === "power-saver") return 0;
-                                    return 1;
-                                }
-                            }
-
-                            onValueChanged: (idx, val) => {
-                                if (PowerProfiles.hasPerformanceProfile) {
-                                    if (idx === 0) PowerProfiles.profile = PowerProfile.PowerSaver;
-                                    else if (idx === 1) PowerProfiles.profile = PowerProfile.Balanced;
-                                    else PowerProfiles.profile = PowerProfile.Performance;
-                                } else {
-                                    if (idx === 0) PowerProfiles.profile = PowerProfile.PowerSaver;
-                                    else PowerProfiles.profile = PowerProfile.Balanced;
-                                }
+                            height: parent.height
+                            radius: parent.radius
+                            width: parent.width * Math.max(0, Math.min(1, root.animCapacity / 100))
+                            color: root.batColorFlat
+                            Behavior on color {
+                                enabled: root.visible
+                                ColorAnimation { duration: 400 }
                             }
                         }
                     }
+
+                    Switch {
+                        id: profileSwitch
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: root.s(36)
+                        implicitHeight: root.s(36)
+                        cornerRadius: root.s(12)
+                        fontPixelSize: root.s(11)
+                        options: PowerProfiles.hasPerformanceProfile
+                            ? ["󰌪 " + I18n.t("syspanel.profiles.power_saver"), "󰗑 " + I18n.t("syspanel.profiles.balanced"), "󰓅 " + I18n.t("syspanel.profiles.performance")]
+                            : ["󰌪 " + I18n.t("syspanel.profiles.power_saver"), "󰗑 " + I18n.t("syspanel.profiles.balanced")]
+                        accentColor: root.profileColor
+                        baseColor: ThemeBackend.surface1
+                        textColor: ThemeBackend.subtext0
+                        activeTextColor: ThemeBackend.crust
+                        currentIndex: {
+                            if (PowerProfiles.hasPerformanceProfile) {
+                                if (root.powerProfile === "power-saver") return 0;
+                                if (root.powerProfile === "balanced") return 1;
+                                return 2;
+                            }
+                            return root.powerProfile === "power-saver" ? 0 : 1;
+                        }
+
+                        onValueChanged: (idx, val) => {
+                            if (idx === 0) PowerProfiles.profile = PowerProfile.PowerSaver;
+                            else if (idx === 1) PowerProfiles.profile = PowerProfile.Balanced;
+                            else PowerProfiles.profile = PowerProfile.Performance;
+                        }
+                    }
                 }
+            }
+
+            NotificationBox {
+                id: notifsBox
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                Layout.minimumHeight: root.s(110)
+                cornerRadius: root.boxRadius
+                cardRadius: root.cardRadius
+                baseColor: root.cardColor
+                emptyGraphicSize: root.s(96)
+                rootContext: root
+                opacity: root.introNotifs
+                transform: Translate { x: (root.isLeftAnchored ? -root.rowSlideDistance : root.rowSlideDistance) * (1.0 - root.introNotifs) }
+            }
+
+            SystemPanelPowerActions {
+                panel: root
+            }
+
+            Text {
+                Layout.fillWidth: true
+                Layout.topMargin: -root.s(2)
+                horizontalAlignment: Text.AlignHCenter
+                text: I18n.t("syspanel.actions.hold_hint")
+                font.family: ThemeBackend.fontFamily
+                font.pixelSize: root.s(9)
+                color: ThemeBackend.overlay0
+                opacity: root.introActions
             }
         }
     }

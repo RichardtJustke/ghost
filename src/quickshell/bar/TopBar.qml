@@ -158,7 +158,7 @@ Item {
     property string layoutState: {
         if (isFill) return "default";
         if (barWindow && barWindow.isNotifOpen) return "settings";
-        if (barWindow && barWindow.isSysOpen) return "sys";
+        // The system panel is a corner modal now, so the bar keeps its layout
         return "default";
     }
 

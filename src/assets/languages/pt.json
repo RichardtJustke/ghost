@@ -1016,7 +1016,8 @@
       "fr": "Sex",
       "sa": "Sáb",
       "su": "Dom"
-    }
+    },
+    "now": "Agora"
   },
   "clipboard": {
     "search": "Pesquisar",
@@ -1297,7 +1298,19 @@
     "actions": {
       "system_name": "Sistema",
       "hibernate_error_title": "Hibernação indisponível",
-      "hibernate_error_body": "Hibernação indisponível neste sistema. Verifique sua configuração de swap."
+      "hibernate_error_body": "Hibernação indisponível neste sistema. Verifique sua configuração de swap.",
+      "hold_hint": "Segure para confirmar"
+    },
+    "toggles": {
+      "wifi": "Wi-Fi",
+      "bluetooth": "Bluetooth",
+      "night_light": "Luz noturna",
+      "caffeine": "Cafeína",
+      "airplane": "Modo avião",
+      "on": "Ligado",
+      "off": "Desligado",
+      "disconnected": "Desconectado",
+      "devices": "{count} dispositivos"
     }
   },
   "volumepopup": {

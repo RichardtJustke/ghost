@@ -12,8 +12,8 @@ RowLayout {
     required property var panel
 
     Layout.fillWidth: true
-    Layout.preferredHeight: panel.s(73)
-    Layout.maximumHeight: panel.s(73)
+    Layout.preferredHeight: panel.s(48)
+    Layout.maximumHeight: panel.s(48)
     spacing: panel.s(6)
 
     Repeater {
@@ -132,7 +132,7 @@ RowLayout {
             Text {
                 anchors.centerIn: parent
                 font.family: ThemeBackend.iconFont
-                font.pixelSize: panel.s(19)
+                font.pixelSize: panel.s(17)
                 color: isDisabled ? ThemeBackend.surface2 : (actionMa.containsMouse ? ThemeBackend.text : ThemeBackend.subtext0)
                 text: icon
                 Behavior on color {
@@ -150,7 +150,7 @@ RowLayout {
                     anchors.horizontalCenter: parent.horizontalCenter
                     y: (actionCapsule.height / 2) - (height / 2) - (actionCapsule.height - parent.height)
                     font.family: ThemeBackend.iconFont
-                    font.pixelSize: panel.s(19)
+                    font.pixelSize: panel.s(17)
                     color: ThemeBackend.crust
                     text: icon
                 }
