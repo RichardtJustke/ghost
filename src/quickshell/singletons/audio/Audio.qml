@@ -145,6 +145,33 @@ Singleton {
         if (node) Pipewire.preferredDefaultAudioSource = node;
     }
 
+    readonly property string combinedSinkName: "ghost_combined"
+
+    readonly property var bluetoothOutputs: root.outputs.filter(n => (n.name || "").startsWith("bluez_output"))
+
+    readonly property PwNode combinedOutput: {
+        for (const n of root.outputs) {
+            if (n.name === root.combinedSinkName) return n;
+        }
+        return null;
+    }
+
+    // Plays the same audio on every connected Bluetooth output at once.
+    function combineBluetoothOutputs(description) {
+        const slaves = root.bluetoothOutputs.map(n => n.name);
+        if (slaves.length < 2 || root.combinedOutput) return;
+        const desc = (description || root.combinedSinkName).replace(/["']/g, "");
+        Quickshell.execDetached(["sh", "-c",
+            "pactl load-module module-combine-sink sink_name=\"$1\" slaves=\"$2\" \"$3\" && pactl set-default-sink \"$1\"",
+            "sh", root.combinedSinkName, slaves.join(","), "sink_properties='device.description=\"" + desc + "\"'"]);
+    }
+
+    function uncombineOutputs() {
+        Quickshell.execDetached(["sh", "-c",
+            "pactl list short modules | awk -v n=\"sink_name=$1\" 'index($0, n) { print $1 }' | xargs -r -n1 pactl unload-module",
+            "sh", root.combinedSinkName]);
+    }
+
     function toggleMute(node) {
         if (node && node.audio) node.audio.muted = !node.audio.muted;
     }

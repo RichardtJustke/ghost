@@ -1306,6 +1306,10 @@
     "master_output_volume": "Volume principal de saída",
     "no_active_streams": "Nenhum fluxo ativo",
     "active_default": "Padrão ativo",
+    "combined_output": "Todos os fones",
+    "combine_bluetooth": "Tocar em todos os fones",
+    "combine_active": "Mesmo áudio em todos os fones Bluetooth",
+    "combine_hint": "{count} fones Bluetooth conectados",
     "tabs": {
       "outputs": "Saídas",
       "inputs": "Entradas",

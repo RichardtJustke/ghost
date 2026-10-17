@@ -485,6 +485,68 @@ Item {
                     }
                 }
 
+                Rectangle {
+                    id: combineToggle
+                    readonly property bool active: Audio.combinedOutput !== null
+
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: window.s(44)
+                    visible: window.activeTab === "outputs" && (active || Audio.bluetoothOutputs.length >= 2)
+                    opacity: introContent
+                    radius: ThemeBackend.borderRadius
+                    color: active ? Qt.alpha(window.tabColor, 0.18) : (combineMa.containsMouse ? ThemeBackend.surface1 : ThemeBackend.surface0)
+                    border.color: active ? window.tabColor : ThemeBackend.surface1
+                    border.width: 1
+                    Behavior on color { ColorAnimation { duration: 200 } }
+
+                    MouseArea {
+                        id: combineMa
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: {
+                            if (combineToggle.active) Audio.uncombineOutputs();
+                            else Audio.combineBluetoothOutputs(I18n.t("volumepopup.combined_output"));
+                        }
+                    }
+
+                    RowLayout {
+                        anchors.fill: parent
+                        anchors.leftMargin: window.s(12)
+                        anchors.rightMargin: window.s(12)
+                        spacing: window.s(10)
+
+                        Text {
+                            font.family: "Iosevka Nerd Font"; font.pixelSize: window.s(18)
+                            color: combineToggle.active ? window.tabColor : ThemeBackend.text
+                            text: "󰋎"
+                        }
+
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            spacing: window.s(1)
+                            Text {
+                                Layout.fillWidth: true; elide: Text.ElideRight
+                                font.family: ThemeBackend.fontFamily; font.weight: Font.Bold; font.pixelSize: window.s(12)
+                                color: ThemeBackend.text
+                                text: I18n.t("volumepopup.combine_bluetooth")
+                            }
+                            Text {
+                                Layout.fillWidth: true; elide: Text.ElideRight
+                                font.family: ThemeBackend.fontFamily; font.pixelSize: window.s(10)
+                                color: ThemeBackend.subtext0
+                                text: combineToggle.active ? I18n.t("volumepopup.combine_active") : I18n.t("volumepopup.combine_hint", { count: Audio.bluetoothOutputs.length })
+                            }
+                        }
+
+                        Text {
+                            font.family: "Iosevka Nerd Font"; font.pixelSize: window.s(22)
+                            color: combineToggle.active ? window.tabColor : ThemeBackend.overlay0
+                            text: combineToggle.active ? "󰔡" : "󰨙"
+                        }
+                    }
+                }
+
                 Item {
                     Layout.fillWidth: true
                     Layout.fillHeight: true

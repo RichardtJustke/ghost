@@ -1320,6 +1320,10 @@
     "master_output_volume": "Master output volume",
     "no_active_streams": "No active streams",
     "active_default": "Active default",
+    "combined_output": "All headphones",
+    "combine_bluetooth": "Play on all headphones",
+    "combine_active": "Same audio on every Bluetooth headphone",
+    "combine_hint": "{count} Bluetooth headphones connected",
     "tabs": {
       "outputs": "Outputs",
       "inputs": "Inputs",
