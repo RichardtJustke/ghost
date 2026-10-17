@@ -695,6 +695,9 @@ Item {
         window.hoveredCardCount = 0;
         if (window.showInfoView) {
             window.updateInfoNodes();
+        } else if (window.activeMode === "bt" && window.visible) {
+            // Connecting stops discovery; resume it when going back to the list so another device can be added.
+            window.startBtScan();
         }
         window.refreshOrbitDisplay();
     }
@@ -832,11 +835,6 @@ Item {
         }
         window.coreVisualIndices = newVis;
         window.activeCoreCount = activeCount;
-    }
-
-    // Connecting stops discovery; resume it when going back to the list so another device can be added.
-    onShowInfoViewChanged: {
-        if (!showInfoView && activeMode === "bt" && visible) startBtScan();
     }
 
     onCurrentConnChanged: {
