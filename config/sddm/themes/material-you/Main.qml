@@ -7,86 +7,121 @@ Rectangle {
     id: root
     width: Screen.width
     height: Screen.height
+    color: "#0b0b0d"
 
-    Image {
-        anchors.fill: parent
-        source: "bg.png"
-        fillMode: Image.PreserveAspectCrop
+    // Layout is designed at 1366x768 and scales with the screen height
+    readonly property real s: Math.max(0.75, Screen.height / 768)
+
+    // Ghost mirrors its wallpaper, colors and avatar here (scripts/sddm_sync.sh)
+    readonly property string syncDir: (typeof config !== "undefined" && config.syncDir) ? config.syncDir : "/var/lib/ghost-sddm"
+
+    Loader {
+        id: ghostPalette
+        source: "file://" + root.syncDir + "/Colors.qml"
+    }
+    readonly property var pal: ghostPalette.status === Loader.Ready ? ghostPalette.item : null
+
+    readonly property color accent: pal ? pal.accent : ((typeof config !== "undefined" && config.accent) ? config.accent : "#a8c7fa")
+    readonly property color onAccent: pal ? pal.crust : "#0b0b0d"
+    readonly property color surfaceHi: pal ? Qt.alpha(pal.surface, 0.9) : "#1b1b1f"
+    readonly property color textColor: pal ? pal.text : "#ececf0"
+    readonly property color subtext: pal ? pal.subtext : "#9b9ba5"
+    readonly property color warn: pal ? pal.warn : "#e8c27a"
+    readonly property color danger: pal ? pal.danger : "#f2a7a7"
+    readonly property color cardColor: pal ? Qt.alpha(pal.base, 0.72) : Qt.rgba(0.07, 0.07, 0.08, 0.72)
+
+    readonly property string greeting: {
+        let h = clock.now.getHours();
+        if (h >= 5 && h < 12) return "Bom dia";
+        if (h >= 12 && h < 18) return "Boa tarde";
+        return "Boa noite";
+    }
+    readonly property string hostName: (typeof sddm !== "undefined" && sddm.hostName) ? sddm.hostName : ""
+    readonly property string kbLayout: {
+        if (typeof keyboard === "undefined" || !keyboard.layouts || keyboard.layouts.length === 0) return "";
+        let l = keyboard.layouts[keyboard.currentLayout];
+        return l && l.shortName ? l.shortName.toUpperCase() : "";
     }
 
-    readonly property real s: Screen.height / 768
+    QtObject {
+        id: clock
+        property date now: new Date()
+    }
+
+    Timer {
+        interval: 1000
+        running: true
+        repeat: true
+        onTriggered: clock.now = new Date()
+    }
+
     property bool isQuickshell: typeof sddm === "undefined" || sddm.hostName === undefined
     property int sessionIndex: (typeof sessionModel !== "undefined" && sessionModel.lastIndex >= 0) ? sessionModel.lastIndex : 0
     property int userIndex: (typeof userModel !== "undefined" && userModel.lastIndex >= 0) ? userModel.lastIndex : 0
-    
-    property real ui1: 0
-    property real ui2: 0
     property string errorMessage: ""
+    property real intro: 0
 
     FontLoader {
         id: customFont
         source: "font/GoogleSans-VariableFont_GRAD,opsz,wght.ttf"
     }
-    
-    readonly property string sansFont: customFont.name !== "" ? customFont.name : "Roboto, Inter, sans-serif"
 
-    function syncModel() {
-        let str = pwd.text;
-        let minLen = Math.min(str.length, charModel.count);
-        let matchLen = 0;
-        while (matchLen < minLen && str[matchLen] === charModel.get(matchLen).char) {
-            matchLen++;
-        }
-        while (charModel.count > matchLen) {
-            charModel.remove(charModel.count - 1);
-        }
-        for (let i = matchLen; i < str.length; i++) {
-            charModel.append({ char: str[i] });
-        }
+    readonly property string sansFont: customFont.name !== "" ? customFont.name : "sans-serif"
+
+    function svgIcon(path, stroke) {
+        return "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='"
+            + String(stroke).replace("#", "%23")
+            + "' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'>" + path + "</svg>";
     }
 
+    readonly property string icPower: "<path d='M12 3v9'/><path d='M6.3 6.3a8 8 0 1 0 11.4 0'/>"
+    readonly property string icReboot: "<path d='M3 12a9 9 0 1 0 3-6.7L3 8'/><path d='M3 3v5h5'/>"
+    readonly property string icSleep: "<path d='M4 6h6l-6 8h6M14 4h6l-6 8h6'/>"
+    readonly property string icArrow: "<path d='M5 12h14M13 6l6 6-6 6'/>"
+    readonly property string icMonitor: "<rect x='3' y='4' width='18' height='14' rx='2'/><path d='M8 21h8'/>"
+    readonly property string icKeyboard: "<rect x='2' y='6' width='20' height='12' rx='2'/><path d='M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10'/>"
+
+    function login() {
+        if (root.isQuickshell || pwd.text.length === 0) return;
+        let currentUser = userHelper.currentItem ? userHelper.currentItem.uLogin : userModel.lastUser;
+        sddm.login(currentUser, pwd.text, root.sessionIndex);
+    }
+
+    // Hidden views that expose the current user/session from SDDM's models
     ListView {
         id: sessionHelper
         model: typeof sessionModel !== "undefined" ? sessionModel : null
         currentIndex: root.sessionIndex
-        opacity: 0
-        width: 100
-        height: 100
-        z: -100
-        delegate: Item {
-            property string sName: model.name || ""
-        }
+        visible: false
+        width: 1; height: 1
+        delegate: Item { property string sName: model.name || "" }
     }
 
     ListView {
         id: userHelper
         model: typeof userModel !== "undefined" ? userModel : null
         currentIndex: root.userIndex
-        opacity: 0
-        width: 100
-        height: 100
-        z: -100
+        visible: false
+        width: 1; height: 1
         delegate: Item {
             property string uName: model.realName || model.name || ""
             property string uLogin: model.name || ""
+            property string uIcon: model.icon || ""
         }
     }
 
-    Timer {
-        id: focusTimer
-        interval: 300
-        running: true
-        onTriggered: pwd.forceActiveFocus()
-    }
+    readonly property string userName: (userHelper.currentItem && userHelper.currentItem.uName) ? userHelper.currentItem.uName : ((typeof userModel !== "undefined" && userModel.lastUser) ? userModel.lastUser : "user")
+    readonly property string userIcon: userHelper.currentItem ? userHelper.currentItem.uIcon : ""
+    readonly property string sessionName: sessionHelper.currentItem ? sessionHelper.currentItem.sName : ""
+    readonly property int userCount: (typeof userModel !== "undefined") ? userModel.rowCount() : 0
 
     Connections {
         target: typeof sddm !== "undefined" ? sddm : null
         function onLoginFailed() {
-            root.errorMessage = "ACCESS DENIED";
+            root.errorMessage = "Senha incorreta";
             pwd.text = "";
-            charModel.clear();
             shakeAnim.start();
-            errTimer.start();
+            errTimer.restart();
         }
     }
 
@@ -96,728 +131,417 @@ Rectangle {
         onTriggered: root.errorMessage = ""
     }
 
+    Timer {
+        id: focusTimer
+        interval: 300
+        running: true
+        onTriggered: pwd.forceActiveFocus()
+    }
+
     Component.onCompleted: {
-        fadeAnim.start();
+        introAnim.start();
         if (typeof keyboard !== "undefined") keyboard.numLock = true;
     }
 
-    SequentialAnimation {
-        id: fadeAnim
-        PauseAnimation { duration: 500 }
-        ParallelAnimation {
-            NumberAnimation { target: root; property: "ui1"; from: 0; to: 1; duration: 900; easing.type: Easing.OutCubic }
-            NumberAnimation { target: root; property: "ui2"; from: 0; to: 1; duration: 900; easing.type: Easing.OutCubic }
+    NumberAnimation {
+        id: introAnim
+        target: root; property: "intro"; from: 0; to: 1
+        duration: 700; easing.type: Easing.OutCubic
+    }
+
+    // Wallpaper, blurred and dimmed
+    Image {
+        id: bg
+        anchors.fill: parent
+        source: "file://" + root.syncDir + "/wallpaper.png"
+        fillMode: Image.PreserveAspectCrop
+        sourceSize.width: root.width
+        asynchronous: true
+        visible: false
+        onStatusChanged: if (status === Image.Error && source != "bg.png") source = "bg.png"
+    }
+
+    FastBlur {
+        id: bgBlur
+        anchors.fill: parent
+        source: bg
+        radius: 40
+    }
+
+    Rectangle {
+        anchors.fill: parent
+        color: Qt.rgba(0.02, 0.02, 0.03, 0.42)
+    }
+
+    // Clock
+    Column {
+        anchors.left: parent.left
+        anchors.bottom: parent.bottom
+        anchors.leftMargin: 96 * s
+        anchors.bottomMargin: 150 * s
+        spacing: 6 * s
+        opacity: root.intro
+        transform: Translate { y: 20 * s * (1 - root.intro) }
+
+        Text {
+            id: clockText
+            font.family: root.sansFont
+            font.weight: Font.Medium
+            font.pixelSize: 128 * s
+            font.letterSpacing: -4 * s
+            color: "#f2f2f5"
+            text: Qt.formatTime(clock.now, "HH:mm")
+            Behavior on text {
+                SequentialAnimation {
+                    NumberAnimation { target: clockText; property: "opacity"; to: 0.35; duration: 160 }
+                    PropertyAction {}
+                    NumberAnimation { target: clockText; property: "opacity"; to: 1; duration: 260 }
+                }
+            }
+        }
+
+        Text {
+            leftPadding: 6 * s
+            font.family: root.sansFont
+            font.pixelSize: 18 * s
+            color: "#d6d6dc"
+            text: clock.now.toLocaleDateString(Qt.locale(), "dddd, d 'de' MMMM")
+        }
+    }
+
+    // Login card
+    Rectangle {
+        id: card
+        anchors.right: parent.right
+        anchors.verticalCenter: parent.verticalCenter
+        anchors.rightMargin: 120 * s
+        width: 340 * s
+        height: cardCol.implicitHeight + 60 * s
+        radius: 28 * s
+        color: "transparent"
+        clip: true
+        opacity: root.intro
+        transform: [
+            Translate { id: shakeTranslate },
+            Translate { x: 30 * s * (1 - root.intro) }
+        ]
+
+        // Frosted glass: the blurred wallpaper behind the card, tinted
+        ShaderEffectSource {
+            anchors.fill: parent
+            sourceItem: bgBlur
+            sourceRect: Qt.rect(card.x, card.y, card.width, card.height)
+            visible: false
+            id: cardBackdrop
+        }
+
+        Rectangle {
+            id: cardMask
+            anchors.fill: parent
+            radius: parent.radius
+            visible: false
+        }
+
+        OpacityMask {
+            anchors.fill: parent
+            source: cardBackdrop
+            maskSource: cardMask
+        }
+
+        Rectangle {
+            anchors.fill: parent
+            radius: parent.radius
+            color: root.cardColor
+            border.color: Qt.rgba(1, 1, 1, 0.10)
+            border.width: 1
+        }
+
+        Column {
+            id: cardCol
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.top: parent.top
+            anchors.topMargin: 32 * s
+            width: parent.width - 56 * s
+            spacing: 14 * s
+
+            // Avatar: user icon when SDDM has one, else the initial
+            Item {
+                anchors.horizontalCenter: parent.horizontalCenter
+                width: 88 * s
+                height: 88 * s
+
+                Rectangle {
+                    anchors.fill: parent
+                    radius: width / 2
+                    color: root.accent
+
+                    Text {
+                        anchors.centerIn: parent
+                        text: root.userName.charAt(0).toUpperCase()
+                        font.family: root.sansFont
+                        font.weight: Font.Bold
+                        font.pixelSize: 34 * s
+                        color: root.onAccent
+                        visible: avatarImg.status !== Image.Ready
+                    }
+                }
+
+                Image {
+                    id: avatarImg
+                    anchors.fill: parent
+                    source: "file://" + root.syncDir + "/avatar.png"
+                    onStatusChanged: if (status === Image.Error && root.userIcon !== "" && source != root.userIcon) source = root.userIcon
+                    fillMode: Image.PreserveAspectCrop
+                    visible: false
+                }
+
+                Rectangle {
+                    id: avatarMask
+                    anchors.fill: parent
+                    radius: width / 2
+                    visible: false
+                }
+
+                OpacityMask {
+                    anchors.fill: parent
+                    source: avatarImg
+                    maskSource: avatarMask
+                    visible: avatarImg.status === Image.Ready
+                }
+            }
+
+            Column {
+                anchors.horizontalCenter: parent.horizontalCenter
+                spacing: 2 * s
+
+                Text {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    text: root.greeting + ", " + root.userName
+                    font.family: root.sansFont
+                    font.weight: Font.Bold
+                    font.pixelSize: 19 * s
+                    color: root.textColor
+                }
+
+                Text {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    visible: root.hostName !== ""
+                    text: root.hostName
+                    font.family: root.sansFont
+                    font.pixelSize: 11 * s
+                    color: root.subtext
+                }
+
+                Text {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    visible: root.userCount > 1
+                    text: "trocar usuário"
+                    font.family: root.sansFont
+                    font.pixelSize: 11 * s
+                    color: userSwitchMouse.containsMouse ? root.textColor : root.subtext
+
+                    MouseArea {
+                        id: userSwitchMouse
+                        anchors.fill: parent
+                        anchors.margins: -4 * s
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: {
+                            if (root.userCount > 0) root.userIndex = (root.userIndex + 1) % root.userCount;
+                            pwd.forceActiveFocus();
+                        }
+                    }
+                }
+            }
+
+            // Password field
+            Rectangle {
+                width: parent.width
+                height: 48 * s
+                radius: 16 * s
+                color: root.surfaceHi
+                border.width: 1.5 * s
+                border.color: root.errorMessage !== "" ? root.danger : (pwd.activeFocus ? root.accent : Qt.rgba(1, 1, 1, 0.1))
+
+                Text {
+                    anchors.left: parent.left
+                    anchors.leftMargin: 16 * s
+                    anchors.verticalCenter: parent.verticalCenter
+                    visible: pwd.text.length === 0
+                    text: "Senha"
+                    font.family: root.sansFont
+                    font.pixelSize: 15 * s
+                    color: root.subtext
+                }
+
+                TextInput {
+                    id: pwd
+                    anchors.left: parent.left
+                    anchors.right: submitBtn.left
+                    anchors.leftMargin: 16 * s
+                    anchors.rightMargin: 8 * s
+                    anchors.verticalCenter: parent.verticalCenter
+                    echoMode: TextInput.Password
+                    passwordCharacter: "•"
+                    font.family: root.sansFont
+                    font.pixelSize: 16 * s
+                    font.letterSpacing: 2 * s
+                    color: root.textColor
+                    selectionColor: root.accent
+                    clip: true
+                    focus: true
+                    inputMethodHints: Qt.ImhHiddenText | Qt.ImhSensitiveData | Qt.ImhNoPredictiveText | Qt.ImhNoAutoUppercase
+                    Keys.onReturnPressed: root.login()
+                    Keys.onEnterPressed: root.login()
+                }
+
+                Rectangle {
+                    id: submitBtn
+                    anchors.right: parent.right
+                    anchors.rightMargin: 6 * s
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: 36 * s
+                    height: 36 * s
+                    radius: 11 * s
+                    color: submitMouse.pressed ? Qt.darker(root.accent, 1.15) : root.accent
+                    opacity: pwd.text.length > 0 ? 1.0 : 0.5
+
+                    Image {
+                        anchors.centerIn: parent
+                        width: 18 * s
+                        height: 18 * s
+                        sourceSize: Qt.size(36 * s, 36 * s)
+                        source: root.svgIcon(root.icArrow, root.onAccent)
+                    }
+
+                    MouseArea {
+                        id: submitMouse
+                        anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: root.login()
+                    }
+                }
+            }
+
+            Text {
+                anchors.horizontalCenter: parent.horizontalCenter
+                height: 14 * s
+                text: root.errorMessage !== "" ? root.errorMessage
+                    : ((typeof keyboard !== "undefined" && keyboard.capsLock) ? "Caps Lock ativado" : "")
+                font.family: root.sansFont
+                font.pixelSize: 11 * s
+                color: root.errorMessage !== "" ? root.danger : root.warn
+            }
         }
     }
 
     SequentialAnimation {
         id: shakeAnim
-        NumberAnimation { target: shakeTranslate; property: "x"; to: 15*s; duration: 50 }
-        NumberAnimation { target: shakeTranslate; property: "x"; to: -15*s; duration: 50 }
-        NumberAnimation { target: shakeTranslate; property: "x"; to: 15*s; duration: 50 }
-        NumberAnimation { target: shakeTranslate; property: "x"; to: -15*s; duration: 50 }
+        NumberAnimation { target: shakeTranslate; property: "x"; to: 12 * s; duration: 50 }
+        NumberAnimation { target: shakeTranslate; property: "x"; to: -12 * s; duration: 50 }
+        NumberAnimation { target: shakeTranslate; property: "x"; to: 8 * s; duration: 50 }
+        NumberAnimation { target: shakeTranslate; property: "x"; to: -8 * s; duration: 50 }
         NumberAnimation { target: shakeTranslate; property: "x"; to: 0; duration: 50 }
     }
 
-    MouseArea {
-        anchors.fill: parent
-        cursorShape: Qt.ArrowCursor
-        z: -1
-        onClicked: pwd.forceActiveFocus()
-    }
+    component FooterButton : Rectangle {
+        id: fb
+        property string icon: ""
+        property string label: ""
+        signal clicked()
 
-    Row {
-        id: mainLayout
-        anchors.centerIn: parent
-        spacing: 96 * s
-        opacity: root.ui1
-        scale: 0.96 + (0.04 * root.ui1)
-        transform: Translate { y: (1 - root.ui1) * 30 * s }
+        height: 40 * s
+        width: label !== "" ? fbRow.implicitWidth + 28 * s : 40 * s
+        radius: 12 * s
+        color: fbMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.14) : Qt.rgba(1, 1, 1, 0.08)
 
-        Column {
-            spacing: 24 * s
-            anchors.verticalCenter: parent.verticalCenter
-            
-            Timer {
-                interval: 1000
-                running: true
-                repeat: true
-                onTriggered: {
-                    let d = new Date();
-                    hText.text = Qt.formatTime(d, "hh");
-                    mText.text = Qt.formatTime(d, "mm");
-                    dateChipText.text = Qt.formatDate(d, "dddd, MMM d").toUpperCase();
-                }
+        Row {
+            id: fbRow
+            anchors.centerIn: parent
+            spacing: 8 * s
+
+            Image {
+                anchors.verticalCenter: parent.verticalCenter
+                visible: fb.icon !== ""
+                width: 18 * s
+                height: 18 * s
+                sourceSize: Qt.size(36 * s, 36 * s)
+                source: fb.icon
             }
 
-            Column {
-                spacing: -24 * s
-                
-                Text {
-                    id: hText
-                    text: Qt.formatTime(new Date(), "hh")
-                    font.family: root.sansFont
-                    font.pixelSize: 140 * s
-                    font.weight: Font.Bold
-                    color: "#0F3C2C"
-                }
-                
-                Text {
-                    id: mText
-                    text: Qt.formatTime(new Date(), "mm")
-                    font.family: root.sansFont
-                    font.pixelSize: 140 * s
-                    font.weight: Font.Bold
-                    color: "#1E4F3E"
-                }
-            }
-
-            Rectangle {
-                width: dateChipText.implicitWidth + 32 * s
-                height: 44 * s
-                radius: 22 * s
-                color: "#BEE8C7"
-                
-                Text {
-                    id: dateChipText
-                    anchors.centerIn: parent
-                    text: Qt.formatDate(new Date(), "dddd, MMM d").toUpperCase()
-                    font.family: root.sansFont
-                    font.pixelSize: 11 * s
-                    font.bold: true
-                    font.letterSpacing: 1 * s
-                    color: "#0F3C2C"
-                }
+            Text {
+                anchors.verticalCenter: parent.verticalCenter
+                visible: fb.label !== ""
+                text: fb.label
+                font.family: root.sansFont
+                font.pixelSize: 13 * s
+                color: "#d6d6dc"
             }
         }
 
-        Column {
-            spacing: 24 * s
-            anchors.verticalCenter: parent.verticalCenter
+        MouseArea {
+            id: fbMouse
+            anchors.fill: parent
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            onClicked: fb.clicked()
+        }
+    }
 
-            Text {
-                text: "QUICK SETTINGS"
-                font.family: root.sansFont
-                font.pixelSize: 11 * s
-                font.bold: true
-                font.letterSpacing: 1.5 * s
-                color: "#8ca090"
+    // Footer: session on the left, power actions on the right
+    Item {
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        anchors.leftMargin: 96 * s
+        anchors.rightMargin: 120 * s
+        anchors.bottomMargin: 36 * s
+        height: 40 * s
+        opacity: root.intro
+
+        FooterButton {
+            id: sessionBtn
+            anchors.left: parent.left
+            icon: root.svgIcon(root.icMonitor, "#d6d6dc")
+            label: (root.sessionName !== "" ? root.sessionName : "Sessão") + "  ▾"
+            onClicked: {
+                if (typeof sessionModel !== "undefined" && sessionModel.rowCount() > 0)
+                    root.sessionIndex = (root.sessionIndex + 1) % sessionModel.rowCount();
+                pwd.forceActiveFocus();
+            }
+        }
+
+        FooterButton {
+            anchors.left: sessionBtn.right
+            anchors.leftMargin: 8 * s
+            visible: root.kbLayout !== ""
+            icon: root.svgIcon(root.icKeyboard, "#d6d6dc")
+            label: root.kbLayout
+            onClicked: {
+                if (typeof keyboard !== "undefined" && keyboard.layouts.length > 0)
+                    keyboard.currentLayout = (keyboard.currentLayout + 1) % keyboard.layouts.length;
+                pwd.forceActiveFocus();
+            }
+        }
+
+        Row {
+            anchors.right: parent.right
+            spacing: 8 * s
+
+            FooterButton {
+                icon: root.svgIcon(root.icSleep, "#d6d6dc")
+                visible: root.isQuickshell || sddm.canSuspend
+                onClicked: if (!root.isQuickshell) sddm.suspend()
             }
 
-            Grid {
-                columns: 2
-                spacing: 16 * s
-                
-                Rectangle {
-                    id: powerTile
-                    width: 180 * s; height: 76 * s; radius: 38 * s
-                    color: powerMouse.pressed ? "#0A281D" : (powerMouse.containsMouse ? "#0F3C2C" : "#E9F3EB")
-                    scale: powerMouse.pressed ? 0.95 : (powerMouse.containsMouse ? 1.03 : 1.0)
-                    Behavior on color { ColorAnimation { duration: 150 } }
-                    Behavior on scale { NumberAnimation { duration: 200; easing.type: Easing.OutBack } }
-                    
-                    Row {
-                        anchors.fill: parent
-                        anchors.leftMargin: 16 * s
-                        anchors.rightMargin: 16 * s
-                        spacing: 12 * s
-                        
-                        Rectangle {
-                            width: 48 * s; height: 48 * s; radius: 24 * s
-                            color: "#BEE8C7"
-                            anchors.verticalCenter: parent.verticalCenter
-                            
-                            Image {
-                                id: powerIcon
-                                source: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><path d='M18.36 6.64a9 9 0 1 1-12.73 0'></path><line x1='12' y1='2' x2='12' y2='12'></line></svg>"
-                                anchors.centerIn: parent
-                                width: 20 * s
-                                height: 20 * s
-                                sourceSize.width: 40 * s
-                                sourceSize.height: 40 * s
-                                visible: false
-                            }
-                            ColorOverlay {
-                                anchors.fill: powerIcon
-                                source: powerIcon
-                                color: "#0F3C2C"
-                            }
-                        }
-                        
-                        Column {
-                            anchors.verticalCenter: parent.verticalCenter
-                            spacing: 2 * s
-                            
-                            Text {
-                                text: "POWER"
-                                font.family: root.sansFont
-                                font.pixelSize: 12 * s
-                                font.bold: true
-                                color: powerMouse.containsMouse ? "#BEE8C7" : "#0F3C2C"
-                                Behavior on color { ColorAnimation { duration: 150 } }
-                            }
-                            Text {
-                                text: "SHUT DOWN"
-                                font.family: root.sansFont
-                                font.pixelSize: 9 * s
-                                color: powerMouse.containsMouse ? "#E9F3EB" : "#1E4F3E"
-                                Behavior on color { ColorAnimation { duration: 150 } }
-                            }
-                        }
-                    }
-                    
-                    MouseArea {
-                        id: powerMouse
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: if (!root.isQuickshell) sddm.powerOff();
-                    }
-                }
-                
-                Rectangle {
-                    id: sessionTile
-                    width: 180 * s; height: 76 * s; radius: 38 * s
-                    color: sessionMouse.pressed ? "#0A281D" : (sessionMouse.containsMouse ? "#0F3C2C" : "#E9F3EB")
-                    scale: sessionMouse.pressed ? 0.95 : (sessionMouse.containsMouse ? 1.03 : 1.0)
-                    Behavior on color { ColorAnimation { duration: 150 } }
-                    Behavior on scale { NumberAnimation { duration: 200; easing.type: Easing.OutBack } }
-                    
-                    Row {
-                        anchors.fill: parent
-                        anchors.leftMargin: 16 * s
-                        anchors.rightMargin: 16 * s
-                        spacing: 12 * s
-                        
-                        Rectangle {
-                            width: 48 * s; height: 48 * s; radius: 24 * s
-                            color: "#BEE8C7"
-                            anchors.verticalCenter: parent.verticalCenter
-                            
-                            Image {
-                                id: sessionIcon
-                                source: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='3'></circle><path d='M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z'></path></svg>"
-                                anchors.centerIn: parent
-                                width: 20 * s
-                                height: 20 * s
-                                sourceSize.width: 40 * s
-                                sourceSize.height: 40 * s
-                                visible: false
-                            }
-                            ColorOverlay {
-                                anchors.fill: sessionIcon
-                                source: sessionIcon
-                                color: "#0F3C2C"
-                            }
-                        }
-                        
-                        Column {
-                            anchors.verticalCenter: parent.verticalCenter
-                            spacing: 2 * s
-                            
-                            Text {
-                                text: "SESSION"
-                                font.family: root.sansFont
-                                font.pixelSize: 12 * s
-                                font.bold: true
-                                color: sessionMouse.containsMouse ? "#BEE8C7" : "#0F3C2C"
-                                Behavior on color { ColorAnimation { duration: 150 } }
-                            }
-                            Text {
-                                text: ((sessionHelper.currentItem && sessionHelper.currentItem.sName) ? sessionHelper.currentItem.sName : "PLASMA").toUpperCase()
-                                font.family: root.sansFont
-                                font.pixelSize: 9 * s
-                                color: sessionMouse.containsMouse ? "#E9F3EB" : "#1E4F3E"
-                                Behavior on color { ColorAnimation { duration: 150 } }
-                                elide: Text.ElideRight
-                                width: 90 * s
-                            }
-                        }
-                    }
-                    
-                    MouseArea {
-                        id: sessionMouse
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: {
-                            if (!root.isQuickshell && typeof sessionModel !== "undefined" && sessionModel.rowCount() > 0) {
-                                root.sessionIndex = (root.sessionIndex + 1) % sessionModel.rowCount();
-                            }
-                        }
-                    }
-                }
-
-                Rectangle {
-                    id: rebootTile
-                    width: 180 * s; height: 76 * s; radius: 38 * s
-                    color: rebootMouse.pressed ? "#0A281D" : (rebootMouse.containsMouse ? "#0F3C2C" : "#E9F3EB")
-                    scale: rebootMouse.pressed ? 0.95 : (rebootMouse.containsMouse ? 1.03 : 1.0)
-                    Behavior on color { ColorAnimation { duration: 150 } }
-                    Behavior on scale { NumberAnimation { duration: 200; easing.type: Easing.OutBack } }
-                    
-                    Row {
-                        anchors.fill: parent
-                        anchors.leftMargin: 16 * s
-                        anchors.rightMargin: 16 * s
-                        spacing: 12 * s
-                        
-                        Rectangle {
-                            width: 48 * s; height: 48 * s; radius: 24 * s
-                            color: "#BEE8C7"
-                            anchors.verticalCenter: parent.verticalCenter
-                            
-                            Image {
-                                id: rebootIcon
-                                source: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='23 4 23 10 17 10'></polyline><path d='M20.49 15a9 9 0 1 1-2.12-9.36L23 10'></path></svg>"
-                                anchors.centerIn: parent
-                                width: 20 * s
-                                height: 20 * s
-                                sourceSize.width: 40 * s
-                                sourceSize.height: 40 * s
-                                visible: false
-                            }
-                            ColorOverlay {
-                                anchors.fill: rebootIcon
-                                source: rebootIcon
-                                color: "#0F3C2C"
-                            }
-                        }
-                        
-                        Column {
-                            anchors.verticalCenter: parent.verticalCenter
-                            spacing: 2 * s
-                            
-                            Text {
-                                text: "REBOOT"
-                                font.family: root.sansFont
-                                font.pixelSize: 12 * s
-                                font.bold: true
-                                color: rebootMouse.containsMouse ? "#BEE8C7" : "#0F3C2C"
-                                Behavior on color { ColorAnimation { duration: 150 } }
-                            }
-                            Text {
-                                text: "RESTART"
-                                font.family: root.sansFont
-                                font.pixelSize: 9 * s
-                                color: rebootMouse.containsMouse ? "#E9F3EB" : "#1E4F3E"
-                                Behavior on color { ColorAnimation { duration: 150 } }
-                            }
-                        }
-                    }
-                    
-                    MouseArea {
-                        id: rebootMouse
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: if (!root.isQuickshell) sddm.reboot();
-                    }
-                }
-
-                Rectangle {
-                    id: suspendTile
-                    width: 180 * s; height: 76 * s; radius: 38 * s
-                    color: suspendMouse.pressed ? "#0A281D" : (suspendMouse.containsMouse ? "#0F3C2C" : "#E9F3EB")
-                    scale: suspendMouse.pressed ? 0.95 : (suspendMouse.containsMouse ? 1.03 : 1.0)
-                    Behavior on color { ColorAnimation { duration: 150 } }
-                    Behavior on scale { NumberAnimation { duration: 200; easing.type: Easing.OutBack } }
-                    
-                    Row {
-                        anchors.fill: parent
-                        anchors.leftMargin: 16 * s
-                        anchors.rightMargin: 16 * s
-                        spacing: 12 * s
-                        
-                        Rectangle {
-                            width: 48 * s; height: 48 * s; radius: 24 * s
-                            color: "#BEE8C7"
-                            anchors.verticalCenter: parent.verticalCenter
-                            
-                            Image {
-                                id: suspendIcon
-                                source: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><path d='M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z'></path></svg>"
-                                anchors.centerIn: parent
-                                width: 20 * s
-                                height: 20 * s
-                                sourceSize.width: 40 * s
-                                sourceSize.height: 40 * s
-                                visible: false
-                            }
-                            ColorOverlay {
-                                anchors.fill: suspendIcon
-                                source: suspendIcon
-                                color: "#0F3C2C"
-                            }
-                        }
-                        
-                        Column {
-                            anchors.verticalCenter: parent.verticalCenter
-                            spacing: 2 * s
-                            
-                            Text {
-                                text: "SLEEP"
-                                font.family: root.sansFont
-                                font.pixelSize: 12 * s
-                                font.bold: true
-                                color: suspendMouse.containsMouse ? "#BEE8C7" : "#0F3C2C"
-                                Behavior on color { ColorAnimation { duration: 150 } }
-                            }
-                            Text {
-                                text: "SUSPEND"
-                                font.family: root.sansFont
-                                font.pixelSize: 9 * s
-                                color: suspendMouse.containsMouse ? "#E9F3EB" : "#1E4F3E"
-                                Behavior on color { ColorAnimation { duration: 150 } }
-                            }
-                        }
-                    }
-                    
-                    MouseArea {
-                        id: suspendMouse
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: if (!root.isQuickshell) sddm.suspend();
-                    }
-                }
+            FooterButton {
+                icon: root.svgIcon(root.icReboot, "#d6d6dc")
+                onClicked: if (!root.isQuickshell) sddm.reboot()
             }
 
-            Rectangle {
-                id: notificationCard
-                width: 376 * s
-                height: 180 * s
-                radius: 32 * s
-                color: "#E9F3EB"
-                transform: Translate { id: shakeTranslate }
-                
-                Column {
-                    anchors.fill: parent
-                    anchors.margins: 20 * s
-                    spacing: 12 * s
-                    
-                    Row {
-                        width: parent.width
-                        spacing: 8 * s
-                        
-                        Item {
-                            width: 12 * s
-                            height: 12 * s
-                            anchors.verticalCenter: parent.verticalCenter
-                            Image {
-                                id: lockIcon
-                                source: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><rect x='3' y='11' width='18' height='11' rx='2' ry='2'></rect><path d='M7 11V7a5 5 0 0 1 10 0v4'></path></svg>"
-                                anchors.fill: parent
-                                sourceSize.width: 24 * s
-                                sourceSize.height: 24 * s
-                                visible: false
-                            }
-                            ColorOverlay {
-                                anchors.fill: lockIcon
-                                source: lockIcon
-                                color: "#8ca090"
-                            }
-                        }
-                        Text {
-                            text: "SYSTEM UI"
-                            font.family: root.sansFont
-                            font.pixelSize: 10 * s
-                            font.bold: true
-                            font.letterSpacing: 1 * s
-                            color: "#8ca090"
-                            anchors.verticalCenter: parent.verticalCenter
-                        }
-                        Text {
-                            text: "•  now"
-                            font.family: root.sansFont
-                            font.pixelSize: 10 * s
-                            color: "#8ca090"
-                            anchors.verticalCenter: parent.verticalCenter
-                        }
-                    }
-
-                    Rectangle {
-                        width: parent.width
-                        height: 52 * s
-                        radius: 26 * s
-                        color: "#D0EADB"
-                        border.color: root.errorMessage !== "" ? "#ea1821" : (pwd.activeFocus ? "#0F3C2C" : "transparent")
-                        border.width: pwd.activeFocus ? 2 * s : 0
-                        Behavior on border.color { ColorAnimation { duration: 150 } }
-                        
-                        ListModel {
-                            id: charModel
-                        }
-
-                        ListView {
-                            id: charRow
-                            anchors.centerIn: parent
-                            height: 12 * s
-                            orientation: ListView.Horizontal
-                            interactive: false
-                            boundsBehavior: Flickable.StopAtBounds
-                            spacing: 6 * s
-                            width: contentWidth
-                            model: charModel
-
-                            add: Transition {
-                                ParallelAnimation {
-                                    NumberAnimation {
-                                        property: "scale"
-                                        from: 0.60
-                                        to: 1.0
-                                        duration: 240
-                                        easing.type: Easing.OutBack
-                                        easing.overshoot: 1.35
-                                    }
-                                    NumberAnimation {
-                                        property: "y"
-                                        from: 3.5 * s
-                                        to: 0
-                                        duration: 220
-                                        easing.type: Easing.OutBack
-                                        easing.overshoot: 1.25
-                                    }
-                                    NumberAnimation {
-                                        property: "rotation"
-                                        from: -9
-                                        to: 0
-                                        duration: 220
-                                        easing.type: Easing.OutCubic
-                                    }
-                                    NumberAnimation {
-                                        property: "opacity"
-                                        from: 0
-                                        to: 1
-                                        duration: 150
-                                        easing.type: Easing.OutQuad
-                                    }
-                                }
-                            }
-
-                            remove: Transition {
-                                ParallelAnimation {
-                                    NumberAnimation {
-                                        property: "scale"
-                                        to: 0.0
-                                        duration: 130
-                                        easing.type: Easing.InCubic
-                                    }
-                                    NumberAnimation {
-                                        property: "y"
-                                        to: 2 * s
-                                        duration: 130
-                                        easing.type: Easing.InCubic
-                                    }
-                                    NumberAnimation {
-                                        property: "rotation"
-                                        to: 6
-                                        duration: 130
-                                        easing.type: Easing.InCubic
-                                    }
-                                    NumberAnimation {
-                                        property: "opacity"
-                                        to: 0
-                                        duration: 100
-                                        easing.type: Easing.InQuad
-                                    }
-                                }
-                            }
-
-                            displaced: Transition {
-                                NumberAnimation {
-                                    properties: "x,y"
-                                    duration: 160
-                                    easing.type: Easing.OutCubic
-                                }
-                            }
-
-                            delegate: Item {
-                                id: charSlot
-                                required property int index
-                                required property string char
-
-                                width: 12 * s
-                                height: 12 * s
-                                transformOrigin: Item.Center
-
-                                Rectangle {
-                                    id: charShape
-                                    anchors.centerIn: parent
-                                    width: 12 * s
-                                    height: 12 * s
-                                    radius: Math.round(width * 0.24)
-                                    color: "#1d3c34"
-                                    antialiasing: true
-
-                                    property real dotPop: 1.0
-                                    scale: dotPop
-
-                                    Component.onCompleted: {
-                                        dotPop = 0.82
-                                        dotPopAnim.restart()
-                                    }
-
-                                    SequentialAnimation {
-                                        id: dotPopAnim
-                                        NumberAnimation {
-                                            target: charShape
-                                            property: "dotPop"
-                                            to: 1.11
-                                            duration: 110
-                                            easing.type: Easing.OutBack
-                                            easing.overshoot: 1.25
-                                        }
-                                        NumberAnimation {
-                                            target: charShape
-                                            property: "dotPop"
-                                            to: 1.0
-                                            duration: 170
-                                            easing.type: Easing.OutCubic
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                        TextInput {
-                            id: pwd
-                            anchors.fill: parent
-                            anchors.leftMargin: 20 * s
-                            anchors.rightMargin: 20 * s
-                            font.family: root.sansFont
-                            font.pixelSize: 18 * s
-                            color: "transparent"
-                            selectionColor: "transparent"
-                            selectedTextColor: "transparent"
-                            cursorVisible: false
-                            cursorDelegate: Item { width: 0; height: 0 }
-                            clip: true
-                            inputMethodHints: Qt.ImhHiddenText | Qt.ImhSensitiveData | Qt.ImhNoPredictiveText | Qt.ImhNoAutoUppercase
-                            
-                            property bool wasClicked: false
-                            onActiveFocusChanged: if (!activeFocus && text.length === 0) wasClicked = false
-                            
-                            onTextChanged: root.syncModel()
-
-                            Text {
-                                anchors.centerIn: parent
-                                text: root.errorMessage !== "" ? root.errorMessage : "PASSWORD REQUIRED"
-                                font.family: root.sansFont
-                                font.pixelSize: 11 * s
-                                font.bold: true
-                                font.letterSpacing: 1.5 * s
-                                color: root.errorMessage !== "" ? "#ea1821" : "#8ca090"
-                                opacity: pwd.text === "" && (!pwd.activeFocus || (!pwd.wasClicked && pwd.text.length === 0)) ? 1 : 0
-                                Behavior on opacity { NumberAnimation { duration: 150 } }
-                            }
-                            
-                            MouseArea {
-                                anchors.fill: parent
-                                cursorShape: Qt.IBeamCursor
-                                onClicked: {
-                                    pwd.wasClicked = true;
-                                    pwd.forceActiveFocus();
-                                }
-                            }
-                            
-                            onAccepted: {
-                                if (!root.isQuickshell && pwd.text !== "") {
-                                    let currentUser = userHelper.currentItem ? userHelper.currentItem.uLogin : userModel.lastUser;
-                                    sddm.login(currentUser, pwd.text, root.sessionIndex);
-                                }
-                            }
-                        }
-                    }
-
-                    Row {
-                        width: parent.width
-                        spacing: 12 * s
-                        
-                        Rectangle {
-                            width: userText.implicitWidth + 32 * s
-                            height: 38 * s
-                            radius: 19 * s
-                            color: userMouse.pressed ? "#cbe8cc" : (userMouse.containsMouse ? "#d2ebd4" : "#eef6f0")
-                            scale: userMouse.pressed ? 0.95 : (userMouse.containsMouse ? 1.02 : 1.0)
-                            Behavior on color { ColorAnimation { duration: 150 } }
-                            Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutBack } }
-                            
-                            Text {
-                                id: userText
-                                anchors.centerIn: parent
-                                text: ((userHelper.currentItem && userHelper.currentItem.uName) ? userHelper.currentItem.uName : (userModel.lastUser || "USER")).toUpperCase()
-                                font.family: root.sansFont
-                                font.pixelSize: 10 * s
-                                font.bold: true
-                                font.letterSpacing: 1 * s
-                                color: "#1d3c34"
-                            }
-                            
-                            MouseArea {
-                                id: userMouse
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                cursorShape: Qt.PointingHandCursor
-                                onClicked: {
-                                    if (!root.isQuickshell && typeof userModel !== "undefined" && userModel.rowCount() > 0) {
-                                        root.userIndex = (root.userIndex + 1) % userModel.rowCount();
-                                    }
-                                }
-                            }
-                        }
-
-                        Item {
-                            width: parent.width - (userText.implicitWidth + 32 * s) - 12 * s
-                            height: 38 * s
-                            
-                            Rectangle {
-                                anchors.right: parent.right
-                                width: parent.width
-                                height: 38 * s
-                                radius: 19 * s
-                                color: loginMouse.pressed ? "#0A281D" : (loginMouse.containsMouse ? "#1E4F3E" : "#0F3C2C")
-                                scale: loginMouse.pressed ? 0.95 : (loginMouse.containsMouse ? 1.02 : 1.0)
-                                Behavior on color { ColorAnimation { duration: 150 } }
-                                Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutBack } }
-                                
-                                Row {
-                                    anchors.centerIn: parent
-                                    spacing: 6 * s
-                                    
-                                    Text {
-                                        text: "UNLOCK"
-                                        font.family: root.sansFont
-                                        font.pixelSize: 10 * s
-                                        font.bold: true
-                                        font.letterSpacing: 1.5 * s
-                                        color: "#BEE8C7"
-                                        anchors.verticalCenter: parent.verticalCenter
-                                    }
-                                    Text {
-                                        text: "➔"
-                                        font.family: root.sansFont
-                                        font.pixelSize: 11 * s
-                                        color: "#BEE8C7"
-                                        anchors.verticalCenter: parent.verticalCenter
-                                        transform: Translate {
-                                            x: loginMouse.containsMouse ? 3 * s : 0
-                                            Behavior on x { NumberAnimation { duration: 150; easing.type: Easing.OutQuad } }
-                                        }
-                                    }
-                                }
-                                
-                                MouseArea {
-                                    id: loginMouse
-                                    anchors.fill: parent
-                                    hoverEnabled: true
-                                    cursorShape: Qt.PointingHandCursor
-                                    onClicked: pwd.accepted()
-                                }
-                            }
-                        }
-                    }
-                }
+            FooterButton {
+                icon: root.svgIcon(root.icPower, "#f2a7a7")
+                onClicked: if (!root.isQuickshell) sddm.powerOff()
             }
         }
     }

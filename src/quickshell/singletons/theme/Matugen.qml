@@ -297,6 +297,8 @@ Item {
                 } else {
                     Quickshell.execDetached(["bash", "-c", "killall -USR1 .kitty-wrapped 2>/dev/null || pkill -SIGUSR1 kitty 2>/dev/null || true"]);
                 }
+                // Keep the login screen's wallpaper/colors in step with the shell
+                Quickshell.execDetached(["bash", Caching.ghostDir + "/scripts/sddm_sync.sh"]);
             }
 
             root._currentReqType = "";

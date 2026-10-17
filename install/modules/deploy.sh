@@ -238,6 +238,10 @@ setup_sddm() {
         fi
     fi
 
+    # Ghost mirrors the wallpaper, colors and avatar here (scripts/sddm_sync.sh)
+    # so the login screen matches the shell
+    sudo install -d -m 755 -o "$(id -un)" -g "$(id -gn)" /var/lib/ghost-sddm
+
     sudo mkdir -p /etc/sddm.conf.d
 
     if [ "$sddm_display_server" = "wayland" ]; then
