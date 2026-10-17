@@ -1,3 +1,12 @@
+### 2.7.0
+
+- feat(syspanel): system panel redesigned as a corner modal with labeled Wi-Fi/Bluetooth tiles (connected network and device), battery card with named power profiles; the bar no longer rearranges while it is open
+- feat(calendar): compact three-column calendar (month, clock with hourly strip, weather)
+- feat(sddm): restyled login screen with frosted card, greeting and keyboard layout; wallpaper, colors and avatar synced from Ghost
+- fix(scale): popups follow the per-monitor shell scale and shrink to fit small screens
+- perf: bar battery wave no longer animates nonstop while charging; calendar drops its always-running animations
+- chore: bump version to 2.7.0
+
 ### 2.6.1
 
 - feat(bluetooth): device popup for any headphone, with an over-ear drawing and a switcher between connected headphones; pair and connect more than one device from the network popup
