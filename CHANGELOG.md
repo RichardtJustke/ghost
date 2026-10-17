@@ -1,3 +1,13 @@
+### 2.6.1
+
+- feat(bluetooth): device popup for any headphone, with an over-ear drawing and a switcher between connected headphones; pair and connect more than one device from the network popup
+- feat(volume): toggle to play audio on every Bluetooth headphone at once
+- feat(bar): Bluetooth module lists every connected device
+- feat(ghostd): restart quickshell when it exits unexpectedly
+- perf: launcher and clipboard load on first open; guide and wallpaper picker no longer preloaded
+- fix: network popup failing to load, lazily created launcher and clipboard closing on first show, leftover side battery style lookup
+- chore: bump version to 2.6.1
+
 ### 2.6.0
 
 - merge: sync the Quickshell modules and installer with upstream 2.2.11; lock screen and Ghost-only features kept as they were
