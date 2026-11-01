@@ -1036,7 +1036,18 @@
     "clear": "Clear",
     "empty": "Nothing found",
     "recent": "Recent",
-    "pinned": "Pinned"
+    "pinned": "Pinned",
+    "copy": "Copy",
+    "pin": "Pin",
+    "unpin": "Unpin",
+    "delete": "Delete",
+    "type": "Type",
+    "size": "Size",
+    "list": "List",
+    "textType": "Text",
+    "imageType": "Image",
+    "linkType": "Link",
+    "characters": "characters"
   },
   "lock": {
     "status": {

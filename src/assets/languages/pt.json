@@ -1025,7 +1025,18 @@
     "clear": "Limpar",
     "empty": "Nada encontrado",
     "recent": "Recentes",
-    "pinned": "Fixados"
+    "pinned": "Fixados",
+    "copy": "Copiar",
+    "pin": "Fixar",
+    "unpin": "Desafixar",
+    "delete": "Apagar",
+    "type": "Tipo",
+    "size": "Tamanho",
+    "list": "Lista",
+    "textType": "Texto",
+    "imageType": "Imagem",
+    "linkType": "Link",
+    "characters": "caracteres"
   },
   "lock": {
     "status": {
