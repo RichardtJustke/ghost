@@ -328,6 +328,14 @@ Item {
         }
     }
 
+    // Wheel steps have no release event, so a pause in scrolling ends the "drag"
+    // and callers that persist on dragFinished still get to save.
+    Timer {
+        id: wheelCommitTimer
+        interval: 400
+        onTriggered: root.dragFinished()
+    }
+
     MouseArea {
         id: sliderMa
         anchors.fill: parent
@@ -340,6 +348,7 @@ Item {
 
         onPressed: mouse => {
             if (!root.enabled) return;
+            wheelCommitTimer.stop();
             root.isDragging = true;
             root.dragPreview = root.value;
             root._lastStepValue = root.value;
@@ -372,6 +381,7 @@ Item {
             if (!root.enabled) return;
             wheelAccumulator += wheel.angleDelta.y;
             const threshold = 120;
+            let stepped = Math.abs(wheelAccumulator) >= threshold;
             while (wheelAccumulator >= threshold) {
                 root.nudge(1);
                 wheelAccumulator -= threshold;
@@ -380,6 +390,7 @@ Item {
                 root.nudge(-1);
                 wheelAccumulator += threshold;
             }
+            if (stepped) wheelCommitTimer.restart();
         }
 
         function updateVal(mx, my) {

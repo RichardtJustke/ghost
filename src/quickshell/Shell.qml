@@ -111,5 +111,8 @@ ShellRoot {
         // startup and its background timer runs regardless of which
         // guide tab (if any) is open.
         PauseReminder.enabled;
+        // Same for MonitorRestore: saved monitor settings must come back
+        // without the display settings tab ever being opened.
+        MonitorRestore.compositor;
     }
 }
