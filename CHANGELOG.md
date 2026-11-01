@@ -1,3 +1,10 @@
+### 2.8.0
+
+- feat(clipboard): redesigned as a centered window with the list on the left and a live preview on the right, with type, size and copy, pin and delete actions; one click selects, double click or Enter copies
+- fix(display): monitor scale and position now survive a compositor config reload, relogin and reconnect
+- fix(sliders): changing a slider with the mouse wheel now saves, including the per-monitor shell scale
+- chore: bump version to 2.8.0
+
 ### 2.7.0
 
 - feat(syspanel): system panel redesigned as a corner modal with labeled Wi-Fi/Bluetooth tiles (connected network and device), battery card with named power profiles; the bar no longer rearranges while it is open
