@@ -1,3 +1,11 @@
+### 2.8.1
+
+- feat(installer): personal setup now installs Java 21 and 17 (21 as default), Node, pnpm, Go, Docker (service and group set up) and more CLI tools and apps
+- feat(installer): new media group (mpv, Loupe, thumbnails, gvfs) and VLC via Flatpak
+- feat(installer): Folio and the Antigravity CLI are installed through their own user-local installers
+- fix(installer): drop antigravity-bin, which no longer exists in the AUR
+- chore: bump version to 2.8.1
+
 ### 2.8.0
 
 - feat(clipboard): redesigned as a centered window with the list on the left and a live preview on the right, with type, size and copy, pin and delete actions; one click selects, double click or Enter copies
