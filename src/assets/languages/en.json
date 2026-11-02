@@ -1723,6 +1723,7 @@
       "essentials": "Essential tools",
       "terminal": "Terminal & desktop apps",
       "audio": "Audio",
+      "runtimes": "Languages & runtimes (Java 21/17, Node, Go)",
       "editors": "Code editors",
       "dev": "Dev tools (AUR)",
       "apps": "Apps (AUR)",

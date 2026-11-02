@@ -7,14 +7,21 @@
 
 PERSONAL_ESSENTIALS_PACMAN=(
     "git" "openssh" "github-cli" "tailscale" "base-devel"
+    "docker" "docker-compose" "fzf" "htop" "ncdu" "onefetch" "ufw"
+    "zsh-autosuggestions"
 )
 
 PERSONAL_TERMINAL_PACMAN=(
     "btop" "neovim" "obsidian" "discord" "retroarch"
+    "ghostty" "alacritty" "firefox"
 )
 
 PERSONAL_AUDIO_PACMAN=(
     "pwvucontrol" "pipewire-jack"
+)
+
+PERSONAL_RUNTIMES_PACMAN=(
+    "jdk21-openjdk" "jdk17-openjdk" "nodejs" "npm" "pnpm" "go"
 )
 
 PERSONAL_EDITORS_PACMAN=(
@@ -30,15 +37,16 @@ PERSONAL_APPS_AUR=(
     "antigravity-bin" "bruno-bin" "dbeaver-ce" "notion-app-electron"
     "waydroid" "zen-browser-bin" "google-chrome" "yazi"
     "jetbrains-toolbox" "notesnook-bin" "onlyoffice-bin" "spotify"
+    "helium-browser-bin" "ytmdesktop" "zapzap"
 )
 
 PERSONAL_GAMING_AUR=(
     "heroic-games-launcher-bin" "sober" "mcpelauncher-manifest"
-    "protonup-qt" "protontricks" "gamemode"
+    "protonup-qt" "protontricks" "gamemode" "millennium"
 )
 
 PERSONAL_FLATPAK_PKGS=(
-    "com.valvesoftware.Steam"
+    "com.valvesoftware.Steam" "org.videolan.VLC"
 )
 
 # Failures are appended to the shared FAILED_PKGS array (declared in deps.sh)
@@ -155,6 +163,19 @@ personal_setup_post_install() {
         enable_system_service "ollama" "$init_sys"
     fi
 
+    if command -v docker &>/dev/null; then
+        if declare -f enable_system_service >/dev/null; then
+            enable_system_service "docker" "$init_sys"
+        fi
+        sudo usermod -aG docker "$USER" >/dev/null 2>&1 || true
+    fi
+
+    # Java 21 is the default JVM; 17 stays installed for projects that need it
+    # (switch with `sudo archlinux-java set java-17-openjdk`).
+    if command -v archlinux-java &>/dev/null && [ -d /usr/lib/jvm/java-21-openjdk ]; then
+        sudo archlinux-java set java-21-openjdk >/dev/null 2>&1 || true
+    fi
+
     if command -v waydroid &>/dev/null; then
         sudo waydroid init >/dev/null 2>&1 || true
     fi
@@ -196,6 +217,7 @@ install_personal_setup() {
     personal_install_list "$(t "installer.personal.essentials")" "${PERSONAL_ESSENTIALS_PACMAN[@]}"
     personal_install_list "$(t "installer.personal.terminal")" "${PERSONAL_TERMINAL_PACMAN[@]}"
     personal_install_list "$(t "installer.personal.audio")" "${PERSONAL_AUDIO_PACMAN[@]}"
+    personal_install_list "$(t "installer.personal.runtimes")" "${PERSONAL_RUNTIMES_PACMAN[@]}"
     personal_install_list "$(t "installer.personal.editors")" "${PERSONAL_EDITORS_PACMAN[@]}"
     personal_install_list "$(t "installer.personal.dev")" "${PERSONAL_DEV_AUR[@]}"
     personal_install_list "$(t "installer.personal.apps")" "${PERSONAL_APPS_AUR[@]}"

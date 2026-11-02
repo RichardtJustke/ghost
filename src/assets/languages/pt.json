@@ -1702,6 +1702,7 @@
       "essentials": "Ferramentas essenciais",
       "terminal": "Terminal e apps desktop",
       "audio": "Áudio",
+      "runtimes": "Linguagens e runtimes (Java 21/17, Node, Go)",
       "editors": "Editores de código",
       "dev": "Dev tools (AUR)",
       "apps": "Aplicativos (AUR)",
