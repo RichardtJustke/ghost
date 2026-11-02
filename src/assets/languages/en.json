@@ -1724,6 +1724,8 @@
       "terminal": "Terminal & desktop apps",
       "audio": "Audio",
       "runtimes": "Languages & runtimes (Java 21/17, Node, Go)",
+      "media": "Media (video & images)",
+      "scripts": "Apps with their own installer (Folio, Antigravity CLI)",
       "editors": "Code editors",
       "dev": "Dev tools (AUR)",
       "apps": "Apps (AUR)",

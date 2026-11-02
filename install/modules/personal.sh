@@ -24,6 +24,17 @@ PERSONAL_RUNTIMES_PACMAN=(
     "jdk21-openjdk" "jdk17-openjdk" "nodejs" "npm" "pnpm" "go"
 )
 
+PERSONAL_MEDIA_PACMAN=(
+    "mpv" "loupe" "ffmpegthumbnailer" "gvfs"
+)
+
+# Apps shipped through their own user-local installers (no root, ~/.local/bin).
+# Format: "name|binary|install command"
+PERSONAL_SCRIPT_INSTALLS=(
+    "Folio|folio|curl -fsSL https://raw.githubusercontent.com/RichardtJustke/folio-releases/main/install.sh | sh"
+    "Antigravity CLI|agy|curl -fsSL https://antigravity.google/cli/install.sh | bash"
+)
+
 PERSONAL_EDITORS_PACMAN=(
     "code"
 )
@@ -34,7 +45,7 @@ PERSONAL_DEV_AUR=(
 )
 
 PERSONAL_APPS_AUR=(
-    "antigravity-bin" "bruno-bin" "dbeaver-ce" "notion-app-electron"
+    "bruno-bin" "dbeaver-ce" "notion-app-electron"
     "waydroid" "zen-browser-bin" "google-chrome" "yazi"
     "jetbrains-toolbox" "notesnook-bin" "onlyoffice-bin" "spotify"
     "helium-browser-bin" "ytmdesktop" "zapzap"
@@ -80,6 +91,24 @@ personal_install_list() {
         else
             echo -e "  \e[31m✗\e[0m $pkg"
             FAILED_PKGS+=("$pkg")
+        fi
+    done
+}
+
+personal_setup_scripts() {
+    local entry name bin cmd
+    for entry in "${PERSONAL_SCRIPT_INSTALLS[@]}"; do
+        IFS='|' read -r name bin cmd <<< "$entry"
+        if command -v "$bin" &>/dev/null || [ -x "$HOME/.local/bin/$bin" ]; then
+            echo -e "  \e[2m- $name ($(t "installer.personal.already_installed"))\e[0m"
+            continue
+        fi
+        echo -e "  \e[34m::\e[0m $name"
+        if bash -c "$cmd" >/dev/null 2>&1; then
+            echo -e "  \e[32m✓\e[0m $name"
+        else
+            echo -e "  \e[31m✗\e[0m $name"
+            FAILED_PKGS+=("$name")
         fi
     done
 }
@@ -218,10 +247,14 @@ install_personal_setup() {
     personal_install_list "$(t "installer.personal.terminal")" "${PERSONAL_TERMINAL_PACMAN[@]}"
     personal_install_list "$(t "installer.personal.audio")" "${PERSONAL_AUDIO_PACMAN[@]}"
     personal_install_list "$(t "installer.personal.runtimes")" "${PERSONAL_RUNTIMES_PACMAN[@]}"
+    personal_install_list "$(t "installer.personal.media")" "${PERSONAL_MEDIA_PACMAN[@]}"
     personal_install_list "$(t "installer.personal.editors")" "${PERSONAL_EDITORS_PACMAN[@]}"
     personal_install_list "$(t "installer.personal.dev")" "${PERSONAL_DEV_AUR[@]}"
     personal_install_list "$(t "installer.personal.apps")" "${PERSONAL_APPS_AUR[@]}"
     personal_install_list "$(t "installer.personal.gaming")" "${PERSONAL_GAMING_AUR[@]}"
+
+    echo -e "\n\e[36m[ INFO ]\e[0m $(t "installer.personal.scripts")"
+    personal_setup_scripts
 
     echo -e "\n\e[36m[ INFO ]\e[0m $(t "installer.personal.flatpak")"
     personal_setup_flatpak

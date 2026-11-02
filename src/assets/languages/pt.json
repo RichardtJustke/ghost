@@ -1703,6 +1703,8 @@
       "terminal": "Terminal e apps desktop",
       "audio": "Áudio",
       "runtimes": "Linguagens e runtimes (Java 21/17, Node, Go)",
+      "media": "Mídia (vídeo e imagem)",
+      "scripts": "Apps com instalador próprio (Folio, Antigravity CLI)",
       "editors": "Editores de código",
       "dev": "Dev tools (AUR)",
       "apps": "Aplicativos (AUR)",
