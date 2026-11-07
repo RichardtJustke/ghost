@@ -1129,6 +1129,7 @@
     "actions": {
       "unpair": "Desemparelhar",
       "scan": "Escanear",
+      "paired_devices": "Dispositivos",
       "sign_in": "Iniciar sessão"
     }
   },

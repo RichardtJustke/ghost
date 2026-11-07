@@ -1070,7 +1070,9 @@ Item {
                 }
             }
             if (window.activeMode !== "eth") {
-                nodes.push({ id: "action_scan", name: I18n.t("network.actions.scan") || "Scan", icon: "󰍉", action: "", isInfoNode: true, isActionable: true, cmdStr: "TOGGLE_VIEW", parentIndex: -1 });
+                // In Bluetooth mode this opens the device list, where paired devices can be connected
+                let isBt = window.activeMode === "bt";
+                nodes.push({ id: "action_scan", name: isBt ? I18n.t("network.actions.paired_devices") : I18n.t("network.actions.scan"), icon: isBt ? "󰂳" : "󰍉", action: "", isInfoNode: true, isActionable: true, cmdStr: "TOGGLE_VIEW", parentIndex: -1 });
             }
         }
 

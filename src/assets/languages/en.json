@@ -1140,6 +1140,7 @@
     "actions": {
       "unpair": "Unpair",
       "scan": "Scan",
+      "paired_devices": "Devices",
       "sign_in": "Sign in"
     }
   },
