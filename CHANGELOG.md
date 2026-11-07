@@ -1,3 +1,13 @@
+### 2.9.0
+
+- feat(dictation): voice dictation with SUPER+Y (types at the cursor) and SUPER+J (cleaned up by an LLM and saved to ~/Documentos/diario); transcription through Groq, nothing runs between dictations
+- feat(cli): `ghost doctor` checks dependencies, services, fonts and the dictation key; `ghost dictate [journal|cancel]`
+- fix(bluetooth): the button that opens the paired device list is now called Devices instead of Scan
+- perf: sounds converted to OGG (62 MB → 4.7 MB) and the bundled Iosevka removed in favor of the installed one (−40 MB)
+- perf: polkit window only exists during an authentication request; notification, notes and analog clock timers pause while hidden; EmojiData compacted
+- chore: lint workflow for shell scripts, JSON and QML syntax; wtype added to dependencies
+- chore: bump version to 2.9.0
+
 ### 2.8.1
 
 - feat(installer): personal setup now installs Java 21 and 17 (21 as default), Node, pnpm, Go, Docker (service and group set up) and more CLI tools and apps
