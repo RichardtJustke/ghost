@@ -48,8 +48,16 @@ end)
 
 To run the shell, launch `ghostd start`
 
----
+If something does not work (clipboard, equalizer, icons), run `ghost doctor`. It checks the required programs, services and fonts and tells you what is missing.
 
+Other useful commands:
+
+```bash
+ghost reload          # restart the shell
+ghost lock            # lock the screen
+ghost ipc show        # list every IPC target you can bind to keys
+ghost ipc call lock activate
+```
 
 ---
 

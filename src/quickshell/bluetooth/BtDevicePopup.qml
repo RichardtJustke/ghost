@@ -904,7 +904,7 @@ Item {
                             if (window.isConnected || window.isConnecting) {
                                 window.pendingMac = "";
                                 window.device.disconnect();
-                                Sounds.playSfx("network/disconnect.wav");
+                                Sounds.playSfx("network/disconnect.ogg");
                             } else {
                                 window.connectDevice(window.device);
                             }

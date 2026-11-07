@@ -1,0 +1,39 @@
+name: Lint
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install tools
+        run: sudo apt-get update && sudo apt-get install -y qt6-declarative-dev-tools jq
+
+      - name: Shell scripts parse
+        run: |
+          fail=0
+          for f in $(git ls-files '*.sh') bin/ghost bin/ghostd; do
+            bash -n "$f" || fail=1
+          done
+          exit $fail
+
+      - name: JSON files are valid
+        run: |
+          fail=0
+          while IFS= read -r -d '' f; do
+            jq empty "$f" || { echo "invalid: $f"; fail=1; }
+          done < <(git ls-files -z '*.json')
+          exit $fail
+
+      - name: QML has no syntax errors
+        run: |
+          QMLLINT=$(command -v qmllint || echo /usr/lib/qt6/bin/qmllint)
+          out=$(find src/quickshell -name '*.qml' -print0 | xargs -0 -n20 "$QMLLINT" -I src/quickshell 2>&1 || true)
+          if echo "$out" | grep -iE "syntax error|expected token"; then
+            exit 1
+          fi

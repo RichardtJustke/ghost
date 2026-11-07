@@ -542,7 +542,7 @@ Item {
     }
 
     function triggerEqLightning() {
-        Sounds.playSfx("musicpopup/swoosh.wav", 0.75);
+        Sounds.playSfx("musicpopup/swoosh.ogg", 0.75);
         eqLightningAnim.restart();
     }
 

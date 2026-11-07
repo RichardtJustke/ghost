@@ -179,7 +179,7 @@ RowLayout {
                             actionCapsule.chargingSoundHandle = -1;
                         }
                         if (typeof Sounds !== "undefined") {
-                            actionCapsule.chargingSoundHandle = Sounds.playUntilStopped("reusables/fillbutton/charge_loop.wav", 0.6, false);
+                            actionCapsule.chargingSoundHandle = Sounds.playUntilStopped("reusables/fillbutton/charge_loop.ogg", 0.6, false);
                         }
                         drainAnim.stop();
                         fillAnim.start();

@@ -86,7 +86,7 @@ Item {
     Timer {
         id: clockTimer
         interval: Math.max(20, 1000 - (new Date()).getMilliseconds())
-        running: true
+        running: root.visible
         repeat: true
         onTriggered: {
             var now = new Date();

@@ -120,7 +120,7 @@ Item {
         command: {
             let sys = Caching.ghostDir ? (Caching.ghostDir + "/assets/fonts") : "";
             let usr = Caching.stateDir ? (Caching.stateDir + "/fonts") : (Caching.home + "/.local/state/ghost/fonts");
-            let cacheFile = Caching.stateDir ? (Caching.stateDir + "/fonts_cache.txt") : (Caching.home + "/.local/state/ghost/fonts_cache.txt");
+            let cacheFile = Caching.stateDir ? (Caching.stateDir + "/fonts_cache_v2.txt") : (Caching.home + "/.local/state/ghost/fonts_cache_v2.txt");
             let force = forceRescan ? "true" : "false";
 
             let cmd = "CACHE=\"" + cacheFile + "\"; ";
@@ -128,7 +128,9 @@ Item {
             cmd += "mkdir -p \"$(dirname \"$CACHE\")\"; ";
             cmd += "find ";
             if (sys !== "") cmd += "\"" + sys + "\" ";
-            cmd += "\"" + usr + "\" -type f \\( -iname \"*.ttf\" -o -iname \"*.otf\" -o -iname \"*.ttc\" \\) -print0 2>/dev/null | sort -z | ";
+            cmd += "\"" + usr + "\" ";
+            // Iosevka is installed system-wide by the installer instead of being bundled
+            cmd += "\"" + Caching.home + "/.local/share/fonts/IosevkaNerdFont\" /usr/share/fonts/IosevkaNerdFont -type f \\( -iname \"*.ttf\" -o -iname \"*.otf\" -o -iname \"*.ttc\" \\) -print0 2>/dev/null | sort -z | ";
             cmd += "xargs -0 -r fc-scan -f '%{family[0]}\\t%{style[0]}\\t%{file}\\n' 2>/dev/null | ";
             cmd += "awk -F'\\t' '{ fam=$1; stl=$2; f=$3; if (fam==\"\") { n=split(f,a,\"/\"); fam=a[n]; sub(/\\.[^.]*$/,\"\",fam) } if (stl!=\"\" && stl!=\"Regular\") print fam \" \" stl \"|\" f; else print fam \"|\" f }' ";
             cmd += "> \"$CACHE.tmp\" || true; mv \"$CACHE.tmp\" \"$CACHE\"; ";

@@ -132,10 +132,11 @@ Rectangle {
 
     Timer {
         interval: 10000
-        running: true
+        running: typeRoot.visible
         repeat: true
         onTriggered: updateTimeText()
     }
+    onVisibleChanged: if (visible) updateTimeText()
 
     onTimestampChanged: updateTimeText()
     Component.onCompleted: {

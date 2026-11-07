@@ -72,7 +72,12 @@ ShellRoot {
         }
     }
 
-    Polkit {}
+    // Polkit window only exists while an authentication request is open
+    LazyLoader {
+        id: polkitLoader
+        active: PolkitService.isActive
+        Polkit {}
+    }
     PopoutManager {}
     UsbSound {}
     BtAutoPopup {}

@@ -78,7 +78,7 @@ Item {
     onWidgetVisibleChanged: {
         updateSubscription();
         if (root.widgetVisible) {
-            Sounds.playSfx("quickactions/usage.wav", 0.25);
+            Sounds.playSfx("quickactions/usage.ogg", 0.25);
         }
     }
     Component.onCompleted: updateSubscription()

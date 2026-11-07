@@ -450,7 +450,7 @@ Item {
                         coreFlashAnim.start();
                         coreBumpAnim.start();
 
-                        Sounds.playSfx("network/disconnect.wav");
+                        Sounds.playSfx("network/disconnect.ogg");
 
                         let dd = window.disconnectingDevices;
                         dd[coreContainer.myId] = true;

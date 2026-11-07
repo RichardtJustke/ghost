@@ -181,7 +181,7 @@ Item {
                         window.expectedEthPower = window.ethPower === "on" ? "off" : "on";
                         window.ethPowerPending = true;
                         window.powerMinSpinTimerRef.restart();
-                        if (window.expectedEthPower === "on") Sounds.playSfx("network/power_on.wav"); else Sounds.playSfx("network/power_off.wav");
+                        if (window.expectedEthPower === "on") Sounds.playSfx("network/power_on.ogg"); else Sounds.playSfx("network/power_off.ogg");
                         window.ethPendingResetTimer.restart();
                         window.ethPower = window.expectedEthPower;
                         if (window.expectedEthPower === "off") {
@@ -194,7 +194,7 @@ Item {
                         window.expectedWifiPower = window.wifiPower === "on" ? "off" : "on";
                         window.wifiPowerPending = true;
                         window.powerMinSpinTimerRef.restart();
-                        if (window.expectedWifiPower === "on") Sounds.playSfx("network/power_on.wav"); else Sounds.playSfx("network/power_off.wav");
+                        if (window.expectedWifiPower === "on") Sounds.playSfx("network/power_on.ogg"); else Sounds.playSfx("network/power_off.ogg");
                         window.wifiPendingResetTimer.restart();
                         window.wifiPower = window.expectedWifiPower;
                         Networking.wifiEnabled = (window.expectedWifiPower === "on");
@@ -204,7 +204,7 @@ Item {
                         window.expectedBtPower = window.btPower === "on" ? "off" : "on";
                         window.btPowerPending = true;
                         window.powerMinSpinTimerRef.restart();
-                        if (window.expectedBtPower === "on") Sounds.playSfx("network/power_on.wav"); else Sounds.playSfx("network/power_off.wav");
+                        if (window.expectedBtPower === "on") Sounds.playSfx("network/power_on.ogg"); else Sounds.playSfx("network/power_off.ogg");
                         window.btPendingResetTimer.restart();
                         window.btPower = window.expectedBtPower;
                         if (Bluetooth.defaultAdapter) Bluetooth.defaultAdapter.enabled = (window.expectedBtPower === "on");

@@ -150,8 +150,8 @@ PanelWindow {
 
     SequentialAnimation {
         id: introChoreography
-        ScriptAction { script: window.bgSoundHandle = Sounds.playUntilStopped("start/background.wav", 0.4, true) }
-        ScriptAction { script: Sounds.playSfx("start/start.wav") }
+        ScriptAction { script: window.bgSoundHandle = Sounds.playUntilStopped("start/background.ogg", 0.4, true) }
+        ScriptAction { script: Sounds.playSfx("start/start.ogg") }
         PauseAnimation { duration: 100 }
 
         NumberAnimation { target: window; property: "panelReveal"; from: 0.0; to: 1.0; duration: 2000; easing.type: Easing.InOutCubic }
@@ -160,7 +160,7 @@ PanelWindow {
         NumberAnimation { target: window; property: "welcomeReveal"; to: 1.0; duration: 850; easing.type: Easing.InOutSine }
         PauseAnimation { duration: 800 }
         NumberAnimation { target: window; property: "welcomeOpacity"; to: 0.0; duration: 400; easing.type: Easing.OutQuart }
-        ScriptAction { script: Sounds.playSfx("start/transition_ghost.wav", 0.6) }
+        ScriptAction { script: Sounds.playSfx("start/transition_ghost.ogg", 0.6) }
 
         ParallelAnimation {
             PropertyAction { target: window; property: "shellTextOpacity"; value: 1.0 }
@@ -180,7 +180,7 @@ PanelWindow {
             NumberAnimation { target: window; property: "shellTextOpacity"; to: 0.0; duration: 400; easing.type: Easing.OutQuart }
             NumberAnimation { target: window; property: "authorOpacity"; to: 0.0; duration: 400; easing.type: Easing.OutQuart }
         }
-        ScriptAction { script: Sounds.playSfx("start/transition_ghost.wav", 0.6) }
+        ScriptAction { script: Sounds.playSfx("start/transition_ghost.ogg", 0.6) }
 
         ParallelAnimation {
             SequentialAnimation {
@@ -211,7 +211,7 @@ PanelWindow {
             }
 
             SequentialAnimation {
-                ScriptAction { script: Sounds.playSfx("start/wave.wav", 0.2) }
+                ScriptAction { script: Sounds.playSfx("start/wave.ogg", 0.2) }
                 PauseAnimation { duration: 300 }
 
                 ParallelAnimation {
@@ -604,8 +604,8 @@ PanelWindow {
 
     SequentialAnimation {
         id: closeSequence
-        ScriptAction { script: Sounds.playSfx("start/transition_ghost.wav", 0.6) }
-        ScriptAction { script: window.exitSoundHandle = Sounds.playUntilStopped("start/exit.wav", 0.7, false) }
+        ScriptAction { script: Sounds.playSfx("start/transition_ghost.ogg", 0.6) }
+        ScriptAction { script: window.exitSoundHandle = Sounds.playUntilStopped("start/exit.ogg", 0.7, false) }
         PauseAnimation { duration: 350 }
         ParallelAnimation {
             NumberAnimation { target: window; property: "mainOpacity"; to: 0.0; duration: 400; easing.type: Easing.OutQuint }

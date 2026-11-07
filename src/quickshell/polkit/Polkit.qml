@@ -48,6 +48,14 @@ PanelWindow {
         }
     }
 
+    // Created by a LazyLoader already visible, so onVisibleChanged does not fire
+    Component.onCompleted: {
+        if (visible) {
+            polkitWindow.isAuthenticating = false;
+            focusRetryTimer.restart();
+        }
+    }
+
     Timer {
         id: focusRetryTimer
         interval: 50

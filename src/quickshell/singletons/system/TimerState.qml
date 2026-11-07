@@ -15,9 +15,9 @@ QtObject {
     property int _focusSoundHandle: -1
 
     readonly property var focusSoundFiles: ({
-        rain: "ambient/rain.wav",
-        lofi: "ambient/lofi.wav",
-        "white-noise": "ambient/white-noise.wav"
+        rain: "ambient/rain.ogg",
+        lofi: "ambient/lofi.ogg",
+        "white-noise": "ambient/white-noise.ogg"
     })
 
     function _stopFocusSound() {

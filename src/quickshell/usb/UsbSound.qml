@@ -35,7 +35,7 @@ Item {
         id: removeDebounce
         interval: 400
         repeat: false
-        onTriggered: Sounds.playSfx("network/disconnect.wav")
+        onTriggered: Sounds.playSfx("network/disconnect.ogg")
     }
 
     Process {
