@@ -72,6 +72,27 @@ ShellRoot {
         }
     }
 
+    // Voice dictation: nothing runs until the first toggle
+    LazyLoader {
+        id: dictationLoader
+        active: false
+        Dictation {}
+    }
+
+    IpcHandler {
+        target: "dictation"
+
+        // mode: "type" (types into the focused window) or "journal"
+        function toggle(mode: string): void {
+            dictationLoader.active = true;
+            if (dictationLoader.item) dictationLoader.item.toggle(mode);
+        }
+
+        function cancel(): void {
+            if (dictationLoader.item) dictationLoader.item.cancel();
+        }
+    }
+
     // Polkit window only exists while an authentication request is open
     LazyLoader {
         id: polkitLoader

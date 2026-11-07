@@ -49,7 +49,8 @@ check_cmds optional \
     "wf-recorder:screen recording fallback" \
     "satty:screenshot editor" \
     "ddcutil:external monitor brightness" \
-    "powerprofilesctl:power profiles"
+    "powerprofilesctl:power profiles" \
+    "wtype:dictation typing at the cursor"
 
 echo
 echo "Services"
@@ -67,6 +68,12 @@ if command -v systemctl >/dev/null 2>&1; then
             warn "easyeffects is installed but not running — equalizer will not work"
         fi
     fi
+fi
+
+if [ -n "$GROQ_API_KEY" ] || [ -s "${XDG_CONFIG_HOME:-$HOME/.config}/ghost/groq_key" ]; then
+    ok "Groq API key (dictation)"
+else
+    warn "no Groq API key — dictation needs ~/.config/ghost/groq_key"
 fi
 
 echo

@@ -17,6 +17,8 @@ binds {
 
     XF86PowerOff { spawn "ghost" "lock"; }
     Mod+L { spawn "ghost" "lock"; }
+    Mod+Y { spawn "ghost" "dictate"; }
+    Mod+J { spawn "ghost" "dictate" "journal"; }
 
     Mod+Space { spawn "playerctl" "play-pause"; }
     XF86AudioPause { spawn "playerctl" "play-pause"; }

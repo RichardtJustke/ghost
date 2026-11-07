@@ -37,6 +37,9 @@ hl.bind("XF86MonBrightnessUp", hl.dsp.exec_cmd("ghost brightness raise"), { lock
 
 hl.bind("XF86PowerOff", hl.dsp.exec_cmd("ghost lock"), { locked = true })
 hl.bind(mainMod .. " + L", hl.dsp.exec_cmd("ghost lock"), { repeating = true, locked = true })
+-- Voice dictation: press once to start, again to stop
+hl.bind(mainMod .. " + Y", hl.dsp.exec_cmd("ghost dictate"))
+hl.bind(mainMod .. " + J", hl.dsp.exec_cmd("ghost dictate journal"))
 
 -- ───────── Screenshot (grimblast — app antigo mantido, só o layout de teclas mudou) ─────────
 -- ALT+S era o print de área ativo no antigo; mantido igual

@@ -114,6 +114,7 @@ show_help() {
     echo "  location_manual              $(t "cli.scripts.location_manual")"
     echo "  blue_light_filter            $(t "cli.scripts.blue_light_filter")"
     echo "  doctor                       Check dependencies, services and fonts"
+    echo "  dictate [journal|cancel]     Voice dictation: type at the cursor or save to the journal"
     echo ""
     echo "$(t "cli.options")"
     echo "  -v, --verbose                $(t "cli.verbose_desc")"
@@ -347,6 +348,7 @@ ALLOWED_SCRIPTS=(
     "location_manual"
     "blue_light_filter"
     "doctor"
+    "dictate"
 )
 
 COMMAND="$1"

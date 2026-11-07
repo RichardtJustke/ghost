@@ -74,3 +74,5 @@ singleton TrayMenuController 1.0 singletons/widgetcontrols/TrayMenuController.qm
 singleton WidgetSync 1.0 singletons/widgetcontrols/WidgetSync.qml
 singleton DesktopMenuController singletons/widgetcontrols/DesktopMenuController.qml
 singleton DockAppMenuController 1.0 singletons/widgetcontrols/DockAppMenuController.qml
+
+Dictation 1.0 dictation/Dictation.qml
