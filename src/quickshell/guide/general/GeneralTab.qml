@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Effects
 import Quickshell
+import Quickshell.Io
 import "../../"
 import "../../reusables"
 import "../../reusables/guide"
@@ -25,6 +26,8 @@ Item {
             if (langDropdown.isOpen) langDropdown.closePopup();
             if (avatarDropdown.isOpen) avatarDropdown.closePopup();
             if (weatherUnitDropdown.isOpen) weatherUnitDropdown.closePopup();
+            if (dictationLangDropdown.isOpen) dictationLangDropdown.closePopup();
+            groqKeyInput.text = "";
             locationPopup.close();
             isLocEditOpen = false;
         }
@@ -42,7 +45,8 @@ Item {
         "screenshotCaptureOnRelease": false,
         "weatherInterval": 15,
         "weatherUnit": "metric",
-        "quickactions": true
+        "quickactions": true,
+        "dictationLanguage": "pt"
     }
 
     property var generalSettings: Config.getSetting("general", defaultGeneralSettings)
@@ -55,7 +59,45 @@ Item {
     property bool quickactions: generalSettings.quickactions !== undefined ? generalSettings.quickactions : true
     property int weatherInterval: generalSettings.weatherInterval !== undefined ? generalSettings.weatherInterval : 15
     property string weatherUnit: generalSettings.weatherUnit !== undefined ? generalSettings.weatherUnit : "metric"
+    property string dictationLanguage: generalSettings.dictationLanguage !== undefined ? generalSettings.dictationLanguage : "pt"
     property bool isLocEditOpen: false
+
+    // The Groq key lives in its own file (mode 600), never in settings.json,
+    // so "Copy settings" and backups don't leak it.
+    readonly property string groqKeyPath: Config.userConfigDir + "/groq_key"
+    property bool groqKeySet: false
+
+    property var dictationLangCodes: ["pt", "en", "es", "fr", "de", "it", "auto"]
+    property var dictationLangNames: ["Português", "English", "Español", "Français", "Deutsch", "Italiano", I18n.t("guide.general.dictation.lang_auto") || "Auto-detect"]
+
+    function refreshGroqKeyState() {
+        groqKeyCheck.running = false;
+        groqKeyCheck.running = true;
+    }
+
+    function saveGroqKey(key) {
+        let k = (key || "").trim();
+        groqKeyWriter.command = ["bash", "-c",
+            'umask 077; mkdir -p "$(dirname "$1")" || exit 1; ' +
+            'if [ -z "$2" ]; then rm -f "$1"; else printf "%s\\n" "$2" > "$1" && chmod 600 "$1"; fi',
+            "_", groqKeyPath, k];
+        groqKeyWriter.running = true;
+        groqKeyInput.text = "";
+    }
+
+    Process {
+        id: groqKeyCheck
+        command: ["test", "-s", generalTabRoot.groqKeyPath]
+        onExited: function(exitCode) { generalTabRoot.groqKeySet = exitCode === 0; }
+    }
+
+    Process {
+        id: groqKeyWriter
+        command: []
+        onExited: generalTabRoot.refreshGroqKeyState()
+    }
+
+    Component.onCompleted: refreshGroqKeyState()
 
     Timer {
         id: sfxVolumeDebounceTimer
@@ -94,6 +136,7 @@ Item {
             generalTabRoot.quickactions = gs.quickactions !== undefined ? gs.quickactions : true;
             generalTabRoot.weatherInterval = gs.weatherInterval !== undefined ? gs.weatherInterval : 15;
             generalTabRoot.weatherUnit = gs.weatherUnit !== undefined ? gs.weatherUnit : "metric";
+            generalTabRoot.dictationLanguage = gs.dictationLanguage !== undefined ? gs.dictationLanguage : "pt";
             generalTabRoot.generalSettings = gs;
             if (weatherIntervalSelector.value !== generalTabRoot.weatherInterval) {
                 weatherIntervalSelector.value = generalTabRoot.weatherInterval;
@@ -126,6 +169,7 @@ Item {
         current.quickactions = generalTabRoot.quickactions;
         current.weatherInterval = generalTabRoot.weatherInterval;
         current.weatherUnit = generalTabRoot.weatherUnit;
+        current.dictationLanguage = generalTabRoot.dictationLanguage;
         Config.setSetting("general", current);
     }
 
@@ -684,6 +728,79 @@ Item {
                             if (typeof Weather !== "undefined") {
                                 Weather.unit = generalTabRoot.weatherUnit;
                             }
+                        }
+                    }
+                }
+            }
+
+            SettingsBlob {
+                SettingsRow {
+                    rootObj: generalTabRoot.rootObj
+                    icon: "󰍬"
+                    title: I18n.t("guide.general.dictation.key_title") || "Dictation: Groq API key"
+                    description: generalTabRoot.groqKeySet
+                        ? (I18n.t("guide.general.dictation.key_set") || "Key saved. Paste a new one to replace it, or save empty to remove it")
+                        : (I18n.t("guide.general.dictation.key_missing") || "Needed for voice dictation. Get a free key at console.groq.com/keys")
+                    searchKeywords: "dictation voice groq api key whisper transcription microphone"
+
+                    Input {
+                        id: groqKeyInput
+                        implicitWidth: rootObj.s(220)
+                        implicitHeight: rootObj.s(32)
+                        masked: true
+                        placeholderText: generalTabRoot.groqKeySet ? "••••••••••••" : "gsk_..."
+                        baseColor: ThemeBackend.surface0
+                        accentColor: ThemeBackend.mauve
+                        textColor: ThemeBackend.text
+                        subTextColor: ThemeBackend.subtext0
+                        borderColor: Qt.alpha(ThemeBackend.surface2, 0.6)
+                        cornerRadius: ThemeBackend.borderRadius
+                        horizontalPadding: rootObj.s(12)
+                        verticalPadding: rootObj.s(6)
+                        fontPixelSize: rootObj.s(12)
+                        onAccepted: function(finalText) { generalTabRoot.saveGroqKey(finalText); }
+                    }
+
+                    ClickButton {
+                        implicitHeight: rootObj.s(32)
+                        buttonText: I18n.t("guide.general.dictation.save") || "Save"
+                        accentColor: ThemeBackend.mauve
+                        textColor: ThemeBackend.crust
+                        cornerRadius: ThemeBackend.borderRadius
+                        horizontalPadding: rootObj.s(16)
+                        textFontSize: rootObj.s(12)
+                        onTriggered: generalTabRoot.saveGroqKey(groqKeyInput.text)
+                    }
+                }
+
+                SettingsRow {
+                    rootObj: generalTabRoot.rootObj
+                    icon: "󰗊"
+                    title: I18n.t("guide.general.dictation.lang_title") || "Dictation language"
+                    description: I18n.t("guide.general.dictation.lang_desc") || "Language you speak when dictating"
+                    searchKeywords: "dictation voice language speech"
+
+                    Dropdown {
+                        id: dictationLangDropdown
+                        implicitWidth: rootObj.s(180)
+                        implicitHeight: rootObj.s(32)
+                        options: generalTabRoot.dictationLangNames
+                        currentIndex: {
+                            let idx = generalTabRoot.dictationLangCodes.indexOf(generalTabRoot.dictationLanguage);
+                            return idx !== -1 ? idx : 0;
+                        }
+                        accentColor: ThemeBackend.mauve
+                        baseColor: ThemeBackend.surface0
+                        hoverColor: ThemeBackend.surface1
+                        dropdownColor: ThemeBackend.surface0
+                        borderColor: Qt.alpha(ThemeBackend.surface2, 0.6)
+                        textColor: ThemeBackend.text
+                        activeTextColor: ThemeBackend.crust
+                        cornerRadius: ThemeBackend.borderRadius
+                        fontPixelSize: rootObj.s(11)
+                        onValueChanged: function(index, value) {
+                            generalTabRoot.dictationLanguage = generalTabRoot.dictationLangCodes[index];
+                            generalTabRoot.updateGeneralSettings();
                         }
                     }
                 }
