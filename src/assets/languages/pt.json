@@ -253,6 +253,15 @@
       "screenshot_on_release": {
         "title": "Capturar ao soltar o mouse",
         "desc": "Tira a captura assim que terminar de arrastar, sem clicar no obturador"
+      },
+      "dictation": {
+        "key_title": "Ditado: chave da API Groq",
+        "key_set": "Chave salva. Cole uma nova para trocar, ou salve vazio para remover",
+        "key_missing": "Necessária para o ditado por voz. Pegue uma chave grátis em console.groq.com/keys",
+        "save": "Salvar",
+        "lang_title": "Idioma do ditado",
+        "lang_desc": "Idioma em que você fala ao ditar",
+        "lang_auto": "Detectar automaticamente"
       }
     },
     "display": {

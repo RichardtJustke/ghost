@@ -9,7 +9,8 @@
 # Transcription and cleanup use the Groq API. The key is read from
 # $GROQ_API_KEY or ~/.config/ghost/groq_key.
 # Optional environment:
-#   GHOST_DICTATION_LANG   spoken language (default: pt)
+#   GHOST_DICTATION_LANG   spoken language, or "auto" (default: the
+#                          general.dictationLanguage setting, else pt)
 #   GHOST_JOURNAL_DIR      journal folder (default: ~/Documentos/diario)
 #   GHOST_DICTATION_MODEL  cleanup model (default: llama-3.3-70b-versatile)
 #
@@ -19,7 +20,12 @@
 set -o pipefail
 
 KEY_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/ghost/groq_key"
-LANG_CODE="${GHOST_DICTATION_LANG:-pt}"
+SETTINGS_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/ghost/settings.json"
+LANG_CODE="$GHOST_DICTATION_LANG"
+if [ -z "$LANG_CODE" ] && [ -r "$SETTINGS_FILE" ]; then
+    LANG_CODE=$(jq -r '.general.dictationLanguage // empty' "$SETTINGS_FILE" 2>/dev/null)
+fi
+LANG_CODE="${LANG_CODE:-pt}"
 JOURNAL_DIR="${GHOST_JOURNAL_DIR:-$HOME/Documentos/diario}"
 CLEANUP_MODEL="${GHOST_DICTATION_MODEL:-llama-3.3-70b-versatile}"
 API="https://api.groq.com/openai/v1"
@@ -36,11 +42,13 @@ api_key() {
 
 transcribe() {
     local audio="$1" key="$2" resp
+    local lang_args=()
+    [ "$LANG_CODE" != auto ] && lang_args=(-F "language=$LANG_CODE")
     resp=$(curl -sS --max-time 60 "$API/audio/transcriptions" \
         -H "Authorization: Bearer $key" \
         -F "file=@$audio" \
         -F "model=whisper-large-v3-turbo" \
-        -F "language=$LANG_CODE" \
+        "${lang_args[@]}" \
         -F "response_format=json") || fail "Sem conexão com a Groq"
     local err
     err=$(jq -r '.error.message // empty' <<< "$resp" 2>/dev/null)
@@ -65,8 +73,43 @@ Responda apenas com o texto final, sem comentários.'
     if [ -n "$out" ]; then printf '%s' "$out"; else printf '%s' "$text"; fi
 }
 
+# Paste through the clipboard on Hyprland. wtype sends its own keymap, which
+# Firefox and Chromium-based apps ignore, so they get number-row keys instead
+# of letters. The previous clipboard is restored afterwards.
+paste_text_hyprland() {
+    local text="$1" class mods saved mime
+    [ -n "$HYPRLAND_INSTANCE_SIGNATURE" ] || return 1
+    command -v wl-copy >/dev/null 2>&1 || return 1
+
+    class=$(hyprctl activewindow -j 2>/dev/null | jq -r '.class // empty')
+    case "${class,,}" in
+        *kitty*|*foot*|*alacritty*|*wezterm*|*ghostty*|*konsole*|*terminal*|*xterm*|*st-256color*)
+            mods="CTRL SHIFT" ;;
+        *) mods="CTRL" ;;
+    esac
+
+    saved=$(mktemp)
+    mime=$(wl-paste --list-types 2>/dev/null | head -n1)
+    if [ -n "$mime" ]; then
+        wl-paste --no-newline --type "$mime" > "$saved" 2>/dev/null || mime=""
+    fi
+
+    printf '%s' "$text" | wl-copy || { rm -f "$saved"; return 1; }
+    sleep 0.05
+    hyprctl dispatch "hl.dsp.send_shortcut({ mods = \"$mods\", key = \"V\" })" >/dev/null 2>&1
+
+    # Give the app time to read the clipboard before restoring it
+    (
+        sleep 0.5
+        if [ -n "$mime" ]; then wl-copy --type "$mime" < "$saved"; fi
+        rm -f "$saved"
+    ) >/dev/null 2>&1 &
+    return 0
+}
+
 type_text() {
     local text="$1"
+    paste_text_hyprland "$text" && return 0
     if command -v wtype >/dev/null 2>&1; then
         wtype -- "$text" && return 0
     fi

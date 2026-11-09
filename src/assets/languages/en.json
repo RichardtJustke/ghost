@@ -253,6 +253,15 @@
       "screenshot_on_release": {
         "title": "Capture region on mouse release",
         "desc": "Take the screenshot as soon as you finish dragging, without clicking the shutter"
+      },
+      "dictation": {
+        "key_title": "Dictation: Groq API key",
+        "key_set": "Key saved. Paste a new one to replace it, or save empty to remove it",
+        "key_missing": "Needed for voice dictation. Get a free key at console.groq.com/keys",
+        "save": "Save",
+        "lang_title": "Dictation language",
+        "lang_desc": "Language you speak when dictating",
+        "lang_auto": "Auto-detect"
       }
     },
     "display": {
